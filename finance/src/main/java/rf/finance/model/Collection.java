@@ -1,10 +1,11 @@
 package rf.finance.model;
 
+import lombok.Data;
 import rf.foundation.model.ModelComponent;
 import rf.foundation.pub.Guid;
 import java.math.BigDecimal;
 
-
+@Data
 public class Collection extends ModelComponent {
 
     private String transactionType;
@@ -19,59 +20,4 @@ public class Collection extends ModelComponent {
         this.setUuid(Guid.generateStrId());
     }
 
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public String getRefBizNumber() {
-        return refBizNumber;
-    }
-
-    public void setRefBizNumber(String refBizNumber) {
-        this.refBizNumber = refBizNumber;
-    }
-
-    public String getRefExtNumber() {
-        return refExtNumber;
-    }
-
-    public void setRefExtNumber(String refExtNumber) {
-        this.refExtNumber = refExtNumber;
-    }
-
-    public String getFeeCode() {
-        return feeCode;
-    }
-
-    public void setFeeCode(String feeCode) {
-        this.feeCode = feeCode;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public PayerPayee getPayerPayee() {
-        return payerPayee;
-    }
-
-    public void setPayerPayee(PayerPayee payerPayee) {
-        this.payerPayee = payerPayee;
-    }
 }

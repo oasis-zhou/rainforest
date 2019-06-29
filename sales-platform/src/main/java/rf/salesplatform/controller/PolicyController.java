@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rf.foundation.context.AppContext;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.foundation.utils.JsonHelper;
@@ -24,7 +21,7 @@ import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.trans.PolicyTransformer;
 import rf.salesplatform.event.PolicyIssueEvent;
 import rf.salesplatform.fs.*;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.List;
@@ -52,13 +49,13 @@ public class PolicyController {
 
     @Transactional
     @PostMapping(value = "/proposal")
-    public ResponseEntity proposal(Quotation quotation) {
+    public ResponseEntity proposal(@RequestBody Quotation quotation) {
 
             long s = System.currentTimeMillis();
             Policy policy = policyTransformer.transFromQuotation(quotation);
 
             Map<String, Object> context = Maps.newHashMap();
-            context.put(PAFConsts.AUTO_UNDERWRITING_RULE_SET, PAFConsts.RULE_SET_UW);
+            context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
@@ -81,12 +78,12 @@ public class PolicyController {
 
     @Transactional
     @PostMapping(value = "/issue")
-    public ResponseEntity issue(Quotation quotation) {
+    public ResponseEntity issue(@RequestBody Quotation quotation) {
 
             Policy policy = policyTransformer.transFromQuotation(quotation);
 
             Map<String, Object> context = Maps.newHashMap();
-            context.put(PAFConsts.AUTO_UNDERWRITING_RULE_SET, PAFConsts.RULE_SET_UW);
+            context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
@@ -138,7 +135,7 @@ public class PolicyController {
 
 
     @PostMapping(value = "/query")
-    public ResponseEntity queryPolicy(PolicyQueryCondition condition) {
+    public ResponseEntity queryPolicy(@RequestBody PolicyQueryCondition condition) {
 
             logger.debug("policy query condition:" + jsonHelper.toJSON(condition));
             List<PolicyIndex> policyIndices = policyService.findPolicy(condition);

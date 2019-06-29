@@ -24,9 +24,8 @@ import rf.product.model.FormulaSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.enums.FormulaPurpose;
 import rf.salesplatform.pub.ModelConverter;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +45,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
-        Policy policy = (Policy)context.get(PAFConsts.POLICY_OBJECT);
+        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
 
         ProductSpec product = productService.findProduct(endorsement.getProductCode());
         Map<String,FeeSpec> feeSpecMap = getFeeSpecs(product);

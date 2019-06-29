@@ -6,7 +6,7 @@ import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 
 import java.util.Date;
 import java.util.Map;
@@ -21,12 +21,7 @@ public class NewbizProposal implements FunctionSlice<Policy> {
     @Override
     public void execute(Policy policy, Map<String, Object> context){
 
-
-        if (PAFConsts.TAX_FREE_PRODUCE_CODE.equals(policy.getProductCode()) && PAFConsts.CHANNEL_TIANCHENG.equals(policy.getChannelCode())) {
-            policy.setContractStatus(ContractStatus.UNDERWRITING);
-        } else {
-            policy.setContractStatus(ContractStatus.WAITING_FOR_PAYMENT);
-        }
+        policy.setContractStatus(ContractStatus.WAITING_FOR_PAYMENT);
 
         policy.setProposalDate(new Date());
         policyService.generateProposal(policy);

@@ -8,14 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rf.foundation.context.AppContext;
 import rf.foundation.pub.FunctionSliceBundle;
-import rf.foundation.utils.JsonHelper;
-import rf.policyadmin.constants.PolicyConstants;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Cancellation;
@@ -26,7 +21,7 @@ import rf.policyadmin.model.enums.EndorsementApplicationType;
 import rf.policyadmin.model.enums.EndorsementType;
 import rf.salesplatform.event.EndorsementIssueEvent;
 import rf.salesplatform.fs.*;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 
 import javax.websocket.server.PathParam;
 import java.util.Date;
@@ -35,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("v0/api/endorsement")
-public class EndorsementResources {
+public class EndorsementController {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -46,7 +41,7 @@ public class EndorsementResources {
 
     @Transactional
     @PostMapping(value = "/cancellation")
-    public ResponseEntity cancelFromInception(Cancellation cancellation){
+    public ResponseEntity cancelFromInception(@RequestBody Cancellation cancellation){
 
         Assert.notNull(cancellation.getPolicyNumber());
 
@@ -57,7 +52,7 @@ public class EndorsementResources {
         cancellation.setProductCode(policy.getProductCode());
 
         Map<String,Object> context = Maps.newHashMap();
-        context.put(PAFConsts.POLICY_OBJECT,policy);
+        context.put(Constants.POLICY_OBJECT,policy);
 
         new FunctionSliceBundle(cancellation,context)
                 .register(EndorsementValidation.class)
@@ -79,7 +74,7 @@ public class EndorsementResources {
 
     @Transactional
     @PostMapping(value = "/cancellation/midway")
-    public ResponseEntity cancelFromMidway(Cancellation cancellation){
+    public ResponseEntity cancelFromMidway(@RequestBody Cancellation cancellation){
 
         Assert.notNull(cancellation.getPolicyNumber());
         Policy policy = policyService.loadPolicyByPolicyNumberOnLock(cancellation.getPolicyNumber());
@@ -93,7 +88,7 @@ public class EndorsementResources {
         cancellation.setApplicationType(EndorsementApplicationType.APPLY_BY_INSURER);
 
         Map<String,Object> context = Maps.newHashMap();
-        context.put(PAFConsts.POLICY_OBJECT,policy);
+        context.put(Constants.POLICY_OBJECT,policy);
 
 
         new FunctionSliceBundle(cancellation,context)
@@ -116,7 +111,7 @@ public class EndorsementResources {
 
     @Transactional
     @PostMapping(value = "/cancellation/midway/prepricing")
-    public ResponseEntity prePricingForCancellation(Cancellation cancellation){
+    public ResponseEntity prePricingForCancellation(@RequestBody Cancellation cancellation){
 
         Assert.notNull(cancellation.getPolicyNumber());
 
@@ -131,7 +126,7 @@ public class EndorsementResources {
         cancellation.setApplicationType(EndorsementApplicationType.APPLY_BY_INSURER);
 
         Map<String,Object> context = Maps.newHashMap();
-        context.put(PAFConsts.POLICY_OBJECT,policy);
+        context.put(Constants.POLICY_OBJECT,policy);
 
 
         new FunctionSliceBundle(cancellation,context)
@@ -142,7 +137,7 @@ public class EndorsementResources {
                 .execute();
 
         Map<String,Object> response = Maps.newHashMap();
-        response.put("endorsementPremium", cancellation.getEndoFeeByCode(PolicyConstants.FEE_APP).getValue());
+        response.put("endorsementPremium", cancellation.getEndoFeeByCode(rf.policyadmin.pub.Constants.FEE_APP).getValue());
 
         return new ResponseEntity(response, HttpStatus.OK);
 

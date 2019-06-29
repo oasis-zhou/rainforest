@@ -7,7 +7,7 @@ import rf.finance.model.ArapItem;
 import rf.finance.model.PayerPayee;
 import rf.finance.model.enums.TransactionType;
 import rf.foundation.pub.FunctionSlice;
-import rf.policyadmin.constants.PolicyConstants;
+import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Customer;
 import rf.policyadmin.model.Endorsement;
@@ -33,7 +33,7 @@ public class EndorsementKeepAccounts implements FunctionSlice<Endorsement> {
 
         record.setTransType(TransactionType.ENDORSEMENT);
         record.setTransDate(new Date());
-        Fee fee = endorsement.getEndoFeeByCode(PolicyConstants.FEE_APP);
+        Fee fee = endorsement.getEndoFeeByCode(Constants.FEE_APP);
         record.setAmount(fee.getValue());
         record.setBalance(fee.getValue());
         record.setDueDate(new Date());

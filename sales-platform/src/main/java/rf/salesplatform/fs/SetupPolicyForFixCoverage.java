@@ -42,7 +42,7 @@ public class SetupPolicyForFixCoverage implements FunctionSlice<Policy> {
 //            }
 //        }
 
-        if(product.getIsfixedCoverage()){
+        if(product.getFixedCoverage()){
 
             List<CoverageSpec> coverageSpecs = product.getAllSubComponentsByType(CoverageSpec.class);
 

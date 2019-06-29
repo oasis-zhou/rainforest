@@ -16,7 +16,7 @@ import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
-import rf.policyadmin.constants.PolicyConstants;
+import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.*;
 import rf.policyadmin.model.enums.ContractStatus;
@@ -249,9 +249,9 @@ public class PolicyServiceImpl implements PolicyService {
         po.setLimitAmount(policy.getAOPAmount());
         po.setTerminalReasonCode(policy.getTerminalReason() == null ? "" : policy.getTerminalReason().name());
 
-        BigDecimal SGP = policy.getPolicyFeeByCode(PolicyConstants.FEE_SGP).getValue();
-        BigDecimal SNP = policy.getPolicyFeeByCode(PolicyConstants.FEE_SNP).getValue();
-        BigDecimal APP = policy.getPolicyFeeByCode(PolicyConstants.FEE_APP).getValue();
+        BigDecimal SGP = policy.getPolicyFeeByCode(Constants.FEE_SGP).getValue();
+        BigDecimal SNP = policy.getPolicyFeeByCode(Constants.FEE_SNP).getValue();
+        BigDecimal APP = policy.getPolicyFeeByCode(Constants.FEE_APP).getValue();
 
         po.setSgp(SGP);
         po.setSnp(SNP);

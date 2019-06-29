@@ -7,7 +7,7 @@ import rf.finance.model.ArapItem;
 import rf.finance.model.PayerPayee;
 import rf.finance.model.enums.TransactionType;
 import rf.foundation.pub.FunctionSlice;
-import rf.policyadmin.constants.PolicyConstants;
+import rf.policyadmin.pub.Constants;
 import rf.policyadmin.model.Customer;
 import rf.policyadmin.model.Fee;
 import rf.policyadmin.model.Policy;
@@ -29,7 +29,7 @@ public class NewbizKeepAccounts implements FunctionSlice<Policy> {
 
         record.setTransType(TransactionType.NEWBIZ);
         record.setTransDate(new Date());
-        Fee fee = policy.getPolicyFeeByCode(PolicyConstants.FEE_APP);
+        Fee fee = policy.getPolicyFeeByCode(Constants.FEE_APP);
         record.setAmount(fee.getValue());
         record.setBalance(fee.getValue());
         record.setDueDate(new Date());

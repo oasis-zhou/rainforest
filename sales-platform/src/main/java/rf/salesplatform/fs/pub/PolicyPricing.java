@@ -16,7 +16,7 @@ import rf.product.ds.ProductService;
 import rf.product.model.*;
 import rf.product.model.enums.LimitPartten;
 import rf.salesplatform.pub.ModelConverter;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class PolicyPricing {
                 limit.setPattern(limitSpec.getPattern());
                 if(limitSpec.getPattern().equals(LimitPartten.FORMULA.getValue())) {
                     Expression expression = ModelConverter.convertFromFormulaSpec(getLimitFormula(limitSpec));
-                    subNode.getFactors().put(PAFConsts.LIMIT_FOMULA, expression);
+                    subNode.getFactors().put(Constants.LIMIT_FOMULA, expression);
                 }
 
                 subNode.getFactors().putAll(ObjFieldUtil.getFieldValues(limit));

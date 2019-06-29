@@ -1,9 +1,11 @@
 package rf.policyadmin.model;
 
+import lombok.Data;
 import rf.foundation.model.ModelComponent;
 import java.math.BigDecimal;
 
 
+@Data
 public class Fee extends ModelComponent {
     private String bizCate;
     private String code;
@@ -11,43 +13,4 @@ public class Fee extends ModelComponent {
     private BigDecimal value;
     private boolean asPremium;
 
-    public String getBizCate() {
-        return bizCate;
-    }
-
-    public void setBizCate(String bizCate) {
-        this.bizCate = bizCate;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    public void setValue(BigDecimal value) {
-        this.value = value;
-    }
-
-    public boolean isAsPremium() {
-        return asPremium;
-    }
-
-    public void setAsPremium(boolean asPremium) {
-        this.asPremium = asPremium;
-    }
 }

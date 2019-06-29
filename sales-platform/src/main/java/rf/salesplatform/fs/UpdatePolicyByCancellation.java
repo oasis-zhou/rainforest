@@ -11,7 +11,7 @@ import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.CancellationType;
 import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.enums.TerminalReason;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 
 import java.util.Date;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class UpdatePolicyByCancellation implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context) {
-        Policy policy = (Policy)context.get(PAFConsts.POLICY_OBJECT);
+        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
 
         Cancellation cancellation = (Cancellation)endorsement;
 

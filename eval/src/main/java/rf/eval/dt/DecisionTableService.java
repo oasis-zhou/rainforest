@@ -12,6 +12,7 @@ import rf.eval.dt.repository.pojo.TDecisionTable;
 import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,7 @@ public class DecisionTableService {
             Map<String,Object> value = Maps.newHashMap();
             for(TableColumn column : item.getColumns()) {
                 ColumnSpec spec = table.getColumnSpecs().get(column.getName());
-                if(!spec.getCondition()){
+                if(spec.getCondition() == null || !spec.getCondition()){
                     value.put(column.getName(),column.getValue());
                 }
 
@@ -186,6 +187,16 @@ public class DecisionTableService {
             BigDecimal v = new BigDecimal(value.toString());
 
             r = c.compareTo(v);
+        }
+
+        if(dataType.equals(STRING_LIST.name())) {
+            String c = (String)condition;
+            String v = (String)value;
+            List<String> lists = Arrays.asList(v.split(","));
+            if (lists.contains(c)){
+                return isMatch;
+            }
+            return false;
         }
 
         if(r != 0)

@@ -1,0 +1,19 @@
+{
+    "ModelPath":"rf.policyadmin.model.Quotation",
+    "productCode":"EHI",
+    "effectiveDate":"2019-05-01T00:00:00.000+0800",
+    "expiredDate":"2020-04-30T23:59:59.000+0800",
+    "insureds":[
+        {
+            "ModelPath":"rf.policyadmin.model.PersonCustomer",
+            "birthday":"1980-01-01T00:00:00.000+0800",
+            "dynamicFields":{
+                "SOCIAL_INSURANCE":"1"
+            }
+        }
+    ],
+    "dynamicFields":{
+        "RENEWAL":"0"
+    }
+}
+

@@ -1,9 +1,12 @@
 package rf.foundation.model;
 
 import com.google.common.collect.Lists;
+import lombok.Data;
 
 import java.util.List;
 
+
+@Data
 public class Pair<T> {
 
 	private T originalObj;
@@ -15,24 +18,5 @@ public class Pair<T> {
 		this.originalObj = originalObj;
 		this.newObj = newObj;
 	}
-
-	public T getOriginalObj() {
-		return originalObj;
-	}
-
-	public T getNewObj() {
-		return newObj;
-	}
-
-	public List<Pair> getSubPairs() {
-		return subPairs;
-	}
-
-	public void setSubPairs(List<Pair> subPairs) {
-		this.subPairs = subPairs;
-	}
-	
-	
-	
 	
 }

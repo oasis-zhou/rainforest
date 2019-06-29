@@ -13,7 +13,7 @@ import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
-import rf.policyadmin.constants.PolicyConstants;
+import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyLogService;
 import rf.policyadmin.ds.PolicyService;
@@ -137,7 +137,7 @@ public class EndorsementServiceImpl implements EndorsementService {
 			endorsement.setEndorsementNumber(endorsementNumber);
 		}
 
-		BigDecimal app = endorsement.getEndoFeeByCode(PolicyConstants.FEE_APP).getValue();
+		BigDecimal app = endorsement.getEndoFeeByCode(Constants.FEE_APP).getValue();
 		endorsement.setPremium(app);
 
 		save(endorsement);

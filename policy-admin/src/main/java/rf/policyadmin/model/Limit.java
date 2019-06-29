@@ -1,10 +1,12 @@
 package rf.policyadmin.model;
 
+import lombok.Data;
 import rf.foundation.anno.FieldSpec;
 import rf.foundation.model.ModelComponent;
 import java.math.BigDecimal;
 
 
+@Data
 public class Limit extends ModelComponent {
 
     @FieldSpec(code = "LIMIT_AMOUNT", name = "limit amount")
@@ -26,75 +28,4 @@ public class Limit extends ModelComponent {
     @FieldSpec(code = "LIMIT_INDEMNITY_TYPE", name = "limit indemnity type")
     private String indemnityType;
 
-    public BigDecimal getLimitAmount() {
-        return limitAmount;
-    }
-
-    public void setLimitAmount(BigDecimal limitAmount) {
-        this.limitAmount = limitAmount;
-    }
-
-    public BigDecimal getLimitNumber() {
-        return limitNumber;
-    }
-
-    public void setLimitNumber(BigDecimal limitNumber) {
-        this.limitNumber = limitNumber;
-    }
-
-    public BigDecimal getUnitAmount() {
-        return unitAmount;
-    }
-
-    public void setUnitAmount(BigDecimal unitAmount) {
-        this.unitAmount = unitAmount;
-    }
-
-    public BigDecimal getNumberOfUnit() {
-        return numberOfUnit;
-    }
-
-    public void setNumberOfUnit(BigDecimal numberOfUnit) {
-        this.numberOfUnit = numberOfUnit;
-    }
-
-    public String getUnitType() {
-        return unitType;
-    }
-
-    public void setUnitType(String unitType) {
-        this.unitType = unitType;
-    }
-
-    public BigDecimal getMaxUnitAmount() {
-        return maxUnitAmount;
-    }
-
-    public void setMaxUnitAmount(BigDecimal maxUnitAmount) {
-        this.maxUnitAmount = maxUnitAmount;
-    }
-
-    public BigDecimal getMaxNumberOfUnit() {
-        return maxNumberOfUnit;
-    }
-
-    public void setMaxNumberOfUnit(BigDecimal maxNumberOfUnit) {
-        this.maxNumberOfUnit = maxNumberOfUnit;
-    }
-
-    public String getPattern() {
-        return pattern;
-    }
-
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-
-    public String getIndemnityType() {
-        return indemnityType;
-    }
-
-    public void setIndemnityType(String indemnityType) {
-        this.indemnityType = indemnityType;
-    }
 }

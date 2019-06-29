@@ -40,7 +40,7 @@ public class ProductRepositoryTest {
 
 //    @Test
     public void loadProduct(){
-        ProductSpec product = productRepository.findProduct("MSEHI");
+        ProductSpec product = productRepository.findProduct("EHI");
 
         String json = jsonHelper.toJSON(product);
 
@@ -56,11 +56,11 @@ public class ProductRepositoryTest {
         product.setExpiredDate(new DateTime(2020,12,31,0,0,0).toDate());
         product.setStatus(ProductStatus.EFFECTIVE);
         product.setVersion("1.0");
-        product.setIsfixedCoverage(true);
+        product.setFixedCoverage(true);
 
         InsuredObjectSpec insured = new InsuredObjectSpec();
         insured.setCate(InsuredObjectCate.PERSON);
-        insured.setIsMultiple(false);
+        insured.setMultiple(false);
         product.getSubComponents().add(insured);
 
         CoverageSpec cover1 = new CoverageSpec();
@@ -289,7 +289,7 @@ public class ProductRepositoryTest {
 //        product.setExpiredDate(new DateTime(2099,12,31,0,0,0).toDate());
 //        product.setStatus(ProductStatus.EFFECTIVE);
 //        product.setVersion("1.0");
-//        product.setIsfixedCoverage(true);
+//        product.setFixedCoverage(true);
 //
 //        InsuredObjectSpec insured = new InsuredObjectSpec();
 //        insured.setCate(InsuredObjectCate.PERSON);
@@ -462,7 +462,7 @@ public class ProductRepositoryTest {
 //        product.setExpiredDate(new DateTime(2099,12,31,0,0,0).toDate());
 //        product.setStatus(ProductStatus.EFFECTIVE);
 //        product.setVersion("1.0");
-//        product.setIsfixedCoverage(true);
+//        product.setFixedCoverage(true);
 //
 //        LimitSpec limit = new LimitSpec();
 //        limit.setIndemnityType(IndemnityType.AOP);

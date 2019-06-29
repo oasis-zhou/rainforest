@@ -1,11 +1,12 @@
 package rf.eval;
 
+import com.google.common.collect.Lists;
 import rf.eval.model.EvalNode;
 import java.util.List;
 
 
 public class EvalJob {
-    private List<EvalStage> stages;
+    private List<EvalStage> stages = Lists.newArrayList();
 
     public void process(EvalNode node){
         if(stages != null && stages.size() > 0){

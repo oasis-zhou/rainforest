@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rf.eval.EvalEngine;
 import rf.eval.EvalJob;
 import rf.eval.model.EvalNode;
 import rf.eval.model.Expression;
@@ -17,7 +18,7 @@ import rf.product.model.ProductSpec;
 import rf.product.model.RuleSetSpec;
 import rf.product.model.RuleSpec;
 import rf.salesplatform.pub.ModelConverter;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 import java.util.List;
 import java.util.Map;
 
@@ -27,20 +28,21 @@ public class AutoUnderwriting implements FunctionSlice<Policy> {
 
     @Autowired
     private ProductService productService;
-
-    private EvalJob autoUnderwritingJob;
+    @Autowired
+    private EvalEngine evalEngine;
 
 
     @Override
     public void execute(Policy policy, Map<String, Object> context){
 
-        String ruleSetCode = (String)context.get(PAFConsts.AUTO_UNDERWRITING_RULE_SET);
+        String ruleSetCode = (String)context.get(Constants.AUTO_UNDERWRITING_RULE_SET);
 
         ProductSpec product = productService.findProduct(policy.getProductCode());
 
         List<Expression> expressionList = ModelConverter.convertFromRuleSpecs(getRules(product, ruleSetCode));
 
         EvalNode node = buildEvalNode(policy, expressionList);
+        EvalJob autoUnderwritingJob = evalEngine.ruleJob();
         autoUnderwritingJob.process(node);
 
         Map<String,Object> result = node.getValues();

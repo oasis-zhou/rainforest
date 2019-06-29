@@ -1,25 +1,12 @@
 package rf.product.model;
 
+import lombok.Data;
 import rf.foundation.model.ModelComponent;
 import rf.product.model.enums.InsuredObjectCate;
 
+@Data
 public class InsuredObjectSpec extends ModelComponent {
     private InsuredObjectCate cate;
-    private boolean isMultiple;
+    private boolean multiple;
 
-    public InsuredObjectCate getCate() {
-        return cate;
-    }
-
-    public void setCate(InsuredObjectCate cate) {
-        this.cate = cate;
-    }
-
-    public boolean isMultiple() {
-        return isMultiple;
-    }
-
-    public void setIsMultiple(boolean isMultiple) {
-        this.isMultiple = isMultiple;
-    }
 }

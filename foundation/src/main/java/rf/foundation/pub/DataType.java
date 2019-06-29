@@ -5,5 +5,6 @@ public enum DataType {
     DATE,
     NUMBER,
     STRING,
-    BOOLEAN;
+    BOOLEAN,
+    STRING_LIST;
 }

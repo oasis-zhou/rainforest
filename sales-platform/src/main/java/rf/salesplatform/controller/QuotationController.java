@@ -5,11 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rf.foundation.context.AppContext;
@@ -26,9 +25,8 @@ import rf.salesplatform.fs.AutoUnderwriting;
 import rf.salesplatform.fs.DataValidation;
 import rf.salesplatform.fs.NewbizPricing;
 import rf.salesplatform.fs.SetupPolicyForFixCoverage;
-import rf.salesplatform.pub.PAFConsts;
+import rf.salesplatform.pub.Constants;
 
-import javax.xml.ws.Response;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public class QuotationController {
 
     @Transactional
     @PostMapping(value = "/pricing")
-    public ResponseEntity price(Quotation quotation) {
+    public ResponseEntity price(@RequestBody Quotation quotation) {
 
             long s = System.currentTimeMillis();
             if (quotation.getQuotationNumber() == null) {
@@ -60,7 +58,7 @@ public class QuotationController {
 
             Map<String, Object> context = Maps.newHashMap();
 
-            context.put(PAFConsts.AUTO_UNDERWRITING_RULE_SET, PAFConsts.RULE_SET_UW);
+            context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
