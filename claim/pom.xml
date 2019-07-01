@@ -20,6 +20,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>rainforest</groupId>
+            <artifactId>foundation</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>

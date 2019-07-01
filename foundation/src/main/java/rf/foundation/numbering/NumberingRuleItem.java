@@ -8,7 +8,7 @@ public class NumberingRuleItem {
 	private String fixValue;
 	
 	public NumberingRuleItem(String template){
-		this.setTemplate(template);
+		this.breakDownTemplate(template);
 	}
 
 	public String getTemplate() {
@@ -16,7 +16,7 @@ public class NumberingRuleItem {
 	}
 
 	//4{PRODUCT_CODE}
-	public void setTemplate(String template) {
+	public void breakDownTemplate(String template) {
 		int left = template.indexOf("{");
 		int right = template.indexOf("}");
 		if(left<0 || right<0){

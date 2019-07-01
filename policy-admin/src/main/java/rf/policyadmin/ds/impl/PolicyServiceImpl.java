@@ -16,6 +16,7 @@ import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
+import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.*;
@@ -47,7 +48,7 @@ public class PolicyServiceImpl implements PolicyService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private NumberingService numberingService;
+    private BusinessNumberService businessNumberService;
 
     @Override
     public String generateProposal(Policy policy) {
@@ -60,16 +61,8 @@ public class PolicyServiceImpl implements PolicyService {
         }
 
         if (po.getProposalNumber() == null) {
-
-                Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-                Date date = new Date();
-                factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-
-                //民生投保单号和保单号一致
-                //P{863100}4{TRANS_YEAR}{023}7{SEQUENCE}
-                String proposalNumber = numberingService.generateNumber(NumberingType.POLICY_NUMBER, factors);
+                String proposalNumber = businessNumberService.generateProposalNumber(policy);
                 policy.setProposalNumber(proposalNumber);
-
         }
 
         BeanUtils.copyProperties(policy, po);
@@ -95,8 +88,6 @@ public class PolicyServiceImpl implements PolicyService {
                 throw new GenericException(30001L);
             }
         }
-
-        //民生投保单号和保单号一致
         if (policy.getProposalNumber() != null) {
             po = dao.findByProposalNumber(policy.getProposalNumber());
             if (po.getPolicyNumber() == null) {
@@ -117,12 +108,7 @@ public class PolicyServiceImpl implements PolicyService {
         }
 
         if (policy.getPolicyNumber() == null) {
-            Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-            Date date = new Date();
-            factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-
-            //{863100}4{TRANS_YEAR}{023}7{SEQUENCE}
-            String policyNumber = numberingService.generateNumber(NumberingType.POLICY_NUMBER, factors);
+            String policyNumber = businessNumberService.generatePolicyNumber(policy);
             policy.setPolicyNumber(policyNumber);
         }
 

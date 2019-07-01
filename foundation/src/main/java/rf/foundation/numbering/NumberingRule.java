@@ -9,7 +9,8 @@ public class NumberingRule {
 	private List<NumberingRuleItem> items = new ArrayList<NumberingRuleItem>();
 	
 	public NumberingRule(String template){
-		this.setTemplate(template);
+		this.template = template;
+		this.breakDownTemplate(template);
 	}
 
 	public String getTemplate() {
@@ -17,12 +18,11 @@ public class NumberingRule {
 	}
 
 	//{FIEXED_PREFIX}4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}
-	public void setTemplate(String template) {
+	public void breakDownTemplate(String template) {
 		for(String str:template.split("}")){
 			NumberingRuleItem item = new NumberingRuleItem(str+"}");
 			this.items.add(item);
 		}
-		this.template = template;
 	}
 
 	public List<NumberingRuleItem> getItems() {
@@ -41,7 +41,7 @@ public class NumberingRule {
 				value = item.getFixValue();
 			if(value!=null){
 				String str = item.generateNumbering(value);
-				int index=numbering.indexOf(item.getTemplate());
+				int index = numbering.indexOf(item.getTemplate());
 				numbering.replace(index, index+item.getTemplate().length(), str);
 			}
 		}
@@ -49,10 +49,10 @@ public class NumberingRule {
 	}
 	
 	public NumberingRuleItem findRuleItem(NumberingFactor factor){
-		NumberingRuleItem result=null;
-		for(NumberingRuleItem item:this.getItems()){
+		NumberingRuleItem result = null;
+		for(NumberingRuleItem item : this.getItems()){
 			if(factor.equals(item.getFactor())){
-				result=item;
+				result = item;
 				break;
 			}
 		}

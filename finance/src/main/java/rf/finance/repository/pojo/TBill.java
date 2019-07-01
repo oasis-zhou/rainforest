@@ -9,8 +9,8 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "T_ARAP_ITEM")
-public class TArapItem extends BaseEntity {
+@Table(name = "T_BILL")
+public class TBill extends BaseEntity {
 
     @Id
     private String uuid;
@@ -23,6 +23,9 @@ public class TArapItem extends BaseEntity {
     private BigDecimal balance;
     private String currency;
     private Date dueDate;
+    private String payerPayee;
+    private String payerPayeeIdNumber;
+    private String statusCode;
     @Lob
     @Column(length = 10000)
     private String content;

@@ -31,7 +31,7 @@ public class ProductRepositoryTest {
     @Test
     public void peristProduct() throws Exception{
 
-        ProductSpec product = initProduct();
+        ProductSpec product = initSampleProduct();
 
         productRepository.saveProduct(product);
 
@@ -46,6 +46,213 @@ public class ProductRepositoryTest {
 
         System.out.print("JSON:" + json);
 
+    }
+
+    private ProductSpec initSampleProduct(){
+        ProductSpec product = new ProductSpec();
+        product.setName("百万医疗");
+        product.setCode("EH");
+        product.setEffectiveDate(new DateTime(2019,1,1,0,0,0).toDate());
+        product.setExpiredDate(new DateTime(2020,12,31,0,0,0).toDate());
+        product.setStatus(ProductStatus.EFFECTIVE);
+        product.setVersion("1.0");
+        product.setFixedCoverage(true);
+
+        InsuredObjectSpec insured = new InsuredObjectSpec();
+        insured.setCate(InsuredObjectCate.PERSON);
+        insured.setMultiple(false);
+        product.getSubComponents().add(insured);
+
+        CoverageSpec cover1 = new CoverageSpec();
+        cover1.setName("一般医疗保险金");
+        cover1.setCode("COM_HC");
+        cover1.setPrimary(true);
+        product.getSubComponents().add(cover1);
+
+        LimitSpec limit1 = new LimitSpec();
+        limit1.setIndemnityType(IndemnityType.AOP);
+        limit1.setPattern(LimitPartten.APO.getValue());
+        limit1.setFixed(true);
+        limit1.setDefaultValue("limitAmount:1000000.00");
+        cover1.getSubComponents().add(limit1);
+
+        CoverageSpec cover2 = new CoverageSpec();
+        cover2.setName("恶性肿瘤医疗保险金");
+        cover2.setCode("CA");
+        cover2.setPrimary(true);
+        cover2.setStatus(CoverageStatus.ENABLE);
+        product.getSubComponents().add(cover2);
+
+        LimitSpec limit2= new LimitSpec();
+        limit2.setIndemnityType(IndemnityType.AOP);
+        limit2.setPattern(LimitPartten.APO.getValue());
+        limit2.setFixed(true);
+        limit2.setDefaultValue("limitAmount:1000000.00");
+        cover2.getSubComponents().add(limit2);
+
+        RuleSetSpec ruleSet = new RuleSetSpec();
+        ruleSet.setName("核保");
+        ruleSet.setCode("RS_UW");
+        product.getSubComponents().add(ruleSet);
+
+        RuleSpec rule = new RuleSpec();
+        rule.setName("被保险人年龄");
+        rule.setCode("R_AGE");
+        rule.setType(RuleType.VALIDATION);
+        rule.setBody("INSURED_AGE > 60");
+        List<String> rfactors = Lists.newArrayList();
+        rfactors.add("INSURED_AGE");
+        rule.setFactors(rfactors);
+        rule.setMessage("被保险人年龄不超过60岁");
+        product.getSubComponents().add(rule);
+
+        List<String> rules = Lists.newArrayList();
+        rules.add("R_AGE");
+        ruleSet.setRefRules(rules);
+
+        FeeSpec fee1 = new FeeSpec();
+        fee1.setName("手续费");
+        fee1.setCode("ADMIN_FEE");
+        fee1.setBizCate(FeeBizCate.TAX_FEE);
+        fee1.setAsPremium(true);
+        fee1.setComposeFrom(FeeComposeFrom.FORMULA);
+        product.getSubComponents().add(fee1);
+
+        FormulaSpec formula4 = new FormulaSpec();
+        formula4.setName("手续费计算公式");
+        formula4.setCode("F_ADMIN_FEE");
+        formula4.setPurpose(FormulaPurpose.TAX_FEE);
+        List<String> factors4 = Lists.newArrayList();
+        factors4.add("SNP");
+        formula4.setFactors(factors4);
+        formula4.setBody(" x = SNP * 0.01; return [ADMIN_FEE:x]");
+        fee1.getSubComponents().add(formula4);
+
+        FeeSpec fee2 = new FeeSpec();
+        fee2.setName("佣金");
+        fee2.setCode("COMMISSION");
+        fee2.setBizCate(FeeBizCate.COMMISSION);
+        fee2.setAsPremium(false);
+        fee2.setComposeFrom(FeeComposeFrom.FORMULA);
+        product.getSubComponents().add(fee2);
+
+        FormulaSpec formula5 = new FormulaSpec();
+        formula5.setName("佣金计算公式");
+        formula5.setCode("F_COMMISSION");
+        formula5.setPurpose(FormulaPurpose.COMMISSION);
+        List<String> factors5 = Lists.newArrayList();
+        factors5.add("SNP");
+        formula5.setFactors(factors5);
+        formula5.setBody(" x = SNP * 0.1; return [COMMISSION:x]");
+        fee2.getSubComponents().add(formula5);
+
+        FeeSpec fee3 = new FeeSpec();
+        fee3.setName("实际支付保费");
+        fee3.setCode("APP");
+        fee3.setBizCate(FeeBizCate.PREMIUM);
+        fee3.setAsPremium(true);
+        fee3.setComposeFrom(FeeComposeFrom.FORMULA);
+        product.getSubComponents().add(fee3);
+
+        FormulaSpec formula6 = new FormulaSpec();
+        formula6.setName("实际支付保费计算公式");
+        formula6.setCode("F_APP");
+        formula6.setPurpose(FormulaPurpose.APP);
+        List<String> factors6 = Lists.newArrayList();
+        factors6.add("SNP");
+        factors6.add("ADMIN_FEE");
+        formula6.setFactors(factors6);
+        formula6.setBody(" x = SNP + ADMIN_FEE; return [APP:x]");
+        fee3.getSubComponents().add(formula6);
+
+        FeeSpec fee4 = new FeeSpec();
+        fee4.setName("毛保费");
+        fee4.setCode("SGP");
+        fee4.setBizCate(FeeBizCate.PREMIUM);
+        fee4.setAsPremium(true);
+        fee4.setComposeFrom(FeeComposeFrom.FORMULA);
+        product.getSubComponents().add(fee4);
+
+        FormulaSpec formula1 = new FormulaSpec();
+        formula1.setName("保费公式");
+        formula1.setCode("F_PREMIUM_EH");
+        formula1.setPurpose(FormulaPurpose.PREMIUM);
+        List<String> factors1 = Lists.newArrayList();
+        factors1.add("INSURED_AGE");
+        factors1.add("SOCIAL_INSURANCE");
+        formula1.setFactors(factors1);
+        formula1.setBody("x =  RateTable('RATE_COM_HC',['INSURED_AGE':INSURED_AGE,'SOCIAL_INSURANCE':SOCIAL_INSURANCE]); return ['SGP':x,'SNP':x];");
+        fee4.getSubComponents().add(formula1);
+
+        FeeSpec fee5 = new FeeSpec();
+        fee5.setName("净保费");
+        fee5.setCode("SNP");
+        fee5.setBizCate(FeeBizCate.PREMIUM);
+        fee5.setAsPremium(true);
+        fee5.setComposeFrom(FeeComposeFrom.FORMULA);
+        product.getSubComponents().add(fee5);
+
+        FormulaSpec formula2 = new FormulaSpec();
+        formula2.setName("保费公式");
+        formula2.setCode("F_PREMIUM_EH");
+        formula2.setPurpose(FormulaPurpose.PREMIUM);
+        List<String> factors2 = Lists.newArrayList();
+        factors2.add("INSURED_AGE");
+        factors2.add("SOCIAL_INSURANCE");
+        formula2.setFactors(factors2);
+        formula2.setBody("x =  RateTable('RATE_COM_HC',['INSURED_AGE':INSURED_AGE,'SOCIAL_INSURANCE':SOCIAL_INSURANCE]); return ['SGP':x,'SNP':x];");
+        fee5.getSubComponents().add(formula2);
+
+        EndorsementSpec endo = new EndorsementSpec();
+        endo.setCode("CANCELLATION_FROM_MIDWAY");
+        endo.setName("中途退保");
+        endo.setEndorsementType(EndorsementType.CANCELLATION);
+        product.getSubComponents().add(endo);
+
+        FormulaSpec formula7 = new FormulaSpec();
+        formula7.setName("中途退保收退费计算公式");
+        formula7.setCode("F_CANCELLATION_FROM_MIDWAY");
+        formula7.setPurpose(FormulaPurpose.PREMIUM);
+        List<String> factors7 = Lists.newArrayList();
+        factors7.add("ORIGINAL_PREMIUM");
+        factors7.add("ENDO_PRO_RATE");
+        formula7.setFactors(factors7);
+        formula7.setBody(" x = ORIGINAL_PREMIUM * ENDO_PRO_RATE; return [SNP:x]");
+        endo.getSubComponents().add(formula7);
+
+        FormulaSpec formula8 = new FormulaSpec();
+        formula8.setName("手续费计算公式");
+        formula8.setCode("F_ADMIN_FEE");
+        formula8.setPurpose(FormulaPurpose.TAX_FEE);
+        List<String> factors8 = Lists.newArrayList();
+        factors8.add("SNP");
+        formula8.setFactors(factors4);
+        formula8.setBody(" x = SNP * 0.01; return [ADMIN_FEE:x]");
+        endo.getSubComponents().add(formula8);
+
+
+        FormulaSpec formula9 = new FormulaSpec();
+        formula9.setName("佣金计算公式");
+        formula9.setCode("F_COMMISSION");
+        formula9.setPurpose(FormulaPurpose.COMMISSION);
+        List<String> factors9 = Lists.newArrayList();
+        factors9.add("SNP");
+        formula9.setFactors(factors9);
+        formula9.setBody(" x = SNP * 0.1; return [COMMISSION:x]");
+        endo.getSubComponents().add(formula9);
+
+        FormulaSpec formula10 = new FormulaSpec();
+        formula10.setName("实际支付保费计算公式");
+        formula10.setCode("F_APP");
+        formula10.setPurpose(FormulaPurpose.APP);
+        List<String> factors10 = Lists.newArrayList();
+        factors10.add("SNP");
+        factors10.add("ADMIN_FEE");
+        formula10.setFactors(factors6);
+        formula10.setBody(" x = SNP + ADMIN_FEE; return [APP:x]");
+        endo.getSubComponents().add(formula10);
+
+        return product;
     }
 
     private ProductSpec initProduct(){

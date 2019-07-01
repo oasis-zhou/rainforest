@@ -2,45 +2,39 @@ package rf.salesplatform.fs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rf.finance.ds.ArapItemService;
-import rf.finance.model.ArapItem;
+import rf.finance.ds.BillService;
+import rf.finance.model.Bill;
 import rf.finance.model.PayerPayee;
 import rf.finance.model.enums.TransactionType;
 import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.pub.Constants;
-import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Customer;
-import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Fee;
 import rf.policyadmin.model.Policy;
 
 import java.util.Date;
 import java.util.Map;
 
+
 @Component
-public class EndorsementKeepAccounts implements FunctionSlice<Endorsement> {
+public class NewbizBill implements FunctionSlice<Policy> {
 
     @Autowired
-    private ArapItemService arapItemService;
-
-    @Autowired
-    private PolicyService policyService;
+    private BillService billService;
 
     @Override
-    public void execute(Endorsement endorsement, Map<String, Object> context) {
+    public void execute(Policy policy, Map<String, Object> context){
 
-        ArapItem record = new ArapItem();
+        Bill record = new Bill();
 
-        record.setTransType(TransactionType.ENDORSEMENT);
+        record.setTransType(TransactionType.NEWBIZ);
         record.setTransDate(new Date());
-        Fee fee = endorsement.getEndoFeeByCode(Constants.FEE_APP);
+        Fee fee = policy.getPolicyFeeByCode(Constants.FEE_APP);
         record.setAmount(fee.getValue());
         record.setBalance(fee.getValue());
         record.setDueDate(new Date());
         record.setFeeCode(fee.getCode());
-        record.setRefBizNumber(endorsement.getEndorsementNumber());
-
-        Policy policy = policyService.loadPolicyByPolicyNumber(endorsement.getPolicyNumber());
+        record.setRefBizNumber(policy.getPolicyNumber());
 
         Customer customer = policy.getPolicyHolder();
         PayerPayee pp = new PayerPayee();
@@ -49,6 +43,6 @@ public class EndorsementKeepAccounts implements FunctionSlice<Endorsement> {
         pp.setIdNumber(customer.getIdNumber());
         record.setPayerPayee(pp);
 
-        arapItemService.keepAccounts(record);
+        billService.generateBill(record);
     }
 }

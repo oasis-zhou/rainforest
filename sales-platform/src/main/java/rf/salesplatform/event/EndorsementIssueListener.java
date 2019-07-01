@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Endorsement;
-import rf.salesplatform.fs.EndorsementKeepAccounts;
+import rf.salesplatform.fs.EndorsementBill;
 
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class EndorsementIssueListener implements ApplicationListener<Endorsement
             Map<String,Object> context = Maps.newHashMap();
 
             new FunctionSliceBundle(endorsement,context)
-                    .register(EndorsementKeepAccounts.class)
+                    .register(EndorsementBill.class)
                     .execute();
         }
     }

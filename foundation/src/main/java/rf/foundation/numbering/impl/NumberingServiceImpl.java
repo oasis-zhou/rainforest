@@ -28,9 +28,10 @@ public class NumberingServiceImpl implements NumberingService {
 	}
 	
 	protected synchronized void initConfiguration(){
-		rulesMap=new HashMap<NumberingType,NumberingRule>();
-		cacheMap=new HashMap<String,NumberingSequence>();
-		rulesMap.put(NumberingType.QUOTATION_NUMBER, new NumberingRule("Q{863100}4{TRANS_YEAR}{023}7{SEQUENCE}"));
+		rulesMap = new HashMap<NumberingType,NumberingRule>();
+		cacheMap = new HashMap<String,NumberingSequence>();
+
+		rulesMap.put(NumberingType.QUOTATION_NUMBER, new NumberingRule("Q2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.PROPOSAL_NUMBER, new NumberingRule("P{863100}4{TRANS_YEAR}{023}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.POLICY_NUMBER, new NumberingRule("{863100}4{TRANS_YEAR}{023}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.ENDORSEMENT_NUMBER,new NumberingRule( "E{863100}4{TRANS_YEAR}7{SEQUENCE}"));
@@ -38,17 +39,12 @@ public class NumberingServiceImpl implements NumberingService {
 		rulesMap.put(NumberingType.NOTICE_NUMBER, new NumberingRule("N{863100}4{TRANS_YEAR}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.BCP_TRANS_NUMBER, new NumberingRule("T2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.BCP_PAYMENT_NUMBER,new NumberingRule( "P2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
-		rulesMap.put(NumberingType.BCP_RECEIPT_NUMBER, new NumberingRule("R2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.ORDER_NUMBER, new NumberingRule("O2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.CARD_NUMBER, new NumberingRule("CARD2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.SIMPLE_SEQUENCE, new NumberingRule("6{PREFIX}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.LONG_SEQUENCE,new NumberingRule("10{SEQUENCE}"));
 		rulesMap.put(NumberingType.GL_SEQUENCE,new NumberingRule("12{SEQUENCE}"));
 		rulesMap.put(NumberingType.CUSTOMER_CODE,new NumberingRule("4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.POLICY_REGIST_SEQUENCE,new NumberingRule("{000052}4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}{1}9{SEQUENCE}"));
-		rulesMap.put(NumberingType.REAL_TIME_PAY_SEQUENCE,new NumberingRule("{BC}13{SEQUENCE}"));
-		rulesMap.put(NumberingType.TAXFREE_PRENT_NUMBER,new NumberingRule("{1110069}7{SEQUENCE}"));
-
 	}
 
 	public synchronized Long nextNumber(NumberingType type, String numbering) {
@@ -64,7 +60,6 @@ public class NumberingServiceImpl implements NumberingService {
 			cacheSeq.setTo(nextSequence);
 
 		}
-
 		cacheSeq.setFrom(cacheSeq.getFrom() + 1);
 
 		return cacheSeq.getFrom();		
@@ -82,9 +77,9 @@ public class NumberingServiceImpl implements NumberingService {
 		NumberingRuleItem item = rule.findRuleItem(NumberingFactor.SEQUENCE);
 		if(item!=null){
 			Long seq = nextNumber(type, numbering);
-			String str=item.generateNumbering(Long.toString(seq));
-			int index=tmp.indexOf(item.getTemplate());
-			if(index!=-1){
+			String str = item.generateNumbering(Long.toString(seq));
+			int index = tmp.indexOf(item.getTemplate());
+			if(index != -1){
 				tmp.replace(index, index+item.getTemplate().length(), str);
 			}
 		}

@@ -16,6 +16,7 @@ import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.pub.FunctionSliceBundle;
+import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.model.Fee;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.Quotation;
@@ -40,9 +41,8 @@ public class QuotationController {
 
     @Autowired
     private PolicyTransformer policyTransformer;
-
     @Autowired
-    private NumberingService numberingService;
+    private BusinessNumberService businessNumberService;
 
     @Transactional
     @PostMapping(value = "/pricing")
@@ -50,7 +50,7 @@ public class QuotationController {
 
             long s = System.currentTimeMillis();
             if (quotation.getQuotationNumber() == null) {
-                String quotationNumber = generateQuotationNumber(quotation);
+                String quotationNumber = businessNumberService.generateQuotationNumber(quotation);
                 quotation.setQuotationNumber(quotationNumber);
             }
 
@@ -81,19 +81,6 @@ public class QuotationController {
             return new ResponseEntity(response, HttpStatus.OK);
 
 
-    }
-
-
-    private String generateQuotationNumber(Quotation quotation) {
-
-        Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-        Date date = new Date();
-        factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-
-        //Q{863100}4{TRANS_YEAR}{023}7{SEQUENCE}
-        String quotationNumber = numberingService.generateNumber(NumberingType.QUOTATION_NUMBER, factors);
-
-        return quotationNumber;
     }
 
 }
