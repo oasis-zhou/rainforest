@@ -5,10 +5,10 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import rf.eval.dt.repository.DecisionTableDao;
 import rf.eval.dt.repository.pojo.TDecisionTable;
+import rf.foundation.cache.GuavaCacheManager;
 import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;
 import java.math.BigDecimal;
@@ -27,23 +27,25 @@ public class DecisionTableService {
 
     @Autowired
     private DecisionTableDao decisionTableDao;
-
     @Autowired
     private JsonHelper jsonHelper;
+    @Autowired
+    private GuavaCacheManager guavaCacheManager;
 
-    @Cacheable(value="ratetable" , key = "#tableCode")
     public DecisionTableSpec findRateTable(String tableCode) {
-        logger.debug("Load rate table " + tableCode + " first.\n");
+        DecisionTableSpec table = (DecisionTableSpec) guavaCacheManager.getCacheByKey(tableCode);
 
-        TDecisionTable po = decisionTableDao.findByCode(tableCode);
+        if(table == null) {
+            TDecisionTable po = decisionTableDao.findByCode(tableCode);
+            logger.debug("Load rate table " + tableCode + " from database.\n");
 
-        DecisionTableSpec table = null;
-        if(po != null && po.getContent() != null){
-            table = jsonHelper.fromJSON(po.getContent(), DecisionTableSpec.class);
+            if (po != null && po.getContent() != null) {
+                table = jsonHelper.fromJSON(po.getContent(), DecisionTableSpec.class);
+                guavaCacheManager.putCache(tableCode,table);
+            }
         }
 
         return table;
-
     }
 
     public Map<String,Object> findRateValues(String tableCode,Map conditions){
@@ -63,7 +65,6 @@ public class DecisionTableService {
         }
         return value;
     }
-
 
     public void saveRateTable(DecisionTableSpec table){
 
@@ -85,6 +86,7 @@ public class DecisionTableService {
 
         decisionTableDao.save(po);
 
+        guavaCacheManager.putCache(table.getCode(),table);
     }
 
     public Map<String,Object> findSingleItemValue(DecisionTableSpec table, Map<String,Object> conditions){

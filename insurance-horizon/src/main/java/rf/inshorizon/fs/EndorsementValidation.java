@@ -1,4 +1,4 @@
-package rf.salesplatform.fs;
+package rf.inshorizon.fs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,17 +9,17 @@ import rf.eval.model.Expression;
 import rf.foundation.exception.GenericException;
 import rf.foundation.pub.FunctionSlice;
 import rf.foundation.utils.ObjFieldUtil;
-import rf.policyadmin.ds.EndorsementService;
-import rf.policyadmin.ds.PolicyService;
+import rf.inshorizon.ds.ProductService;
+import rf.inshorizon.model.EndorsementPolicy;
+import rf.inshorizon.pub.Constants;
+import rf.inshorizon.pub.ModelConverter;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
-import rf.product.ds.ProductService;
 import rf.product.model.EndorsementSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.RuleSpec;
-import rf.salesplatform.pub.ModelConverter;
-import rf.salesplatform.pub.Constants;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,29 +28,24 @@ import java.util.Map;
 public class EndorsementValidation implements FunctionSlice<Endorsement> {
 
     @Autowired
-    private PolicyService policyService;
-    @Autowired
     private ProductService productService;
-    @Autowired
-    private EndorsementService endorsementService;
     @Autowired
     private EvalEngine evalEngine;
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
-        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
+        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDOSEMENT_POLICY_OBJECT);
+        Policy policy = endoPolicy.getOriginal();
 
         //verify the policy contract status
         if(policy.getContractStatus().equals(ContractStatus.TERMINAL))
             throw new GenericException(30011L);
-        //verify the policy has pending endorsement
-        verifyPendingEndorsement(endorsement);
         //verify the endorsement effective date
         verifyEffate(endorsement,policy);
         //verify the endorsement application date
         verifyApplyDate(endorsement,policy);
 
-        ProductSpec product = productService.findProduct(endorsement.getProductCode());
+        ProductSpec product = productService.pullFromChain(endorsement.getProductCode());
         List<EndorsementSpec> endorsementSpecs = product.getAllSubComponentsByType(EndorsementSpec.class);
         EndorsementSpec endorsementSpec = null;
         for(EndorsementSpec spec : endorsementSpecs){
@@ -113,11 +108,6 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
         if (applyDate.before(polEff) || applyDate.after(polExp)) {
             throw  new GenericException(30013L);
         }
-    }
-
-    private void verifyPendingEndorsement(Endorsement endorsement){
-        if(endorsementService.hasPendingEndorsement(endorsement.getPolicyNumber()))
-            throw new GenericException(30005L);
     }
 
 

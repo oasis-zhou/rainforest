@@ -1,4 +1,4 @@
-package rf.product.repository;
+package rf.product.ds;
 
 
 import org.assertj.core.util.Lists;
@@ -7,24 +7,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.junit4.SpringRunner;
 import rf.foundation.utils.JsonHelper;
 import rf.product.model.*;
 import rf.product.model.enums.*;
+import rf.product.repository.ProductDao;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ProductRepositoryTest {
+public class ProductServiceTest {
 
     @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private ProductDao productDao;
-
+    private ProductService productService;
     @Autowired
     private JsonHelper jsonHelper;
 
@@ -33,14 +32,14 @@ public class ProductRepositoryTest {
 
         ProductSpec product = initSampleProduct();
 
-        productRepository.saveProduct(product);
+        productService.saveProduct(product);
 
     }
 
 
 //    @Test
     public void loadProduct(){
-        ProductSpec product = productRepository.findProduct("EHI");
+        ProductSpec product = productService.findProduct("EH");
 
         String json = jsonHelper.toJSON(product);
 

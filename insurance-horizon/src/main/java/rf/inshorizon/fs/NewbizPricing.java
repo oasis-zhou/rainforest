@@ -1,11 +1,10 @@
-package rf.salesplatform.fs;
+package rf.inshorizon.fs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rf.foundation.pub.FunctionSlice;
+import rf.inshorizon.ds.PricingService;
 import rf.policyadmin.model.Policy;
-import rf.salesplatform.ds.PricingService;
-
 import java.util.Map;
 
 

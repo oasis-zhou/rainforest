@@ -1,9 +1,9 @@
-package rf.salesplatform.fs.pub;
+package rf.salesplatform.ds.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import rf.eval.EvalConstant;
 import rf.eval.EvalEngine;
 import rf.eval.EvalJob;
@@ -15,23 +15,30 @@ import rf.policyadmin.model.*;
 import rf.product.ds.ProductService;
 import rf.product.model.*;
 import rf.product.model.enums.LimitPartten;
-import rf.salesplatform.pub.ModelConverter;
+import rf.salesplatform.ds.PricingService;
 import rf.salesplatform.pub.Constants;
+import rf.salesplatform.pub.ModelConverter;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by zhouzheng on 2017/5/5.
- */
-@Component
-public class PolicyPricing {
+ * @ClassName PricingServiceImpl
+ * @Description: TODO
+ * @Author zhouzheng
+ * @Date 2019/7/2
+ * @Version V1.0
+ **/
+@Service
+public class PricingServiceImpl implements PricingService {
 
     @Autowired
     private ProductService productService;
     @Autowired
     private EvalEngine evalEngine;
 
+    @Override
     public void price(Policy policy){
         ProductSpec product = productService.findProduct(policy.getProductCode());
         Map<String, FeeSpec> feeSpecMap = getFeeSpecs(product);
@@ -200,5 +207,4 @@ public class PolicyPricing {
         }
         return feeMap;
     }
-
 }

@@ -1,4 +1,4 @@
-package rf.bop.conf;
+package rf.bizop.conf;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;

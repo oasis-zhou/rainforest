@@ -6,5 +6,6 @@ import rf.product.model.ProductSpec;
 @Service
 public interface ProductService {
 
-   public ProductSpec findProduct(String productCode);
+   ProductSpec findProduct(String productCode);
+   void saveProduct(ProductSpec product);
 }

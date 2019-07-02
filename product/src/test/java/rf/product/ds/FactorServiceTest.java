@@ -1,4 +1,4 @@
-package rf.product.repository;
+package rf.product.ds;
 
 
 import org.junit.Test;
@@ -9,13 +9,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class FactorRepositoryTest {
+public class FactorServiceTest {
 
     @Autowired
-    private FactorRepository repository;
+    private FactorService factorService;
 
     @Test
     public void saveFators(){
-        repository.initFatorsFromExcel();
+        factorService.initFatorsFromExcel();
     }
 }

@@ -1,4 +1,4 @@
-package rf.bop.conf;
+package rf.inshorizon.conf;
 
 
 

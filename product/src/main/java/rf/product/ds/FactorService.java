@@ -5,5 +5,7 @@ import rf.product.model.FactorSpec;
 
 public interface FactorService {
 
-    public FactorSpec findFactor(String code);
+    FactorSpec findFactor(String code);
+    void saveFactor(FactorSpec spec);
+    void initFatorsFromExcel();
 }

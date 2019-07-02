@@ -21,6 +21,7 @@
         <module>sales-platform</module>
         <module>business-operation-platform</module>
         <module>eval</module>
+        <module>insurance-horizon</module>
     </modules>
 
     <name>rf</name>
@@ -48,6 +49,7 @@
         <guava.vsersion>28.0-jre</guava.vsersion>
         <jodatime.version>2.9.4</jodatime.version>
         <mysql.connector.version>8.0.16</mysql.connector.version>
+        <ipfs.version>v1.2.3</ipfs.version>
     </properties>
 
     <dependencies>
@@ -221,6 +223,11 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>${jodatime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ipfs</groupId>
+            <artifactId>java-ipfs-api</artifactId>
+            <version>${ipfs.version}</version>
         </dependency>
 
     </dependencies>
