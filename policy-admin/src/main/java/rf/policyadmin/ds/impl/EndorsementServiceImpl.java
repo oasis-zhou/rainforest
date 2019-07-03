@@ -4,23 +4,25 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import rf.foundation.model.ResponsePage;
 import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
+import rf.policyadmin.model.QueryCondition;
 import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyLogService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Endorsement;
-import rf.policyadmin.model.EndorsementQueryCondition;
 import rf.policyadmin.model.Policy;
-import rf.policyadmin.model.ResponsePage;
 import rf.policyadmin.model.enums.EndorsementStatus;
 import rf.policyadmin.model.enums.LogType;
 import rf.policyadmin.repository.EndorsementDao;
@@ -209,19 +211,15 @@ public class EndorsementServiceImpl implements EndorsementService {
 	}
 
 	@Override
-	public ResponsePage<Endorsement> findEndorsement(EndorsementQueryCondition condition, Pageable pageable) {
+	public ResponsePage<Endorsement> findEndorsement(QueryCondition condition) {
 
-		Page tEndorsements = endoDao.findAll(new Specification<TEndorsement>(){
+		Page page = endoDao.findAll(new Specification<TEndorsement>(){
 			@Override
 			public Predicate toPredicate(Root<TEndorsement> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				List<Predicate> predicates = new ArrayList<>();
-				if (condition.getStatusCode()!=null&&!"".equals(condition.getStatusCode())){
-					Predicate p1 = cb.equal(root.get("statusCode").as(String.class),condition.getStatusCode());
+				if (condition.getStatus()!=null&&!"".equals(condition.getStatus())){
+					Predicate p1 = cb.equal(root.get("statusCode").as(String.class),condition.getStatus());
 					predicates.add(p1);
-				}
-				if (condition.getApplicationName()!=null&&!"".equals(condition.getApplicationName())){
-					Predicate p2 = cb.like(root.get("applicationName").as(String.class),"%"+condition.getApplicationName()+"%");
-					predicates.add(p2);
 				}
 				if (condition.getChannelCode()!=null&&!"".equals(condition.getChannelCode())){
 					Predicate p3 = cb.equal(root.get("channelCode").as(String.class),condition.getChannelCode());
@@ -239,16 +237,16 @@ public class EndorsementServiceImpl implements EndorsementService {
 					Predicate p6 = cb.equal(root.get("policyNumber").as(String.class),condition.getPolicyNumber());
 					predicates.add(p6);
 				}
-				if (condition.getApplicationDateStart()!=null&&condition.getApplicationDateEnd()!=null){
+				if (condition.getDateStart()!=null&&condition.getDateEnd()!=null){
 					Predicate p7 = cb.between(root.get("applicationDate").as(Date.class),
-							condition.getApplicationDateStart(),condition.getApplicationDateEnd());
+							condition.getDateStart(),condition.getDateEnd());
 					predicates.add(p7);
 				}
 				query.where(predicates.toArray(new Predicate[predicates.size()]));
 				return query.getRestriction();
 			}
-		},pageable);
-		return buildResponsePage(tEndorsements);
+		}, PageRequest.of(condition.getPageNo() - 1, condition.getPageSize(), Sort.by(Sort.Direction.DESC, "applicationDate")));
+		return buildResponsePage(page);
 	}
 
 	@Override
@@ -282,14 +280,13 @@ public class EndorsementServiceImpl implements EndorsementService {
 		return endorsement;
 	}
 
-	private ResponsePage<Endorsement> buildResponsePage(Page<TEndorsement> tEndorsements){
-
-		List<Endorsement> ts = tEndorsements.getContent().stream()
-				.map(tu -> {
-					Endorsement u = jsonHelper.fromJSON(tu.getContent(), Endorsement.class);
-					return u;
+	private ResponsePage<Endorsement> buildResponsePage(Page<TEndorsement> page){
+		List<Endorsement> datas = page.getContent().stream()
+				.map(po -> {
+					Endorsement endorsement = jsonHelper.fromJSON(po.getContent(), Endorsement.class);
+					return endorsement;
 				})
 				.collect(toList());
-		return new ResponsePage<>(tEndorsements, ts);
+		return new ResponsePage<>(page, datas);
 	}
 }

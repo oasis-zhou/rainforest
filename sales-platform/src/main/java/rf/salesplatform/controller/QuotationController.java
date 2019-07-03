@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rf.foundation.context.AppContext;
-import rf.foundation.numbering.NumberingFactor;
-import rf.foundation.numbering.NumberingService;
-import rf.foundation.numbering.NumberingType;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.model.Fee;
@@ -23,14 +20,10 @@ import rf.policyadmin.model.Quotation;
 import rf.policyadmin.model.trans.PolicyTransformer;
 import rf.salesplatform.event.QuotationEvent;
 import rf.salesplatform.fs.AutoUnderwriting;
-import rf.salesplatform.fs.DataValidation;
 import rf.salesplatform.fs.NewbizPricing;
 import rf.salesplatform.fs.SetupPolicyForFixCoverage;
 import rf.salesplatform.pub.Constants;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -62,7 +55,6 @@ public class QuotationController {
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
-                    .register(DataValidation.class)
                     .register(AutoUnderwriting.class)
                     .register(NewbizPricing.class)
                     .execute();

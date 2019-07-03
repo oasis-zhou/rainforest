@@ -10,12 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import rf.foundation.context.AppContext;
+import rf.foundation.model.ResponsePage;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
-import rf.policyadmin.model.Cancellation;
-import rf.policyadmin.model.Endorsement;
-import rf.policyadmin.model.Policy;
+import rf.policyadmin.model.*;
 import rf.policyadmin.model.enums.CancellationType;
 import rf.policyadmin.model.enums.EndorsementApplicationType;
 import rf.policyadmin.model.enums.EndorsementType;
@@ -140,7 +139,6 @@ public class EndorsementController {
         response.put("endorsementPremium", cancellation.getEndoFeeByCode(rf.policyadmin.pub.Constants.FEE_APP).getValue());
 
         return new ResponseEntity(response, HttpStatus.OK);
-
     }
 
     @GetMapping(value = "query/{policyNumber}")
@@ -149,6 +147,5 @@ public class EndorsementController {
         List<Endorsement> endorsementList = endorsementService.findEndorsements(policyNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);
     }
-
 
 }

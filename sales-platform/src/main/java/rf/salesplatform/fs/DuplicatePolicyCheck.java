@@ -7,7 +7,6 @@ import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.*;
 import rf.policyadmin.model.enums.ContractStatus;
-import rf.salesplatform.pub.Constants;
 
 import java.util.List;
 import java.util.Map;
@@ -27,15 +26,14 @@ public class DuplicatePolicyCheck implements FunctionSlice<Policy> {
         List<Customer> insureds = policy.getInsureds();
         PersonCustomer insured = (PersonCustomer) insureds.get(0);
 
-        PolicyQueryCondition condition = new PolicyQueryCondition();
+        QueryCondition condition = new QueryCondition();
         condition.setProductCode(policy.getProductCode());
         condition.setPolicyInsuredIdNumber(insured.getIdNumber());
-        condition.setContractStatus(ContractStatus.EFFECTIVE.name());
+        condition.setStatus(ContractStatus.EFFECTIVE.name());
 
-        List<PolicyIndex> indexs = policyService.findPolicy(condition);
-        if(indexs.size() > 0)
+       Long count = policyService.countPolicy(condition);
+        if(count > 0)
             throw new GenericException(30007L);
-
     }
 
 }

@@ -1,5 +1,7 @@
 package rf.policyadmin.ds;
 
+import rf.foundation.model.ResponsePage;
+import rf.policyadmin.model.QueryCondition;
 import rf.policyadmin.model.Quotation;
 
 /**
@@ -7,5 +9,8 @@ import rf.policyadmin.model.Quotation;
  */
 public interface QuotationService {
 
-    public String generateQuotation(Quotation quotation);
+    String generateQuotation(Quotation quotation);
+
+    ResponsePage<Quotation> findQuotations(QueryCondition condition);
+
 }

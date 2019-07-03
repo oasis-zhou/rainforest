@@ -31,6 +31,8 @@ public class BusinessNumberServiceImpl implements BusinessNumberService {
         Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
         Date date = new Date();
         factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
+        factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
+        factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
 
         String policyNumber = numberingService.generateNumber(NumberingType.POLICY_NUMBER, factors);
         return policyNumber;
@@ -41,6 +43,8 @@ public class BusinessNumberServiceImpl implements BusinessNumberService {
         Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
         Date date = new Date();
         factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
+        factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
+        factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
 
         String proposalNumber = numberingService.generateNumber(NumberingType.PROPOSAL_NUMBER, factors);
         return proposalNumber;
@@ -53,7 +57,7 @@ public class BusinessNumberServiceImpl implements BusinessNumberService {
         factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
         factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
         factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
-        //Q{863100}4{TRANS_YEAR}{023}7{SEQUENCE}
+
         String quotationNumber = numberingService.generateNumber(NumberingType.QUOTATION_NUMBER,factors);
         return quotationNumber;
     }

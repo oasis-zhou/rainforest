@@ -1,7 +1,9 @@
 package rf.inshorizon.ds.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import rf.foundation.cache.GuavaCacheManager;
 import rf.inshorizon.ds.ProductService;
 import rf.product.model.ProductSpec;
 
@@ -16,15 +18,15 @@ import rf.product.model.ProductSpec;
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
-    private CacheManager cacheManager;
+    private GuavaCacheManager cacheManager;
 
     @Override
     public ProductSpec pullFromChain(String productCode) {
 
-        ProductSpec productSpec = (ProductSpec) cacheManager.getCacheDataByKey(productCode);
+        ProductSpec productSpec = (ProductSpec) cacheManager.getCacheByKey(productCode);
 
         if(productSpec == null) {
-            //TODO 从区块链获取产品信息
+            //TODO 从区块链获取产品信息，缓存产品和费率表数据
         }
         return productSpec;
     }

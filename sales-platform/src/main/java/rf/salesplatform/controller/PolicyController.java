@@ -9,13 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import rf.foundation.context.AppContext;
+import rf.foundation.model.ResponsePage;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.foundation.utils.JsonHelper;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.PolicyIndex;
-import rf.policyadmin.model.PolicyQueryCondition;
+import rf.policyadmin.model.QueryCondition;
 import rf.policyadmin.model.Quotation;
 import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.trans.PolicyTransformer;
@@ -59,7 +60,6 @@ public class PolicyController {
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
-                    .register(DataValidation.class)
                     .register(DuplicatePolicyCheck.class)
                     .register(AutoUnderwriting.class)
                     .register(NewbizPricing.class)
@@ -87,7 +87,6 @@ public class PolicyController {
 
             new FunctionSliceBundle(policy, context)
                     .register(SetupPolicyForFixCoverage.class)
-                    .register(DataValidation.class)
                     .register(DuplicatePolicyCheck.class)
                     .register(AutoUnderwriting.class)
                     .register(NewbizPricing.class)
@@ -135,21 +134,12 @@ public class PolicyController {
 
 
     @PostMapping(value = "/query")
-    public ResponseEntity queryPolicy(@RequestBody PolicyQueryCondition condition) {
+    public ResponseEntity queryPolicy(@RequestBody QueryCondition condition) {
 
-            logger.debug("policy query condition:" + jsonHelper.toJSON(condition));
-            List<PolicyIndex> policyIndices = policyService.findPolicy(condition);
+        logger.debug("policy query condition:" + jsonHelper.toJSON(condition));
+        ResponsePage<PolicyIndex> policyIndices = policyService.findPolicy(condition);
 
-            for (PolicyIndex index : policyIndices) {
-                if (index.getContractStatusCode().equals(ContractStatus.EFFECTIVE.name())) {
-                    Date expDate = index.getExpiredDate();
-                    if (expDate.before(new Date())) {
-                        index.setContractStatusCode(ContractStatus.TERMINAL.name());
-                    }
-                }
-            }
-            return new ResponseEntity(policyIndices, HttpStatus.OK);
-
+        return new ResponseEntity(policyIndices, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{policyNumber}")

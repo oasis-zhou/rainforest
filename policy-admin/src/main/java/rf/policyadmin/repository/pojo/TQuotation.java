@@ -9,8 +9,6 @@ import java.util.Date;
 @Data
 @Table(name = "T_QUOTATION")
 public class TQuotation extends BaseEntity {
-
-
 	/**
 	 * 
 	 */
@@ -23,7 +21,6 @@ public class TQuotation extends BaseEntity {
 	private String channelCode;
 	private Date effectiveDate;
 	private Date expiredDate;
-	private Date proposalDate;
 	private String quotationStatusCode;
 	private String businessOrgan;
 	private String businessSource;

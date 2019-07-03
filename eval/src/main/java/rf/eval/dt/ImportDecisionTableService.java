@@ -27,32 +27,9 @@ public class ImportDecisionTableService {
             for(Resource r : resources){
                 File file = r.getFile();
 
-                ExcelReader specReader = new ExcelReader(file, "RATE_SPEC");
+                DecisionTableSpec tableSpec = buildDecisionTableSpec(file);
 
-                DecisionTableSpec tableSpec = buildDecisionTableSpec(specReader);
                 rateTableSpecs.add(tableSpec);
-
-                ExcelReader rateReader = new ExcelReader(file, "RATES");
-                List<Map<String,String>> mapData = rateReader.getAllMapData();
-                mapData.forEach(map -> {
-                    TableItem item = new TableItem();
-                    tableSpec.getSubComponents().add(item);
-                    for (Map.Entry<String, String> me : map.entrySet()) {
-                        TableColumn column = new TableColumn();
-                        item.getColumns().add(column);
-                        column.setName(me.getKey());
-                        if (me.getValue().matches("^(\\[|\\()(\\d+,\\d+)(\\]|\\))$")) {
-                            String temp = me.getValue().replaceAll("\\[|\\]|\\(|\\)", "");
-                            String[] values = temp.split(",");
-                            column.setMinValue(values[0]);
-                            column.setMaxValue(values[1]);
-
-                        } else {
-                            column.setValue(me.getValue());
-                        }
-                    }
-                });
-
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -60,6 +37,34 @@ public class ImportDecisionTableService {
         }
 
         return rateTableSpecs;
+    }
+
+    public DecisionTableSpec buildDecisionTableSpec(File file) {
+        ExcelReader specReader = new ExcelReader(file, "RATE_SPEC");
+
+        DecisionTableSpec tableSpec = buildDecisionTableSpec(specReader);
+
+        ExcelReader rateReader = new ExcelReader(file, "RATES");
+        List<Map<String,String>> mapData = rateReader.getAllMapData();
+        mapData.forEach(map -> {
+            TableItem item = new TableItem();
+            tableSpec.getSubComponents().add(item);
+            for (Map.Entry<String, String> me : map.entrySet()) {
+                TableColumn column = new TableColumn();
+                item.getColumns().add(column);
+                column.setName(me.getKey());
+                if (me.getValue().matches("^(\\[|\\()(\\d+,\\d+)(\\]|\\))$")) {
+                    String temp = me.getValue().replaceAll("\\[|\\]|\\(|\\)", "");
+                    String[] values = temp.split(",");
+                    column.setMinValue(values[0]);
+                    column.setMaxValue(values[1]);
+
+                } else {
+                    column.setValue(me.getValue());
+                }
+            }
+        });
+        return tableSpec;
     }
 
     private DecisionTableSpec buildDecisionTableSpec(ExcelReader specReader) {

@@ -8,13 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import rf.foundation.exception.GenericException;
-import rf.foundation.numbering.NumberingFactor;
-import rf.foundation.numbering.NumberingService;
-import rf.foundation.numbering.NumberingType;
+import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
 import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.pub.Constants;
@@ -26,10 +28,16 @@ import rf.policyadmin.repository.PolicyDao;
 import rf.policyadmin.repository.PolicyIndexDao;
 import rf.policyadmin.repository.pojo.TPolicy;
 import rf.policyadmin.repository.pojo.TPolicyIndex;
+import rf.policyadmin.repository.pojo.TQuotation;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by zhengzhou on 16/8/8.
@@ -248,72 +256,110 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
-    public List<PolicyIndex> findPolicy(PolicyQueryCondition condition) {
+    public ResponsePage<PolicyIndex> findPolicy(QueryCondition condition) {
 
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 构造自定义查询条件
+        Specification<TPolicyIndex> queryCondition = new Specification<TPolicyIndex>() {
+            @Override
+            public Predicate toPredicate(Root<TPolicyIndex> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicateList = new ArrayList<>();
+                if (condition.getPolicyNumber() != null && !condition.getPolicyNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyNumber"),condition.getPolicyNumber()));
+                }
+                if (condition.getProposalNumber() != null && !condition.getProposalNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("proposalNumber"),condition.getProposalNumber()));
+                }
+                if (condition.getPolicyHolderName() != null && !condition.getPolicyHolderName().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("policyHolderName"),"%" + condition.getPolicyHolderName() + "%"));
+                }
+                if (condition.getPolicyHolderIdNumber() != null && !condition.getPolicyHolderIdNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyHolderIdNumber"),condition.getPolicyHolderIdNumber()));
+                }
+                if (condition.getPolicyInsuredName() != null && !condition.getPolicyInsuredName().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("policyInsuredName"),"%" + condition.getPolicyInsuredName() + "%"));
+                }
+                if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyInsuredNumber"),condition.getPolicyInsuredIdNumber()));
+                }
+                if (condition.getMobile() != null && !condition.getMobile().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("mobile"),condition.getMobile()));
+                }
+                if (condition.getChannelCode()!=null&&!"".equals(condition.getChannelCode())){
+                    predicateList.add(criteriaBuilder.equal(root.get("channelCode"),condition.getChannelCode()));
+                }
+                if (condition.getProductCode()!=null&&!"".equals(condition.getProductCode())){
+                    predicateList.add(criteriaBuilder.equal(root.get("productCode"),condition.getProductCode()));
+                }
+                if (condition.getDateStart()!=null&&condition.getDateEnd()!=null){
+                    predicateList.add(criteriaBuilder.between(root.get("proposalDate"),condition.getDateStart(),condition.getDateEnd()));
+                }
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[predicateList.size()]));
+            }
+        };
 
-        String sql = "select * from t_policy_index as p  where 1 = 1 ";
+        Page<TPolicyIndex> page = indexDao.findAll(queryCondition, PageRequest.of(condition.getPageNo() - 1, condition.getPageSize(), Sort.by(Sort.Direction.DESC, "proposalDate")));
 
-        List<PolicyIndex> indexs = Lists.newArrayList();
+        return buildResponsePage(page);
 
-        List<Object> queryConditions = new ArrayList<Object>();
-        if (condition.getPolicyNumber() != null && !condition.getPolicyNumber().equals("")) {
-            sql += " and p.policyNumber = ? ";
-            queryConditions.add(condition.getPolicyNumber());
-        }
-        if (condition.getProposalNumber() != null && !condition.getProposalNumber().equals("")) {
-            sql += " and p.proposalNumber = ? ";
-            queryConditions.add(condition.getProposalNumber());
-        }
-        if (condition.getPolicyHolderName() != null && !condition.getPolicyHolderName().equals("")) {
-            sql += " and p.policyHolderName = ? ";
-            queryConditions.add(condition.getPolicyHolderName());
-        }
-        if (condition.getPolicyHolderIdNumber() != null && !condition.getPolicyHolderIdNumber().equals("")) {
-            sql += " and p.policyHolderIdNumber = ? ";
-            queryConditions.add(condition.getPolicyHolderIdNumber());
-        }
-        if (condition.getPolicyInsuredName() != null && !condition.getPolicyInsuredName().equals("")) {
-            sql += " and p.policyInsuredName = ? ";
-            queryConditions.add(condition.getPolicyInsuredName());
-        }
-        if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
-            sql += " and p.policyInsuredIdNumber = ? ";
-            queryConditions.add(condition.getPolicyInsuredIdNumber());
-        }
-        if (condition.getProductCode() != null && !condition.getProductCode().equals("")) {
-            sql += " and p.productCode = ? ";
-            queryConditions.add(condition.getProductCode());
-        }
-        if (condition.getMobile() != null && !condition.getMobile().equals("")) {
-            sql += " and p.mobile = ? ";
-            queryConditions.add(condition.getMobile());
-        }
-        if (condition.getContractStatus() != null && !condition.getContractStatus().equals("")) {
-            sql += " and p.contractStatusCode = ? ";
-            queryConditions.add(condition.getContractStatus());
-        }
-        if (condition.getProposalDateStart() != null) {
-            sql += " and p.proposalDate >= ? ";
-            queryConditions.add(fmt.print(new DateTime(condition.getProposalDateStart())));
-        }
-        if (condition.getProposalDateEnd() != null) {
-            sql += " and p.proposalDate <= ? ";
-            queryConditions.add(fmt.print(new DateTime(condition.getProposalDateEnd())));
-        }
-        if (condition.getChannelCode() != null && !condition.getChannelCode().equals("")) {
-            sql += " and p.channelCode = ? ";
-            queryConditions.add(condition.getChannelCode());
-        }
+    }
 
-        if (queryConditions.size()==0){
-            return indexs;
-        }
+    @Override
+    public Long countPolicy(QueryCondition condition) {
 
-        indexs = jdbcTemplate.query(sql, queryConditions.toArray(), new BeanPropertyRowMapper(PolicyIndex.class));
+        Long count = 0L;
+        // 构造自定义查询条件
+        Specification<TPolicyIndex> queryCondition = new Specification<TPolicyIndex>() {
+            @Override
+            public Predicate toPredicate(Root<TPolicyIndex> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicateList = new ArrayList<>();
+                if (condition.getPolicyNumber() != null && !condition.getPolicyNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyNumber"),condition.getPolicyNumber()));
+                }
+                if (condition.getProposalNumber() != null && !condition.getProposalNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("proposalNumber"),condition.getProposalNumber()));
+                }
+                if (condition.getPolicyHolderName() != null && !condition.getPolicyHolderName().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("policyHolderName"),"%" + condition.getPolicyHolderName() + "%"));
+                }
+                if (condition.getPolicyHolderIdNumber() != null && !condition.getPolicyHolderIdNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyHolderIdNumber"),condition.getPolicyHolderIdNumber()));
+                }
+                if (condition.getPolicyInsuredName() != null && !condition.getPolicyInsuredName().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("policyInsuredName"),"%" + condition.getPolicyInsuredName() + "%"));
+                }
+                if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyInsuredNumber"),condition.getPolicyInsuredIdNumber()));
+                }
+                if (condition.getMobile() != null && !condition.getMobile().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("mobile"),condition.getMobile()));
+                }
+                if (condition.getChannelCode()!=null&&!"".equals(condition.getChannelCode())){
+                    predicateList.add(criteriaBuilder.equal(root.get("channelCode"),condition.getChannelCode()));
+                }
+                if (condition.getProductCode()!=null&&!"".equals(condition.getProductCode())){
+                    predicateList.add(criteriaBuilder.equal(root.get("productCode"),condition.getProductCode()));
+                }
+                if (condition.getDateStart()!=null&&condition.getDateEnd()!=null){
+                    predicateList.add(criteriaBuilder.between(root.get("proposalDate"),condition.getDateStart(),condition.getDateEnd()));
+                }
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[predicateList.size()]));
+            }
+        };
 
+        count = indexDao.count(queryCondition);
 
-        return indexs;
+        return count;
+    }
+
+    private ResponsePage<PolicyIndex> buildResponsePage(Page<TPolicyIndex> page){
+        List<PolicyIndex> datas = page.getContent().stream()
+                .map(po -> {
+                    PolicyIndex index = new PolicyIndex();
+                    BeanUtils.copyProperties(po,index);
+                    return index;
+                })
+                .collect(toList());
+        return new ResponsePage<>(page, datas);
     }
 
 }

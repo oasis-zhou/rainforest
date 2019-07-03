@@ -16,7 +16,6 @@ import rf.foundation.pub.FunctionSlice;
 import rf.inshorizon.model.EndorsementPolicy;
 import rf.inshorizon.pub.Constants;
 import rf.inshorizon.pub.ModelConverter;
-import rf.policyadmin.ds.PolicyLogService;
 import rf.policyadmin.model.*;
 import rf.policyadmin.model.enums.EndorsementFeeLevel;
 import rf.product.ds.ProductService;
@@ -36,8 +35,6 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
     @Autowired
     private ProductService productService;
-    @Autowired
-    private PolicyLogService logService;
     @Autowired
     private EvalEngine evalEngine;
 

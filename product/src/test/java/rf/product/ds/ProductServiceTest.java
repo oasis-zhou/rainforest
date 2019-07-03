@@ -229,7 +229,6 @@ public class ProductServiceTest {
         formula8.setBody(" x = SNP * 0.01; return [ADMIN_FEE:x]");
         endo.getSubComponents().add(formula8);
 
-
         FormulaSpec formula9 = new FormulaSpec();
         formula9.setName("佣金计算公式");
         formula9.setCode("F_COMMISSION");
@@ -250,6 +249,12 @@ public class ProductServiceTest {
         formula10.setFactors(factors6);
         formula10.setBody(" x = SNP + ADMIN_FEE; return [APP:x]");
         endo.getSubComponents().add(formula10);
+
+        RateTableSpec tableSpec = new RateTableSpec();
+        tableSpec.setCode("RATE_COM_HC");
+        tableSpec.setName("一般医疗险费率表");
+
+        product.getSubComponents().add(tableSpec);
 
         return product;
     }

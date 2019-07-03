@@ -9,10 +9,12 @@ import java.util.Date;
  */
 
 @Data
-public class PolicyQueryCondition {
+public class QueryCondition {
 
     private String policyNumber;
     private String proposalNumber;
+    private String quotationNumber;
+    private String endorsementNumber;
     private String productCode;
     private String channelCode;
     private String policyHolderName;
@@ -20,8 +22,11 @@ public class PolicyQueryCondition {
     private String policyInsuredName;
     private String policyInsuredIdNumber;
     private String mobile;
-    private String contractStatus;
-    private Date proposalDateStart;
-    private Date proposalDateEnd;
+    private String status;
+    private Date dateStart;
+    private Date dateEnd;
+
+    private int pageNo;
+    private int pageSize;
 
 }

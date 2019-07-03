@@ -1,9 +1,9 @@
 package rf.policyadmin.ds;
 
 import org.springframework.data.domain.Pageable;
+import rf.foundation.model.ResponsePage;
 import rf.policyadmin.model.Endorsement;
-import rf.policyadmin.model.EndorsementQueryCondition;
-import rf.policyadmin.model.ResponsePage;
+import rf.policyadmin.model.QueryCondition;
 
 import java.util.List;
 
@@ -35,6 +35,6 @@ public interface EndorsementService {
 
 	public Endorsement findEndorsementByUuid(String uuid);
 
-	ResponsePage<Endorsement> findEndorsement(EndorsementQueryCondition condition, Pageable pageable);
+	ResponsePage<Endorsement> findEndorsement(QueryCondition condition);
 	
 }

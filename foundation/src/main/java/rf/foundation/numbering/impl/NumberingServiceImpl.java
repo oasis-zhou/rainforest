@@ -32,11 +32,11 @@ public class NumberingServiceImpl implements NumberingService {
 		cacheMap = new HashMap<String,NumberingSequence>();
 
 		rulesMap.put(NumberingType.QUOTATION_NUMBER, new NumberingRule("Q2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.PROPOSAL_NUMBER, new NumberingRule("P{863100}4{TRANS_YEAR}{023}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.POLICY_NUMBER, new NumberingRule("{863100}4{TRANS_YEAR}{023}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.ENDORSEMENT_NUMBER,new NumberingRule( "E{863100}4{TRANS_YEAR}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.CLAIM_NUMBER, new NumberingRule("C{863100}4{TRANS_YEAR}7{SEQUENCE}"));
-		rulesMap.put(NumberingType.NOTICE_NUMBER, new NumberingRule("N{863100}4{TRANS_YEAR}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.PROPOSAL_NUMBER, new NumberingRule("P2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.POLICY_NUMBER, new NumberingRule("4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.ENDORSEMENT_NUMBER,new NumberingRule( "E2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.CLAIM_NUMBER, new NumberingRule("C2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.NOTICE_NUMBER, new NumberingRule("N2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
 		rulesMap.put(NumberingType.BCP_TRANS_NUMBER, new NumberingRule("T2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.BCP_PAYMENT_NUMBER,new NumberingRule( "P2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
 		rulesMap.put(NumberingType.ORDER_NUMBER, new NumberingRule("O2{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}10{SEQUENCE}"));
