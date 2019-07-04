@@ -11,6 +11,7 @@ import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.CancellationType;
 import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.enums.TerminalReason;
+import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.Constants;
 
 import java.util.Date;
@@ -22,12 +23,12 @@ import java.util.Map;
 @Component
 public class UpdatePolicyByCancellation implements FunctionSlice<Endorsement> {
 
-    @Autowired
-    private PolicyService policyService;
+
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context) {
-        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
+        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDORSEMENT_POLICY_OBJECT);
+        Policy policy = endoPolicy.getNewOne();
 
         Cancellation cancellation = (Cancellation)endorsement;
 
@@ -43,8 +44,5 @@ public class UpdatePolicyByCancellation implements FunctionSlice<Endorsement> {
         }
 
         policy.setTerminalDate(new Date());
-
-        policyService.savePolicy(policy);
-        policyService.generatePolicyIndex(policy);
     }
 }

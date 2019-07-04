@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import rf.finance.ds.BillService;
 import rf.finance.model.Bill;
 import rf.finance.model.PayerPayee;
+import rf.finance.model.enums.BillStatus;
 import rf.finance.model.enums.TransactionType;
 import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.pub.Constants;
@@ -13,6 +14,7 @@ import rf.policyadmin.model.Customer;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Fee;
 import rf.policyadmin.model.Policy;
+import rf.salesplatform.model.EndorsementPolicy;
 
 import java.util.Date;
 import java.util.Map;
@@ -28,7 +30,6 @@ public class EndorsementBill implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context) {
-
         Bill record = new Bill();
 
         record.setTransType(TransactionType.ENDORSEMENT);
@@ -38,6 +39,7 @@ public class EndorsementBill implements FunctionSlice<Endorsement> {
         record.setBalance(fee.getValue());
         record.setDueDate(new Date());
         record.setFeeCode(fee.getCode());
+        record.setStatus(BillStatus.PAID);
         record.setRefBizNumber(endorsement.getEndorsementNumber());
 
         Policy policy = policyService.loadPolicyByPolicyNumber(endorsement.getPolicyNumber());

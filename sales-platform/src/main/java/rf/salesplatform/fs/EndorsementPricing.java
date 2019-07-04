@@ -23,6 +23,8 @@ import rf.product.model.FeeSpec;
 import rf.product.model.FormulaSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.enums.FormulaPurpose;
+import rf.product.model.enums.RatingLevel;
+import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.ModelConverter;
 import rf.salesplatform.pub.Constants;
 
@@ -45,7 +47,9 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
-        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
+        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDORSEMENT_POLICY_OBJECT);
+        Policy original = endoPolicy.getOriginal();
+        Policy newOne = endoPolicy.getNewOne();
 
         ProductSpec product = productService.findProduct(endorsement.getProductCode());
         Map<String,FeeSpec> feeSpecMap = getFeeSpecs(product);
@@ -63,7 +67,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
         List<FormulaSpec> formulaSpecs = endorsementSpec.getAllSubComponentsByType(FormulaSpec.class);
 
-        EvalNode node = buildEvalNode(endorsement,policy,formulaSpecs);
+        EvalNode node = buildEvalNode(endorsement,original,newOne,formulaSpecs,endorsementSpec.getRatingLevel());
         EvalJob endoPremiumJob = evalEngine.endosementPremium();
         endoPremiumJob.process(node);
 
@@ -82,7 +86,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
     }
 
 
-    public EvalNode buildEvalNode(Endorsement bizObject,Policy policy,List<FormulaSpec> formulaSpecs){
+    public EvalNode buildEvalNode(Endorsement bizObject,Policy original,Policy newOne,List<FormulaSpec> formulaSpecs,RatingLevel level){
 
         EvalNode root = new EvalNode();
         root.setRefBizObject(bizObject);
@@ -91,7 +95,11 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
         List<FormulaSpec> cFormulaSpecs = Lists.newArrayList();
         for(FormulaSpec spec : formulaSpecs){
             if(spec.getPurpose().equals(FormulaPurpose.PREMIUM)){
-                cFormulaSpecs.add(spec);
+                if(RatingLevel.COVERAGE.equals(level)) {
+                    cFormulaSpecs.add(spec);
+                } else if(RatingLevel.POLICY.equals(level)){
+                    pFormulaSpecs.add(spec);
+                }
             }else{
                 pFormulaSpecs.add(spec);
             }
@@ -103,66 +111,68 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
         factors.put(EvalConstant.ENDORSEMENT_TYPE_FACTOR, bizObject.getEndorsementType());
         factors.put(EvalConstant.ENDO_EFF_DATE,new Date(bizObject.getEffectiveDate().getTime()));
 
-        //load policy log
-        String endoId = bizObject.getUuid();
-        Policy policyLog = logService.loadLogPolicy(endoId, LogType.ISSUE_LOG.name());
+        if(RatingLevel.POLICY.equals(level)){
+            factors.put(EvalConstant.ORIGINAL_PREMIUM, original.getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+            factors.put(EvalConstant.NEW_PREMIUM, newOne.getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+        }
 
         BigDecimal proRate = BigDecimal.ONE;
 
         if(bizObject instanceof Cancellation){
-            Days originalDays = Days.daysBetween(new LocalDate(policyLog.getEffectiveDate()), new LocalDate(policyLog.getExpiredDate()));
-            Days offsetDays = Days.daysBetween(new LocalDate(bizObject.getEffectiveDate()), new LocalDate(policyLog.getExpiredDate()));
+            Days originalDays = Days.daysBetween(new LocalDate(original.getEffectiveDate()), new LocalDate(original.getExpiredDate()));
+            Days offsetDays = Days.daysBetween(new LocalDate(bizObject.getEffectiveDate()), new LocalDate(original.getExpiredDate()));
             proRate = new BigDecimal(offsetDays.getDays() + 1).divide(new BigDecimal(originalDays.getDays() + 1),50, BigDecimal.ROUND_HALF_UP).negate();
 
         }
 
         factors.put(EvalConstant.ENDO_PRO_RATE,proRate);
 
-        //generate policy data pair
+        if(RatingLevel.COVERAGE.equals(level)) {
+            //generate policy data pair
+            Pair rootPair = new Pair(original, newOne);
 
-        Pair rootPair = new Pair(policyLog,policy);
+            List<Pair<BaseModel>> subjectPairs = generalPair(original.getSubComponentsByType(InsuredObject.class), newOne.getSubComponentsByType(InsuredObject.class));
 
-        List<Pair<BaseModel>> subjectPairs = generalPair(policyLog.getSubComponentsByType(InsuredObject.class),policy.getSubComponentsByType(InsuredObject.class));
+            rootPair.getSubPairs().addAll(subjectPairs);
 
-        rootPair.getSubPairs().addAll(subjectPairs);
+            for (Pair<BaseModel> pair : subjectPairs) {
+                InsuredObject oldSubject = (InsuredObject) pair.getOriginalObj();
+                InsuredObject newSubject = (InsuredObject) pair.getNewObj();
 
-        for(Pair<BaseModel> pair : subjectPairs){
-            InsuredObject oldSubject = (InsuredObject)pair.getOriginalObj();
-            InsuredObject newSubject = (InsuredObject)pair.getNewObj();
+                List<Pair<BaseModel>> coveragePairs = generalPair(oldSubject.getSubComponentsByType(Coverage.class), newSubject.getSubComponentsByType(Coverage.class));
 
-            List<Pair<BaseModel>> coveragePairs = generalPair(oldSubject.getSubComponentsByType(Coverage.class), newSubject.getSubComponentsByType(Coverage.class));
+                pair.getSubPairs().addAll(coveragePairs);
+            }
+            //build endorsement rating model
+            List<Pair> subPairs = rootPair.getSubPairs();
+            for (Pair pair : subPairs) {
 
-            pair.getSubPairs().addAll(coveragePairs);
-        }
-        //build endorsement rating model
-        List<Pair> subPairs = rootPair.getSubPairs();
-        for(Pair pair : subPairs){
+                List<Pair> subSubPairs = pair.getSubPairs();
+                for (Pair subPair : subSubPairs) {
+                    EvalNode cNode = new EvalNode();
+                    cNode.getFactors().putAll(root.getFactors());
 
-            List<Pair> subSubPairs = pair.getSubPairs();
-            for(Pair subPair : subSubPairs){
-                EvalNode cNode = new EvalNode();
-                cNode.getFactors().putAll(root.getFactors());
+                    BaseModel oCoverage = (BaseModel) subPair.getOriginalObj();
+                    BaseModel nCoverage = (BaseModel) subPair.getNewObj();
 
-                BaseModel oCoverage = (BaseModel)subPair.getOriginalObj();
-                BaseModel nCoverage = (BaseModel)subPair.getNewObj();
+                    if (oCoverage == null && nCoverage != null) {
+                        cNode.setRefBizObject(nCoverage);
+                        cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, BigDecimal.ZERO);
+                        cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage) nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                    } else if (oCoverage != null && nCoverage != null) {
+                        cNode.setRefBizObject(nCoverage);
+                        cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage) nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                        cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage) nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                    } else if (oCoverage != null && nCoverage == null) {
+                        cNode.setRefBizObject(oCoverage);
+                        cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage) nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                        cNode.getFactors().put(EvalConstant.NEW_PREMIUM, BigDecimal.ZERO);
+                    }
 
-                if(oCoverage == null && nCoverage != null){
-                    cNode.setRefBizObject(nCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, BigDecimal.ZERO);
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                }else if(oCoverage != null && nCoverage != null){
-                    cNode.setRefBizObject(nCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                }else if(oCoverage != null && nCoverage == null){
-                    cNode.setRefBizObject(oCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM,BigDecimal.ZERO);
+                    cNode.setExpressions(ModelConverter.converFromFormulaSpecs(cFormulaSpecs));
+
+                    root.getSubNodes().add(cNode);
                 }
-
-                cNode.setExpressions(ModelConverter.converFromFormulaSpecs(cFormulaSpecs));
-
-                root.getSubNodes().add(cNode);
             }
         }
 
@@ -210,13 +220,15 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
         Map<String,Object> values = node.getValues();
         BaseModel bizObject = node.getRefBizObject();
 
-        if(bizObject instanceof Endorsement){
-            endoFee.setFeeLevel(EndorsementFeeLevel.POLICY);
-            endoFee.setRefBizobjectId(bizObject.getUuid());
+        if(bizObject != null) {
+            if (bizObject instanceof Endorsement) {
+                endoFee.setFeeLevel(EndorsementFeeLevel.POLICY);
+                endoFee.setRefBizobjectId(bizObject.getUuid());
 
-        }else if(bizObject instanceof Coverage){
-            endoFee.setFeeLevel(EndorsementFeeLevel.COVERAGE);
-            endoFee.setRefBizobjectId(bizObject.getUuid());
+            } else if (bizObject instanceof Coverage) {
+                endoFee.setFeeLevel(EndorsementFeeLevel.COVERAGE);
+                endoFee.setRefBizobjectId(bizObject.getUuid());
+            }
         }
 
 

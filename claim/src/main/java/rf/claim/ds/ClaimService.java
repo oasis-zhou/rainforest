@@ -2,14 +2,19 @@ package rf.claim.ds;
 
 
 import rf.claim.model.Claim;
+import rf.claim.model.NoticeOfLoss;
+import rf.claim.model.QueryCondition;
+import rf.foundation.model.ResponsePage;
+
 import java.util.List;
 
 public interface ClaimService {
 
-    public void saveClaim(Claim claim);
+    void saveClaim(Claim claim);
 
-    public Claim loadClaim(String claimNumber);
+    Claim loadClaim(String claimNumber);
 
-    public List<Claim> findClaimsByPolicyNumber(String policyNumber);
+    List<Claim> findClaimsByPolicyNumber(String policyNumber);
 
+    ResponsePage<Claim> queryClaim(QueryCondition condition);
 }

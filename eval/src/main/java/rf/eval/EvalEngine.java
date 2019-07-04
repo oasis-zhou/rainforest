@@ -19,7 +19,6 @@ public class EvalEngine {
 
         EvalStage premiumStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.PREMIUM.name());
 
-
         EvalStage taxfeeStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.TAX_FEE.name());
 
         EvalStage commissionStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.COMMISSION.name());

@@ -1,4 +1,4 @@
-package rf.salesplatform.controller;
+package rf.inshorizon.controller;
 
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
@@ -8,8 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import rf.claim.ds.ClaimService;
-import rf.claim.ds.NoticeOfLossService;
+import rf.claim.ds.BusinessNumberService;
 import rf.claim.model.Claim;
 import rf.claim.model.ClaimMaterials;
 import rf.claim.model.NoticeOfLoss;
@@ -18,9 +17,12 @@ import rf.claim.model.enums.NoticeStatus;
 import rf.foundation.exception.GenericException;
 import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
-import rf.policyadmin.ds.PolicyService;
+
+import rf.inshorizon.ds.NoticeOfLossService;
+import rf.inshorizon.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
+
 import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
@@ -41,7 +43,7 @@ public class ClaimController {
     @Autowired
     private NoticeOfLossService noticeOfLossService;
     @Autowired
-    private ClaimService claimService;
+    private BusinessNumberService businessNumberService;
     @Autowired
     private PolicyService policyService;
     @Autowired
@@ -49,7 +51,7 @@ public class ClaimController {
 
     @PostMapping("/loss/notice/apply/{policyNumber}")
     public ResponseEntity applyNoticeOfLoss(@PathParam("policyNumber") String policyNumber){
-        Policy policy = policyService.loadPolicyByPolicyNumber(policyNumber);
+        Policy policy = policyService.pullFromChain(policyNumber);
         if(policy == null)
             throw new GenericException(30012L);
         if(!policy.getContractStatus().equals(ContractStatus.EFFECTIVE))
@@ -60,16 +62,15 @@ public class ClaimController {
         noticeOfLoss.setNoticeTime(new Date());
         noticeOfLoss.setNoticeStatus(NoticeStatus.APPLICATION);
 
-        noticeOfLoss = noticeOfLossService.createNoticeOfLoss(noticeOfLoss);
+        String noticeNumber = businessNumberService.generateNoticeNumber(noticeOfLoss);
+        noticeOfLoss.setNoticeNumber(noticeNumber);
 
-        Map<String, Object> response = Maps.newHashMap();
-        response.put("noticeNumber", noticeOfLoss.getNoticeNumber());
-        return new ResponseEntity(response,HttpStatus.OK);
+        return new ResponseEntity(noticeOfLoss,HttpStatus.OK);
     }
 
     @PostMapping("/loss/notice")
     public ResponseEntity saveNoticeOfLoss(@RequestBody NoticeOfLoss noticeOfLoss){
-        noticeOfLossService.saveNotice(noticeOfLoss);
+        noticeOfLossService.pushToChain(noticeOfLoss);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -85,25 +86,8 @@ public class ClaimController {
 
     @GetMapping("/loss/notice/{noticeNumber}")
     public ResponseEntity getNoticeOfLoss(@PathParam("noticeNumber") String noticeNumber){
-        NoticeOfLoss noticeOfLoss = noticeOfLossService.loadNoticeOfLoss(noticeNumber);
+        NoticeOfLoss noticeOfLoss = noticeOfLossService.pullFromChain(noticeNumber);
         return new ResponseEntity(noticeOfLoss,HttpStatus.OK);
     }
 
-    @PostMapping(value = "/loss/notice/query")
-    public ResponseEntity queryNoticeOfLoss(@RequestBody QueryCondition condition) {
-
-        logger.debug("noticeOfLoss query condition:" + jsonHelper.toJSON(condition));
-        ResponsePage<NoticeOfLoss> notices = noticeOfLossService.queryNoticeOfLoss(condition);
-
-        return new ResponseEntity(notices, HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/query")
-    public ResponseEntity queryClaim(@RequestBody QueryCondition condition) {
-
-        logger.debug("claim query condition:" + jsonHelper.toJSON(condition));
-        ResponsePage<Claim> claims = claimService.queryClaim(condition);
-
-        return new ResponseEntity(claims, HttpStatus.OK);
-    }
 }

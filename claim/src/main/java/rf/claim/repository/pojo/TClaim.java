@@ -17,11 +17,15 @@ public class TClaim extends BaseEntity {
     @Id
     private String uuid;
     private String claimNumber;
-    private String productCode;
-    private String statusCode;
+    private String noticeNumber;
     private String policyNumber;
+    private String productCode;
+    private String claimant;
+    private String mobile;
+    private Date noticeTime;
     private Date accidentTime;
     private Date claimTime;
+    private String statusCode;
     @Lob
     private String content;
 }

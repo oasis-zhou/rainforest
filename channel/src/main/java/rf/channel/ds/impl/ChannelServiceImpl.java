@@ -24,10 +24,8 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public void saveChannel(ChannelSpec channelSpec) {
-        TChannel tchannel = channelDao.findById(channelSpec.getUuid()).get();
-        if (tchannel == null){
-            tchannel = new TChannel();
-        }
+        TChannel tchannel = channelDao.findById(channelSpec.getUuid()).orElse(new TChannel());
+
         BeanUtils.copyProperties(channelSpec, tchannel);
         String json = jsonHelper.toJSON(channelSpec);
         tchannel.setContent(json);

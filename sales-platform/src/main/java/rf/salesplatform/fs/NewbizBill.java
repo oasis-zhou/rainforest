@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import rf.finance.ds.BillService;
 import rf.finance.model.Bill;
 import rf.finance.model.PayerPayee;
+import rf.finance.model.enums.BillStatus;
 import rf.finance.model.enums.TransactionType;
 import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.pub.Constants;
@@ -34,6 +35,7 @@ public class NewbizBill implements FunctionSlice<Policy> {
         record.setBalance(fee.getValue());
         record.setDueDate(new Date());
         record.setFeeCode(fee.getCode());
+        record.setStatus(BillStatus.PAID);
         record.setRefBizNumber(policy.getPolicyNumber());
 
         Customer customer = policy.getPolicyHolder();

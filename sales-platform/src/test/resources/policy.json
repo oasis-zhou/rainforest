@@ -1,8 +1,8 @@
 {
     "ModelPath":"rf.policyadmin.model.Quotation",
-    "productCode":"EHI",
-    "effectiveDate":"2017-05-01T00:00:00.000+0800",
-    "expiredDate":"2018-04-30T23:59:59.000+0800",
+    "productCode":"EH",
+    "effectiveDate":"2019-05-01T00:00:00.000+0800",
+    "expiredDate":"2020-04-30T23:59:59.000+0800",
     "policyHolder":{
         "ModelPath":"rf.policyadmin.model.PersonCustomer",
         "idType":"ID",

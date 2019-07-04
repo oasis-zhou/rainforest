@@ -4,7 +4,7 @@ import rf.customer.model.Customer;
 
 public interface CustomerService {
 
-    public String generateCustomer(Customer customer);
+    String generateCustomer(Customer customer);
 
-    public Customer findCustomerById(String idType, String idNumber);
+    Customer findCustomerById(String idType, String idNumber);
 }

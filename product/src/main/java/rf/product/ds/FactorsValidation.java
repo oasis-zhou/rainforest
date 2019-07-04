@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface FactorsValidation {
 
-    public Map<String,String> verify(Map<String, Object> factor);
+    Map<String,String> verify(Map<String, Object> factor);
 }

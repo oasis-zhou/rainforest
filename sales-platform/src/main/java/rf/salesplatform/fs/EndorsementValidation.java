@@ -18,8 +18,10 @@ import rf.product.ds.ProductService;
 import rf.product.model.EndorsementSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.RuleSpec;
-import rf.salesplatform.pub.ModelConverter;
+import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.Constants;
+import rf.salesplatform.pub.ModelConverter;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,9 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
-        Policy policy = (Policy)context.get(Constants.POLICY_OBJECT);
+
+        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDORSEMENT_POLICY_OBJECT);
+        Policy policy = endoPolicy.getOriginal();
 
         //verify the policy contract status
         if(policy.getContractStatus().equals(ContractStatus.TERMINAL))

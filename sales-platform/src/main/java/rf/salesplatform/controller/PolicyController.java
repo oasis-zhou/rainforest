@@ -52,27 +52,27 @@ public class PolicyController {
     @PostMapping(value = "/proposal")
     public ResponseEntity proposal(@RequestBody Quotation quotation) {
 
-            long s = System.currentTimeMillis();
-            Policy policy = policyTransformer.transFromQuotation(quotation);
+        long s = System.currentTimeMillis();
+        Policy policy = policyTransformer.transFromQuotation(quotation);
 
-            Map<String, Object> context = Maps.newHashMap();
-            context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
+        Map<String, Object> context = Maps.newHashMap();
+        context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
-            new FunctionSliceBundle(policy, context)
-                    .register(SetupPolicyForFixCoverage.class)
-                    .register(DuplicatePolicyCheck.class)
-                    .register(AutoUnderwriting.class)
-                    .register(NewbizPricing.class)
-                    .register(NewbizProposal.class)
-                    .register(CreatePolicyIndex.class)
-                    .execute();
+        new FunctionSliceBundle(policy, context)
+                .register(SetupPolicyForFixCoverage.class)
+                .register(DuplicatePolicyCheck.class)
+                .register(AutoUnderwriting.class)
+                .register(NewbizPricing.class)
+                .register(NewbizProposal.class)
+                .register(CreatePolicyIndex.class)
+                .execute();
 
-            Map<String, Object> response = Maps.newHashMap();
-            response.put("proposalNumber", policy.getProposalNumber());
+        Map<String, Object> response = Maps.newHashMap();
+        response.put("proposalNumber", policy.getProposalNumber());
 //            response.put("underwritingReason",policy.getUnderwritingReason());
-            long e = System.currentTimeMillis();
-            logger.info("生成投保单耗时" + (e - s) + "ms");
-            return new ResponseEntity(response, HttpStatus.OK);
+        long e = System.currentTimeMillis();
+        logger.info("生成投保单耗时" + (e - s) + "ms");
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
 
@@ -80,25 +80,25 @@ public class PolicyController {
     @PostMapping(value = "/issue")
     public ResponseEntity issue(@RequestBody Quotation quotation) {
 
-            Policy policy = policyTransformer.transFromQuotation(quotation);
+        Policy policy = policyTransformer.transFromQuotation(quotation);
 
-            Map<String, Object> context = Maps.newHashMap();
-            context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
+        Map<String, Object> context = Maps.newHashMap();
+        context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
-            new FunctionSliceBundle(policy, context)
-                    .register(SetupPolicyForFixCoverage.class)
-                    .register(DuplicatePolicyCheck.class)
-                    .register(AutoUnderwriting.class)
-                    .register(NewbizPricing.class)
-                    .register(PolicyIssue.class)
-                    .register(CreatePolicyIndex.class)
-                    .execute();
+        new FunctionSliceBundle(policy, context)
+                .register(SetupPolicyForFixCoverage.class)
+                .register(DuplicatePolicyCheck.class)
+                .register(AutoUnderwriting.class)
+                .register(NewbizPricing.class)
+                .register(PolicyIssue.class)
+                .register(CreatePolicyIndex.class)
+                .execute();
 
-            PolicyIssueEvent event = new PolicyIssueEvent(policy);
-            AppContext.getApplicationContext().publishEvent(event);
+        PolicyIssueEvent event = new PolicyIssueEvent(policy);
+        AppContext.getApplicationContext().publishEvent(event);
 
-            Map<String, Object> response = Maps.newHashMap();
-            response.put("policyNumber", policy.getPolicyNumber());
+        Map<String, Object> response = Maps.newHashMap();
+        response.put("policyNumber", policy.getPolicyNumber());
 //            response.put("underwritingReason",policy.getUnderwritingReason());
 
         return new ResponseEntity(response, HttpStatus.OK);
@@ -109,23 +109,19 @@ public class PolicyController {
     @Transactional
     @PostMapping(value = "/issue/{proposalNumber}")
     public ResponseEntity issueProposal(@PathParam("proposalNumber") String proposalNumber) {
+        Policy policy = policyService.loadPolicyByProposalNumber(proposalNumber);
+        Map<String, Object> context = Maps.newHashMap();
 
+        new FunctionSliceBundle(policy, context)
+                .register(PolicyIssue.class)
+                .register(CreatePolicyIndex.class)
+                .execute();
 
-            Policy policy = policyService.loadPolicyByProposalNumber(proposalNumber);
+        PolicyIssueEvent event = new PolicyIssueEvent(policy);
+        AppContext.getApplicationContext().publishEvent(event);
 
-            Map<String, Object> context = Maps.newHashMap();
-
-
-            new FunctionSliceBundle(policy, context)
-                    .register(PolicyIssue.class)
-                    .register(CreatePolicyIndex.class)
-                    .execute();
-
-            PolicyIssueEvent event = new PolicyIssueEvent(policy);
-            AppContext.getApplicationContext().publishEvent(event);
-
-            Map<String, Object> response = Maps.newHashMap();
-            response.put("policyNumber", policy.getPolicyNumber());
+        Map<String, Object> response = Maps.newHashMap();
+        response.put("policyNumber", policy.getPolicyNumber());
 //            response.put("underwritingReason",policy.getUnderwritingReason());
 
         return new ResponseEntity(response, HttpStatus.OK);

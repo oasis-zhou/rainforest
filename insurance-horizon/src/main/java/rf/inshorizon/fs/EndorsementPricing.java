@@ -40,7 +40,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
-        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDOSEMENT_POLICY_OBJECT);
+        EndorsementPolicy endoPolicy = (EndorsementPolicy)context.get(Constants.ENDORSEMENT_POLICY_OBJECT);
         Policy original = endoPolicy.getOriginal();
         Policy newOne = endoPolicy.getNewOne();
 

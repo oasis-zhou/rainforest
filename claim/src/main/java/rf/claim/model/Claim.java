@@ -26,11 +26,15 @@ public class Claim extends ModelComponent
 	 */
 	private String policyNumber;
 	/**
+	 * 报案时间
+	 */
+	private Date noticeTime;
+	/**
 	 * 出险时间
 	 */
 	private Date accidentTime;
 	/**
-	 * 理赔申请时间
+	 * 理赔立案时间
 	 */
 	private Date claimTime;
 	/**

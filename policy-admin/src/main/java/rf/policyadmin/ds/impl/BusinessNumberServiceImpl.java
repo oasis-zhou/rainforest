@@ -6,6 +6,7 @@ import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.policyadmin.ds.BusinessNumberService;
+import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.Quotation;
 
@@ -60,5 +61,17 @@ public class BusinessNumberServiceImpl implements BusinessNumberService {
 
         String quotationNumber = numberingService.generateNumber(NumberingType.QUOTATION_NUMBER,factors);
         return quotationNumber;
+    }
+
+    @Override
+    public String generateEndorsementNumber(Endorsement endorsement) {
+        Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
+        Date date = new Date();
+        factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
+        factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
+        factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
+
+        String endorsementNumber = numberingService.generateNumber(NumberingType.ENDORSEMENT_NUMBER,factors);
+        return endorsementNumber;
     }
 }

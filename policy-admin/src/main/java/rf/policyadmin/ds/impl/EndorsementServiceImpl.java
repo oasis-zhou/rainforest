@@ -11,11 +11,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import rf.foundation.exception.GenericException;
 import rf.foundation.model.ResponsePage;
 import rf.foundation.numbering.NumberingFactor;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
+import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.model.QueryCondition;
 import rf.policyadmin.pub.Constants;
 import rf.policyadmin.ds.EndorsementService;
@@ -50,22 +52,14 @@ public class EndorsementServiceImpl implements EndorsementService {
 	@Autowired
 	private PolicyService policyService;
 
-
 	@Autowired
 	private JsonHelper jsonHelper;
 
 	@Autowired
-	private NumberingService numberingService;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+	private BusinessNumberService businessNumberService;
 
 	@Override
 	public String create(Endorsement endorsement){
-
-		Assert.notNull(endorsement.getPolicyNumber());
-		Assert.notNull(endorsement.getEndorsementType());
-
 		endorsement.setEndorsementStatus(EndorsementStatus.QUOTATION);
 		save(endorsement);
 
@@ -80,9 +74,7 @@ public class EndorsementServiceImpl implements EndorsementService {
 	@Override
 	public void save(Endorsement endorsement) {
 
-		TEndorsement po = endoDao.findById(endorsement.getUuid()).get();
-		if(po == null)
-			po = new TEndorsement();
+		TEndorsement po = endoDao.findById(endorsement.getUuid()).orElse(new TEndorsement());
 
 		BeanUtils.copyProperties(endorsement, po);
 		po.setType(endorsement.getEndorsementType().name());
@@ -115,8 +107,9 @@ public class EndorsementServiceImpl implements EndorsementService {
 
 	@Override
 	public Endorsement load(String endorsementId) {
-		TEndorsement po = endoDao.findById(endorsementId).get();
-
+		TEndorsement po = endoDao.findById(endorsementId).orElse(null);
+		if(po == null)
+			throw new GenericException(30014L);
 		Endorsement endorsement = jsonHelper.fromJSON(po.getContent(), Endorsement.class);
 
 		return endorsement;
@@ -130,12 +123,7 @@ public class EndorsementServiceImpl implements EndorsementService {
 		endorsement.setEndorsementStatus(EndorsementStatus.ISSUE);
 
 		if(endorsement.getEndorsementNumber() == null){
-			Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-			Date date = new Date();
-			factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-
-			//E{863100}4{TRANS_YEAR}7{SEQUENCE}
-			String endorsementNumber = numberingService.generateNumber(NumberingType.ENDORSEMENT_NUMBER,factors);
+			String endorsementNumber = businessNumberService.generateEndorsementNumber(endorsement);
 			endorsement.setEndorsementNumber(endorsementNumber);
 		}
 
@@ -154,17 +142,14 @@ public class EndorsementServiceImpl implements EndorsementService {
 	@Override
 	public void reject(String endorsementId){
 
-		TEndorsement p = endoDao.findById(endorsementId).get();
-
-		p.setStatusCode(EndorsementStatus.REJECT.name());
-
-		endoDao.save(p);
-
+		TEndorsement po = endoDao.findById(endorsementId).orElse(null);
+		if(po == null)
+			throw new GenericException(30014L);
+		po.setStatusCode(EndorsementStatus.REJECT.name());
+		endoDao.save(po);
 		//TODO recall policy info
 		Policy policy = logService.loadLogPolicy(endorsementId, LogType.ISSUE_LOG.name());
-
 		policyService.savePolicy(policy);
-
 		logService.disablePolicyLog(endorsementId);
 	}
 
@@ -272,7 +257,7 @@ public class EndorsementServiceImpl implements EndorsementService {
 
 	@Override
 	public Endorsement findEndorsementByUuid(String uuid){
-		TEndorsement po = endoDao.findById(uuid).get();
+		TEndorsement po = endoDao.findById(uuid).orElse(null);
 		if(po == null){
 			return null;
 		}

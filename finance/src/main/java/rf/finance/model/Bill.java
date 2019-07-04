@@ -24,4 +24,8 @@ public class Bill extends ModelComponent {
     private BillStatus status;
     private PayerPayee payerPayee;
 
+    public Bill(){
+        this.setUuid(Guid.generateStrId());
+    }
+
 }

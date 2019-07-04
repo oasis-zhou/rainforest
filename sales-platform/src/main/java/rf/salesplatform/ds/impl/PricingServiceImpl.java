@@ -44,7 +44,7 @@ public class PricingServiceImpl implements PricingService {
         Map<String, FeeSpec> feeSpecMap = getFeeSpecs(product);
 
         EvalNode node = buildEvalNode(policy);
-        EvalJob newbizPremiumJob = evalEngine.endosementPremium();
+        EvalJob newbizPremiumJob = evalEngine.newbizPremium();
         newbizPremiumJob.process(node);
         processResult(node,feeSpecMap);
 

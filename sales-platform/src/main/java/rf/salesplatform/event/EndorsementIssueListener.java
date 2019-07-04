@@ -15,9 +15,6 @@ import java.util.Map;
 
 @Component
 public class EndorsementIssueListener implements ApplicationListener<EndorsementIssueEvent> {
-    @Autowired
-    private PolicyService policyService;
-
     @Override
     @Async
     @Transactional

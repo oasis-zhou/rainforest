@@ -1,12 +1,10 @@
 package rf.claim.ds;
 
-import org.springframework.data.domain.Pageable;
 import rf.claim.model.ClaimMaterials;
 import rf.claim.model.NoticeOfLoss;
-import rf.claim.model.NoticeOfLossIndex;
-import rf.claim.model.NoticeOfLossQueryCondition;
+import rf.claim.model.QueryCondition;
+import rf.foundation.model.ResponsePage;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,8 +21,6 @@ public interface NoticeOfLossService {
 
      void saveNotice(NoticeOfLoss notice);
 
-     List<NoticeOfLossIndex> queryNoticeOfLoss(NoticeOfLossQueryCondition condition);
-
-     void generateNoticeOfLossIndex(NoticeOfLoss notice);
+     ResponsePage<NoticeOfLoss> queryNoticeOfLoss(QueryCondition condition);
 
 }

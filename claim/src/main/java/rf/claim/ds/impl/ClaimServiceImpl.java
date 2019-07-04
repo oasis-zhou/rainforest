@@ -6,27 +6,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import rf.claim.ds.ClaimService;
 import rf.claim.model.Claim;
+import rf.claim.model.NoticeOfLoss;
+import rf.claim.model.QueryCondition;
 import rf.claim.repository.ClaimDao;
 import rf.claim.repository.pojo.TClaim;
+import rf.claim.repository.pojo.TNoticeOfLoss;
+import rf.foundation.model.ResponsePage;
 import rf.foundation.numbering.NumberingService;
 import rf.foundation.utils.JsonHelper;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 
 @Service
 public class ClaimServiceImpl implements ClaimService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private NumberingService numberingService;
 
     @Autowired
     private ClaimDao claimDao;
@@ -76,6 +86,57 @@ public class ClaimServiceImpl implements ClaimService {
             }
         }
         return result;
+    }
+
+    @Override
+    public ResponsePage<Claim> queryClaim(QueryCondition condition) {
+
+        // 构造自定义查询条件
+        Specification<TClaim> queryCondition = new Specification<TClaim>() {
+            @Override
+            public Predicate toPredicate(Root<TClaim> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicateList = new ArrayList<>();
+                if (condition.getPolicyNumber() != null && !condition.getPolicyNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("policyNumber"),condition.getPolicyNumber()));
+                }
+                if (condition.getClaimNumber() != null && !condition.getClaimNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("claimNumber"),condition.getClaimNumber()));
+                }
+                if (condition.getNoticeNumber() != null && !condition.getNoticeNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("noticeNumber"),condition.getNoticeNumber()));
+                }
+                if (condition.getClaimant() != null && !condition.getClaimant().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("claimant"),"%" + condition.getClaimant() + "%"));
+                }
+                if (condition.getClaimantIdNumber() != null && !condition.getClaimantIdNumber().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("claimantIdNumber"),condition.getClaimantIdNumber()));
+                }
+                if (condition.getMobile() != null && !condition.getMobile().equals("")) {
+                    predicateList.add(criteriaBuilder.like(root.get("mobile"),"%" + condition.getMobile() + "%"));
+                }
+                if (condition.getStatus() != null && !condition.getStatus().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("statusCode"),condition.getStatus()));
+                }
+                if (condition.getDateStart()!=null&&condition.getDateEnd()!=null){
+                    predicateList.add(criteriaBuilder.between(root.get("claimTime"),condition.getDateStart(),condition.getDateEnd()));
+                }
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[predicateList.size()]));
+            }
+        };
+
+        Page<TClaim> page = claimDao.findAll(queryCondition, PageRequest.of(condition.getPageNo() - 1, condition.getPageSize(), Sort.by(Sort.Direction.DESC, "claimTime")));
+
+        return buildResponsePage(page);
+    }
+
+    private ResponsePage<Claim> buildResponsePage(Page<TClaim> page){
+        List<Claim> datas = page.getContent().stream()
+                .map(po -> {
+                    Claim claim = jsonHelper.fromJSON(po.getContent(), Claim.class);
+                    return claim;
+                })
+                .collect(toList());
+        return new ResponsePage<>(page, datas);
     }
 
 }

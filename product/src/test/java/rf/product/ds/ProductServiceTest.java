@@ -30,7 +30,7 @@ public class ProductServiceTest {
     @Test
     public void peristProduct() throws Exception{
 
-        ProductSpec product = initSampleProduct();
+        ProductSpec product = initProduct();
 
         productService.saveProduct(product);
 
@@ -206,6 +206,7 @@ public class ProductServiceTest {
         endo.setCode("CANCELLATION_FROM_MIDWAY");
         endo.setName("中途退保");
         endo.setEndorsementType(EndorsementType.CANCELLATION);
+        endo.setRatingLevel(RatingLevel.POLICY);
         product.getSubComponents().add(endo);
 
         FormulaSpec formula7 = new FormulaSpec();
@@ -443,6 +444,7 @@ public class ProductServiceTest {
         endo.setCode("CANCELLATION_FROM_MIDWAY");
         endo.setName("中途退保");
         endo.setEndorsementType(EndorsementType.CANCELLATION);
+        endo.setRatingLevel(RatingLevel.COVERAGE);
         product.getSubComponents().add(endo);
 
         FormulaSpec formula7 = new FormulaSpec();

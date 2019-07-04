@@ -54,8 +54,6 @@ public class PolicyServiceImpl implements PolicyService {
     @Autowired
     private JsonHelper jsonHelper;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
     private BusinessNumberService businessNumberService;
 
     @Override
@@ -95,33 +93,23 @@ public class PolicyServiceImpl implements PolicyService {
             if (po != null){
                 throw new GenericException(30001L);
             }
+            po.setPolicyNumber(policy.getPolicyNumber());
+        } else  {
+            String policyNumber = businessNumberService.generatePolicyNumber(policy);
+            policy.setPolicyNumber(policyNumber);
         }
         if (policy.getProposalNumber() != null) {
             po = dao.findByProposalNumber(policy.getProposalNumber());
-            if (po.getPolicyNumber() == null) {
-                if (policy.getPolicyNumber() == null) {
-                    po.setPolicyNumber(policy.getProposalNumber());
-                    policy.setPolicyNumber(policy.getProposalNumber());
-                } else {
-                    po.setPolicyNumber(policy.getPolicyNumber());
-                }
-            } else {
+            if (po != null && po.getPolicyNumber() != null) {
                 throw new GenericException(30001L);
             }
-
         }
 
         if (po == null) {
             po = new TPolicy();
         }
 
-        if (policy.getPolicyNumber() == null) {
-            String policyNumber = businessNumberService.generatePolicyNumber(policy);
-            policy.setPolicyNumber(policyNumber);
-        }
-
         BeanUtils.copyProperties(policy, po);
-
         po.setContractStatusCode(ContractStatus.EFFECTIVE.name());
         po.setIssueDate(new Date());
 
@@ -202,10 +190,7 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Override
     public void savePolicy(Policy policy) {
-        TPolicy po = dao.findById(policy.getUuid()).get();
-        if (po == null){
-            po = new TPolicy();
-        }
+        TPolicy po = dao.findById(policy.getUuid()).orElse(new TPolicy());
 
         BeanUtils.copyProperties(policy, po);
 
@@ -220,10 +205,8 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     public void generatePolicyIndex(Policy policy) {
 
-        TPolicyIndex po = indexDao.findById(policy.getUuid()).get();
-        if (po == null) {
-            po = new TPolicyIndex();
-        }
+        TPolicyIndex po = indexDao.findById(policy.getUuid()).orElse(new TPolicyIndex());
+
         BeanUtils.copyProperties(policy, po);
         if (policy.getContractStatus() != null){
             po.setContractStatusCode(policy.getContractStatus().name());
@@ -328,7 +311,7 @@ public class PolicyServiceImpl implements PolicyService {
                     predicateList.add(criteriaBuilder.like(root.get("policyInsuredName"),"%" + condition.getPolicyInsuredName() + "%"));
                 }
                 if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
-                    predicateList.add(criteriaBuilder.equal(root.get("policyInsuredNumber"),condition.getPolicyInsuredIdNumber()));
+                    predicateList.add(criteriaBuilder.equal(root.get("policyInsuredIdNumber"),condition.getPolicyInsuredIdNumber()));
                 }
                 if (condition.getMobile() != null && !condition.getMobile().equals("")) {
                     predicateList.add(criteriaBuilder.equal(root.get("mobile"),condition.getMobile()));

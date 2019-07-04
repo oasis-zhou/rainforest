@@ -17,9 +17,11 @@ public class TNoticeOfLoss extends BaseEntity {
     private String uuid;
     private String noticeNumber;
     private String policyNumber;
+    private String claimant;
+    private String mobile;
     private Date accidentTime;
     private Date noticeTime;
-    private String noticeStatus;
+    private String statusCode;
     @Lob
     private String content;
 }

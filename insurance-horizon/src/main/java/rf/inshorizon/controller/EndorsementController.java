@@ -8,8 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import rf.foundation.context.AppContext;
+import rf.foundation.exception.GenericException;
 import rf.foundation.pub.FunctionSliceBundle;
 import rf.inshorizon.ds.EndorsementService;
 import rf.inshorizon.ds.PolicyService;
@@ -25,7 +26,6 @@ import rf.policyadmin.model.enums.EndorsementApplicationType;
 import rf.policyadmin.model.enums.EndorsementType;
 import javax.websocket.server.PathParam;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,18 +43,19 @@ public class EndorsementController {
     @PostMapping(value = "/cancellation")
     public ResponseEntity cancelFromInception(@RequestBody Cancellation cancellation){
 
-        Assert.notNull(cancellation.getPolicyNumber());
-
+        if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
+            throw new GenericException(30015L);
         Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        if(policy == null)
+            throw new GenericException(30012L);
 
         cancellation.setCancellationType(CancellationType.CANCELLATION_FROM_INCEPTION);
         cancellation.setEffectiveDate(policy.getEffectiveDate());
         cancellation.setProductCode(policy.getProductCode());
 
         Map<String,Object> context = Maps.newHashMap();
-
         EndorsementPolicy endorsementPolicy = new EndorsementPolicy(policy,policy);
-        context.put(Constants.ENDOSEMENT_POLICY_OBJECT,endorsementPolicy);
+        context.put(Constants.ENDORSEMENT_POLICY_OBJECT,endorsementPolicy);
 
         new FunctionSliceBundle(cancellation,context)
                 .register(EndorsementValidation.class)
@@ -74,8 +75,11 @@ public class EndorsementController {
     @PostMapping(value = "/cancellation/midway")
     public ResponseEntity cancelFromMidway(@RequestBody Cancellation cancellation){
 
-        Assert.notNull(cancellation.getPolicyNumber());
+        if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
+            throw new GenericException(30015L);
         Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        if(policy == null)
+            throw new GenericException(30012L);
 
         cancellation.setCancellationType(CancellationType.CANCELLATION_MIDWAY);
         cancellation.setProductCode(policy.getProductCode());
@@ -87,7 +91,7 @@ public class EndorsementController {
 
         Map<String,Object> context = Maps.newHashMap();
         context.put(Constants.POLICY_OBJECT,policy);  EndorsementPolicy endorsementPolicy = new EndorsementPolicy(policy,policy);
-        context.put(Constants.ENDOSEMENT_POLICY_OBJECT,endorsementPolicy);
+        context.put(Constants.ENDORSEMENT_POLICY_OBJECT,endorsementPolicy);
 
         new FunctionSliceBundle(cancellation,context)
                 .register(EndorsementValidation.class)
@@ -103,12 +107,14 @@ public class EndorsementController {
     }
 
     @Transactional
-    @PostMapping(value = "/cancellation/midway/prepricing")
-    public ResponseEntity prePricingForCancellation(@RequestBody Cancellation cancellation){
+    @PostMapping(value = "/cancellation/midway/pricing")
+    public ResponseEntity priceCancellation(@RequestBody Cancellation cancellation){
 
-        Assert.notNull(cancellation.getPolicyNumber());
-
+        if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
+            throw new GenericException(30015L);
         Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        if(policy == null)
+            throw new GenericException(30012L);
 
         cancellation.setCancellationType(CancellationType.CANCELLATION_MIDWAY);
         cancellation.setProductCode(policy.getProductCode());
@@ -120,7 +126,7 @@ public class EndorsementController {
 
         Map<String,Object> context = Maps.newHashMap();
         EndorsementPolicy endorsementPolicy = new EndorsementPolicy(policy,policy);
-        context.put(Constants.ENDOSEMENT_POLICY_OBJECT,endorsementPolicy);
+        context.put(Constants.ENDORSEMENT_POLICY_OBJECT,endorsementPolicy);
 
         new FunctionSliceBundle(cancellation,context)
                 .register(EndorsementValidation.class)
@@ -131,7 +137,6 @@ public class EndorsementController {
         response.put("endorsementPremium", cancellation.getEndoFeeByCode(rf.policyadmin.pub.Constants.FEE_APP).getValue());
 
         return new ResponseEntity(response, HttpStatus.OK);
-
     }
 
     @GetMapping(value = "query/{endorsementNumber}")
@@ -140,6 +145,4 @@ public class EndorsementController {
         Endorsement endorsementList = endorsementService.pullFromChain(endorsementNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);
     }
-
-
 }
