@@ -14,7 +14,6 @@ import rf.policyadmin.model.Customer;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Fee;
 import rf.policyadmin.model.Policy;
-import rf.salesplatform.model.EndorsementPolicy;
 
 import java.util.Date;
 import java.util.Map;

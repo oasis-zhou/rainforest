@@ -10,7 +10,7 @@ import rf.foundation.exception.GenericException;
 import rf.foundation.pub.FunctionSlice;
 import rf.foundation.utils.ObjFieldUtil;
 import rf.inshorizon.ds.ProductService;
-import rf.inshorizon.model.EndorsementPolicy;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.inshorizon.pub.Constants;
 import rf.inshorizon.pub.ModelConverter;
 import rf.policyadmin.model.Endorsement;

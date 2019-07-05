@@ -6,8 +6,8 @@ import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Endorsement;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.policyadmin.model.Policy;
-import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.Constants;
 
 import java.util.Map;

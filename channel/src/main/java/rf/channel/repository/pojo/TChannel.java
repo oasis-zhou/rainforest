@@ -15,7 +15,7 @@ public class TChannel extends BaseEntity {
     private String uuid;
     private String name;
     private String code;
-    private String type;
+    private String typeCode;
     private String accessKey;
     private String secretKey;
     private String parentChannel;

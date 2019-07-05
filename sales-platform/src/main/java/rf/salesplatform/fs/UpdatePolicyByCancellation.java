@@ -1,17 +1,15 @@
 package rf.salesplatform.fs;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rf.foundation.pub.FunctionSlice;
-import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Cancellation;
 import rf.policyadmin.model.Endorsement;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.CancellationType;
 import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.enums.TerminalReason;
-import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.Constants;
 
 import java.util.Date;

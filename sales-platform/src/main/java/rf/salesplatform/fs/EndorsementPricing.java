@@ -16,7 +16,6 @@ import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.ds.PolicyLogService;
 import rf.policyadmin.model.*;
 import rf.policyadmin.model.enums.EndorsementFeeLevel;
-import rf.policyadmin.model.enums.LogType;
 import rf.product.ds.ProductService;
 import rf.product.model.EndorsementSpec;
 import rf.product.model.FeeSpec;
@@ -24,7 +23,6 @@ import rf.product.model.FormulaSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.enums.FormulaPurpose;
 import rf.product.model.enums.RatingLevel;
-import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.ModelConverter;
 import rf.salesplatform.pub.Constants;
 

@@ -12,13 +12,13 @@ import rf.foundation.utils.ObjFieldUtil;
 import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Endorsement;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
 import rf.product.ds.ProductService;
 import rf.product.model.EndorsementSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.RuleSpec;
-import rf.salesplatform.model.EndorsementPolicy;
 import rf.salesplatform.pub.Constants;
 import rf.salesplatform.pub.ModelConverter;
 

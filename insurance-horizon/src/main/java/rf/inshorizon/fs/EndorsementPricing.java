@@ -13,7 +13,7 @@ import rf.eval.model.EvalNode;
 import rf.foundation.model.BaseModel;
 import rf.foundation.model.Pair;
 import rf.foundation.pub.FunctionSlice;
-import rf.inshorizon.model.EndorsementPolicy;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.inshorizon.pub.Constants;
 import rf.inshorizon.pub.ModelConverter;
 import rf.policyadmin.model.*;

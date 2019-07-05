@@ -9,6 +9,8 @@ import rf.foundation.pub.Guid;
 public class ChannelSpec extends ModelComponent {
 
     private String name;
+    private String idType;
+    private String idNumber;
     private String code;
     private ChannelType type;
     private String description;

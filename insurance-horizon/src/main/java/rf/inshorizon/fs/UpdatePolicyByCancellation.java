@@ -4,7 +4,7 @@ package rf.inshorizon.fs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rf.foundation.pub.FunctionSlice;
-import rf.inshorizon.model.EndorsementPolicy;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.inshorizon.pub.Constants;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Cancellation;

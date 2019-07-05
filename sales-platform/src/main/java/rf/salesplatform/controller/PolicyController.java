@@ -18,14 +18,12 @@ import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.PolicyIndex;
 import rf.policyadmin.model.QueryCondition;
 import rf.policyadmin.model.Quotation;
-import rf.policyadmin.model.enums.ContractStatus;
 import rf.policyadmin.model.trans.PolicyTransformer;
 import rf.salesplatform.event.PolicyIssueEvent;
 import rf.salesplatform.fs.*;
 import rf.salesplatform.pub.Constants;
+
 import javax.websocket.server.PathParam;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 

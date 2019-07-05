@@ -45,12 +45,13 @@ public class NumberingServiceImpl implements NumberingService {
 		rulesMap.put(NumberingType.LONG_SEQUENCE,new NumberingRule("10{SEQUENCE}"));
 		rulesMap.put(NumberingType.GL_SEQUENCE,new NumberingRule("12{SEQUENCE}"));
 		rulesMap.put(NumberingType.CUSTOMER_CODE,new NumberingRule("4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
+		rulesMap.put(NumberingType.CHANNEL_CODE,new NumberingRule("4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}"));
 	}
 
-	public synchronized Long nextNumber(NumberingType type, String numbering) {
+	private synchronized Long nextSequence(NumberingType type, String numbering) {
 		String key = type + numbering;
 		NumberingSequence cacheSeq = cacheMap.get(key);
-		if(cacheSeq == null){
+		if( cacheSeq == null ){
 			cacheSeq = new NumberingSequence();
 			cacheMap.put(key,cacheSeq);
 		}		
@@ -58,13 +59,11 @@ public class NumberingServiceImpl implements NumberingService {
 			Long nextSequence = seqDAO.getNextSeq(type, numbering, cacheCount);
 			cacheSeq.setFrom(nextSequence - cacheCount >0 ?(nextSequence-cacheCount) : 0);
 			cacheSeq.setTo(nextSequence);
-
 		}
 		cacheSeq.setFrom(cacheSeq.getFrom() + 1);
 
 		return cacheSeq.getFrom();		
 	}
-
 
 	@Override
 	public String generateNumber(NumberingType type, Map<NumberingFactor, String> factors){
@@ -76,7 +75,7 @@ public class NumberingServiceImpl implements NumberingService {
 		StringBuffer tmp = new StringBuffer(numbering);
 		NumberingRuleItem item = rule.findRuleItem(NumberingFactor.SEQUENCE);
 		if(item!=null){
-			Long seq = nextNumber(type, numbering);
+			Long seq = nextSequence(type, numbering);
 			String str = item.generateNumbering(Long.toString(seq));
 			int index = tmp.indexOf(item.getTemplate());
 			if(index != -1){

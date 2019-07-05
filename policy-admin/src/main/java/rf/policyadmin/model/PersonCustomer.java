@@ -13,8 +13,6 @@ public class PersonCustomer extends Customer{
     @FieldSpec(code = "CUST_BIRTHDAY", name = "customer birthday")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", locale = "zh", timezone = "GMT+8")
     private Date birthday;
-    private String mobile;
-    private String phone;
     private String mail;
     private String relationWithPH;
 

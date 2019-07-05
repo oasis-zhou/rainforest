@@ -1,6 +1,7 @@
-package rf.inshorizon.model;
+package rf.policyadmin.model;
 
 import lombok.Data;
+import rf.foundation.model.ModelComponent;
 import rf.policyadmin.model.Policy;
 
 /**
@@ -11,7 +12,7 @@ import rf.policyadmin.model.Policy;
  * @Version V1.0
  **/
 @Data
-public class EndorsementPolicy {
+public class EndorsementPolicy extends ModelComponent {
 
     private Policy original;
     private Policy newOne;

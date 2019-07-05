@@ -7,7 +7,7 @@
         "ModelPath":"rf.policyadmin.model.PersonCustomer",
         "idType":"ID",
         "idNumber":"420123198001017616",
-        "mobile":"13988888888",
+        "phone":"13988888888",
         "name":"zhouzheng",
         "dynamicFields":{
             "RESIDENT_AREA":"上海"
@@ -19,7 +19,7 @@
             "idType":"ID",
             "idNumber":"420123198001017616",
             "birthday":"1980-01-01T00:00:00.000+0800",
-            "mobile":"13988888888",
+            "phone":"13988888888",
             "name":"zhouzheng",
             "relationWithPH":"SELF",
             "dynamicFields":{

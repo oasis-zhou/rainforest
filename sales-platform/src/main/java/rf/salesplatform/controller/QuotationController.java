@@ -48,9 +48,7 @@ public class QuotationController {
             }
 
             Policy policy = policyTransformer.transFromQuotation(quotation);
-
             Map<String, Object> context = Maps.newHashMap();
-
             context.put(Constants.AUTO_UNDERWRITING_RULE_SET, Constants.RULE_SET_UW);
 
             new FunctionSliceBundle(policy, context)
@@ -71,7 +69,6 @@ public class QuotationController {
             long e = System.currentTimeMillis();
             logger.info("保费计算耗时" + (e - s) + "ms");
             return new ResponseEntity(response, HttpStatus.OK);
-
 
     }
 

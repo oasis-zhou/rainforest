@@ -1,6 +1,5 @@
 package rf.inshorizon.controller;
 
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,23 +8,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import rf.claim.ds.BusinessNumberService;
-import rf.claim.model.Claim;
 import rf.claim.model.ClaimMaterials;
 import rf.claim.model.NoticeOfLoss;
-import rf.claim.model.QueryCondition;
 import rf.claim.model.enums.NoticeStatus;
 import rf.foundation.exception.GenericException;
-import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
-
 import rf.inshorizon.ds.NoticeOfLossService;
 import rf.inshorizon.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
-
 import javax.websocket.server.PathParam;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * @ClassName ClaimController
@@ -69,7 +62,8 @@ public class ClaimController {
     }
 
     @PostMapping("/loss/notice")
-    public ResponseEntity saveNoticeOfLoss(@RequestBody NoticeOfLoss noticeOfLoss){
+    public ResponseEntity createNoticeOfLoss(@RequestBody NoticeOfLoss noticeOfLoss){
+        //报案数据上链
         noticeOfLossService.pushToChain(noticeOfLoss);
         return new ResponseEntity(HttpStatus.OK);
     }

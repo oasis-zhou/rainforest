@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import rf.foundation.exception.GenericException;
@@ -15,9 +14,8 @@ import rf.foundation.pub.FunctionSliceBundle;
 import rf.inshorizon.ds.EndorsementService;
 import rf.inshorizon.ds.PolicyService;
 import rf.inshorizon.fs.*;
-import rf.inshorizon.model.EndorsementPolicy;
+import rf.policyadmin.model.EndorsementPolicy;
 import rf.inshorizon.pub.Constants;
-
 import rf.policyadmin.model.Cancellation;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Policy;

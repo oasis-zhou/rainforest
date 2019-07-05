@@ -3,6 +3,7 @@ package rf.bizop.controller;
 
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import rf.bizop.pub.Constants;
 import rf.eval.dt.DecisionTableService;
 import rf.eval.dt.DecisionTableSpec;
 import rf.eval.dt.ImportDecisionTableService;
@@ -32,6 +34,9 @@ import java.io.FileInputStream;
 @RestController
 @RequestMapping("v0/api/product")
 public class ProductController {
+
+    @Value("${operation.mode}")
+    private String operationMode;
 
     @Autowired
     private ImportDecisionTableService importDecisionTableService;
@@ -76,7 +81,9 @@ public class ProductController {
     public ResponseEntity deployProduct(ProductSpec spec){
         productService.saveProduct(spec);
 
-        //TODO 发布产品信息到区块链
+        if(Constants.OPERATION_MODE_DECENTRALIZED.equals(operationMode)) {
+            //TODO 发布产品信息到区块链
+        }
         return new ResponseEntity(HttpStatus.OK);
     }
 

@@ -88,7 +88,7 @@ public class BillServiceImpl implements BillService {
             }
         };
 
-        Page<TBill> page = billDao.findAll(queryCondition, PageRequest.of(condition.getPageNo() - 1, condition.getPageSize(), Sort.by(Sort.Direction.DESC, "quotationDate")));
+        Page<TBill> page = billDao.findAll(queryCondition, PageRequest.of(condition.getPageNo() - 1, condition.getPageSize(), Sort.by(Sort.Direction.DESC, "transDate")));
 
         return buildResponsePage(page);
     }

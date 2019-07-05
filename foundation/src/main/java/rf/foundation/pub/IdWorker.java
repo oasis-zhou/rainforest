@@ -2,6 +2,11 @@ package rf.foundation.pub;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.util.Random;
 
 /**
  *
@@ -10,10 +15,11 @@ import org.slf4j.LoggerFactory;
  *       注意这里进行了小改动: snowkflake是5位的datacenter加5位的机器id; 这里变成使用10位的机器id
  *   (b) 对系统时间的依赖性非常强，需关闭ntp的时间同步功能。当检测到ntp时间调整后，将会拒绝分配id
  */
-
 public class IdWorker {
 
     private final static Logger logger = LoggerFactory.getLogger(IdWorker.class);
+
+    private static IdWorker flowIdWorker = new IdWorker();
 
     private final long workerId;
     private final long epoch = 1403854494756L;   // 时间起始标记点，作为基准，一般取系统的最近时间
@@ -27,11 +33,17 @@ public class IdWorker {
     private final long sequenceMask = -1L ^ -1L << this.sequenceBits;                 // 4095,111111111111,12位
     private long lastTimestamp = -1L;
 
-    private IdWorker(long workerId) {
-        if (workerId > this.maxWorkerId || workerId < 0) {
+    private IdWorker() {
+        Random ran = new Random();
+        int ranId = ran.nextInt(1023);
+        if (ranId > this.maxWorkerId || ranId < 0) {
             throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", this.maxWorkerId));
         }
-        this.workerId = workerId;
+        this.workerId = ranId;
+    }
+
+    public static IdWorker getFlowIdWorkerInstance() {
+        return flowIdWorker;
     }
 
     public synchronized long nextId() throws Exception {
@@ -54,13 +66,6 @@ public class IdWorker {
         return timestamp - this.epoch << this.timestampLeftShift | this.workerId << this.workerIdShift | this.sequence;
     }
 
-    private static IdWorker flowIdWorker = new IdWorker(1);
-    public static IdWorker getFlowIdWorkerInstance() {
-        return flowIdWorker;
-    }
-
-
-
     /**
      * 等待下一个毫秒的到来, 保证返回的毫秒数在参数lastTimestamp之后
      */
@@ -77,15 +82,6 @@ public class IdWorker {
      */
     private static long timeGen() {
         return System.currentTimeMillis();
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(timeGen());
-
-        IdWorker idWorker = IdWorker.getFlowIdWorkerInstance();
-        // System.out.println(Long.toBinaryString(idWorker.nextId()));
-        System.out.println(idWorker.nextId());
-        System.out.println(idWorker.nextId());
     }
 
 }

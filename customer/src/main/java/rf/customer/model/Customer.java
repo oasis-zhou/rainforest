@@ -11,6 +11,7 @@ public class Customer extends ModelComponent {
     private String idType;
     private String idNumber;
     private String code;
+    private String phone;
 
     public Customer(){
         this.setUuid(Guid.generateStrId());

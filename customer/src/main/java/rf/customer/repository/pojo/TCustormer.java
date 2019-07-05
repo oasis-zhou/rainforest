@@ -16,6 +16,7 @@ public class TCustormer extends BaseEntity {
     private String idType;
     private String idNumber;
     private String code;
+    private String phone;
     @Lob
     private String content;
 

@@ -23,9 +23,6 @@ import java.util.List;
 public class EndorsementController {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private PolicyService policyService;
     @Autowired
     private EndorsementService endorsementService;
 
@@ -43,6 +40,5 @@ public class EndorsementController {
         List<Endorsement> endorsementList = endorsementService.findEndorsements(policyNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);
     }
-
 
 }

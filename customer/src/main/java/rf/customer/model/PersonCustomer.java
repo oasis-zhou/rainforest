@@ -9,8 +9,6 @@ public class PersonCustomer extends Customer {
 
     private String gender;
     private Date birthday;
-    private String mobile;
-    private String phone;
     private String mail;
 
 }

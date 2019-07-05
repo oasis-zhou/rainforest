@@ -8,13 +8,11 @@ import java.util.UUID;
 public class Guid {
 
 	public static Long generateId(){
-
 		Long id = 0L;
 		try {
 			IdWorker idWorker = IdWorker.getFlowIdWorkerInstance();
 			id = idWorker.nextId();
 		}catch (Exception e){
-			e.printStackTrace();
 			throw new GenericException(e);
 		}
 		return id;
@@ -23,7 +21,6 @@ public class Guid {
 	public static String generateStrId(){
 		return String.valueOf(generateId());
 	}
-
 
 	public static int randomNumber(){
 
@@ -78,7 +75,5 @@ public class Guid {
 
 		return  new String(chs);
 	}
-
-
 
 }
