@@ -6,22 +6,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import rf.customer.ds.CustomerNumberService;
 import rf.customer.ds.CustomerService;
 import rf.customer.model.Customer;
 import rf.customer.model.QueryCondition;
 import rf.customer.repository.CustomerDao;
 import rf.customer.repository.pojo.TCustormer;
 import rf.foundation.model.ResponsePage;
-import rf.foundation.numbering.NumberingFactor;
-import rf.foundation.numbering.NumberingService;
-import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -37,21 +34,15 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerDao customerDao;
 
     @Autowired
-    private NumberingService numberingService;
+    private CustomerNumberService customerNumberService;
 
     @Override
     public String generateCustomer(Customer customer) {
 
         TCustormer po = customerDao.findByIdNumber(customer.getIdType(),customer.getIdNumber());
         if(po == null) {
-            Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-            Date date = new Date();
-            factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-            factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
-            factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
 
-            //4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}
-            String code = numberingService.generateNumber(NumberingType.CUSTOMER_CODE,factors);
+            String code = customerNumberService.generateCustomerCode(customer);
             customer.setCode(code);
 
             po = new TCustormer();

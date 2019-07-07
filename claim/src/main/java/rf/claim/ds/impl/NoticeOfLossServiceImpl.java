@@ -1,6 +1,5 @@
 package rf.claim.ds.impl;
 
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -9,10 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import rf.claim.ds.BusinessNumberService;
+import rf.claim.ds.ClaimNumberService;
 import rf.claim.ds.NoticeOfLossService;
 import rf.claim.model.ClaimMaterials;
 import rf.claim.model.NoticeOfLoss;
@@ -44,7 +42,7 @@ public class NoticeOfLossServiceImpl implements NoticeOfLossService {
     @Autowired
     private JsonHelper jsonHelper;
     @Autowired
-    private BusinessNumberService businessNumberService;
+    private ClaimNumberService claimNumberService;
 
     @Override
     public NoticeOfLoss createNoticeOfLoss(NoticeOfLoss notice) {
@@ -57,7 +55,7 @@ public class NoticeOfLossServiceImpl implements NoticeOfLossService {
             throw new GenericException(40000L);
         }
 
-        String noticeNumber = businessNumberService.generateNoticeNumber(notice);
+        String noticeNumber = claimNumberService.generateNoticeNumber(notice);
         notice.setNoticeNumber(noticeNumber);
 
         BeanUtils.copyProperties(notice, po);

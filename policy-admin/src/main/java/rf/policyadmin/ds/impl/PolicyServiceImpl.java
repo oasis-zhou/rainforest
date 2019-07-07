@@ -216,7 +216,7 @@ public class PolicyServiceImpl implements PolicyService {
         po.setPolicyHolderIdType(policyHolder.getIdType());
         po.setPolicyHolderIdNumber(policyHolder.getIdNumber());
         if (policyHolder instanceof PersonCustomer){
-            po.setMobile(((PersonCustomer) policyHolder).getMobile());
+            po.setPhone(((PersonCustomer) policyHolder).getPhone());
         }
         List<Customer> insureds = policy.getInsureds();
         PersonCustomer insured = (PersonCustomer) insureds.get(0);
@@ -264,8 +264,8 @@ public class PolicyServiceImpl implements PolicyService {
                 if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
                     predicateList.add(criteriaBuilder.equal(root.get("policyInsuredNumber"),condition.getPolicyInsuredIdNumber()));
                 }
-                if (condition.getMobile() != null && !condition.getMobile().equals("")) {
-                    predicateList.add(criteriaBuilder.equal(root.get("mobile"),condition.getMobile()));
+                if (condition.getPhone() != null && !condition.getPhone().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("phone"),condition.getPhone()));
                 }
                 if (condition.getChannelCode()!=null&&!"".equals(condition.getChannelCode())){
                     predicateList.add(criteriaBuilder.equal(root.get("channelCode"),condition.getChannelCode()));
@@ -313,8 +313,8 @@ public class PolicyServiceImpl implements PolicyService {
                 if (condition.getPolicyInsuredIdNumber() != null && !condition.getPolicyInsuredIdNumber().equals("")) {
                     predicateList.add(criteriaBuilder.equal(root.get("policyInsuredIdNumber"),condition.getPolicyInsuredIdNumber()));
                 }
-                if (condition.getMobile() != null && !condition.getMobile().equals("")) {
-                    predicateList.add(criteriaBuilder.equal(root.get("mobile"),condition.getMobile()));
+                if (condition.getPhone() != null && !condition.getPhone().equals("")) {
+                    predicateList.add(criteriaBuilder.equal(root.get("phone"),condition.getPhone()));
                 }
                 if (condition.getChannelCode()!=null&&!"".equals(condition.getChannelCode())){
                     predicateList.add(criteriaBuilder.equal(root.get("channelCode"),condition.getChannelCode()));

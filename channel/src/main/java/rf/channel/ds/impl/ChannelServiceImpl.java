@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import rf.channel.ds.ChannelNumberService;
 import rf.channel.ds.ChannelService;
 import rf.channel.model.ChannelSpec;
 import rf.channel.model.QueryCondition;
@@ -15,16 +16,12 @@ import rf.channel.model.SalesAgreementSpec;
 import rf.channel.repository.ChannelDao;
 import rf.channel.repository.pojo.TChannel;
 import rf.foundation.model.ResponsePage;
-import rf.foundation.numbering.NumberingFactor;
-import rf.foundation.numbering.NumberingService;
-import rf.foundation.numbering.NumberingType;
 import rf.foundation.utils.JsonHelper;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -40,20 +37,13 @@ public class ChannelServiceImpl implements ChannelService {
     @Autowired
     private JsonHelper jsonHelper;
     @Autowired
-    private NumberingService numberingService;
+    private ChannelNumberService channelNumberService;
 
     @Override
     public void saveChannel(ChannelSpec channelSpec) {
         TChannel po = channelDao.findByIdNumber(channelSpec.getIdType(),channelSpec.getIdNumber());
         if(po == null) {
-            Map<NumberingFactor, String> factors = new HashMap<NumberingFactor, String>();
-            Date date = new Date();
-            factors.put(NumberingFactor.TRANS_YEAR, new SimpleDateFormat("yyyy").format(date));
-            factors.put(NumberingFactor.TRANS_MONTH, new SimpleDateFormat("MM").format(date));
-            factors.put(NumberingFactor.TRANS_DAY, new SimpleDateFormat("dd").format(date));
-
-            //4{TRANS_YEAR}2{TRANS_MONTH}2{TRANS_DAY}7{SEQUENCE}
-            String code = numberingService.generateNumber(NumberingType.CHANNEL_CODE,factors);
+            String code = channelNumberService.generateChannelCode(channelSpec);
             channelSpec.setCode(code);
 
             po = new TChannel();

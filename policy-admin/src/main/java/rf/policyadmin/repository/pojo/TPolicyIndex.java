@@ -36,7 +36,7 @@ public class TPolicyIndex extends BaseEntity {
     private String policyInsuredName;
     private String policyInsuredIdType;
     private String policyInsuredIdNumber;
-    private String mobile;
+    private String phone;
     private Date effectiveDate;
     private Date expiredDate;
     private Date proposalDate;

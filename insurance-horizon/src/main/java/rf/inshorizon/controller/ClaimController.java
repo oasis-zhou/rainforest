@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import rf.claim.ds.BusinessNumberService;
+import rf.claim.ds.ClaimNumberService;
 import rf.claim.model.ClaimMaterials;
 import rf.claim.model.NoticeOfLoss;
 import rf.claim.model.enums.NoticeStatus;
@@ -36,7 +36,7 @@ public class ClaimController {
     @Autowired
     private NoticeOfLossService noticeOfLossService;
     @Autowired
-    private BusinessNumberService businessNumberService;
+    private ClaimNumberService claimNumberService;
     @Autowired
     private PolicyService policyService;
     @Autowired
@@ -55,7 +55,7 @@ public class ClaimController {
         noticeOfLoss.setNoticeTime(new Date());
         noticeOfLoss.setNoticeStatus(NoticeStatus.APPLICATION);
 
-        String noticeNumber = businessNumberService.generateNoticeNumber(noticeOfLoss);
+        String noticeNumber = claimNumberService.generateNoticeNumber(noticeOfLoss);
         noticeOfLoss.setNoticeNumber(noticeNumber);
 
         return new ResponseEntity(noticeOfLoss,HttpStatus.OK);

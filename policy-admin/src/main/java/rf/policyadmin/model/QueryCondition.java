@@ -21,7 +21,7 @@ public class QueryCondition {
     private String policyHolderIdNumber;
     private String policyInsuredName;
     private String policyInsuredIdNumber;
-    private String mobile;
+    private String phone;
     private String status;
     private Date dateStart;
     private Date dateEnd;
