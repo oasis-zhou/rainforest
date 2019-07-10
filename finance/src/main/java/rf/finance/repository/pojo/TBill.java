@@ -15,6 +15,7 @@ public class TBill extends BaseEntity {
     @Id
     private String uuid;
     private String transType;
+    private String billNumber;
     private String refBizNumber;
     private String refExtNumber;
     private Date transDate;

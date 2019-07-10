@@ -41,10 +41,8 @@ public class CustomerServiceImpl implements CustomerService {
 
         TCustormer po = customerDao.findByIdNumber(customer.getIdType(),customer.getIdNumber());
         if(po == null) {
-
             String code = customerNumberService.generateCustomerCode(customer);
             customer.setCode(code);
-
             po = new TCustormer();
         }
 

@@ -8,10 +8,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import rf.finance.ds.BillService;
+import rf.finance.ds.FinanceNumberService;
 import rf.finance.model.Bill;
 import rf.finance.model.QueryCondition;
 import rf.finance.repository.BillDao;
 import rf.finance.repository.pojo.TBill;
+import rf.foundation.exception.GenericException;
 import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -30,18 +32,22 @@ public class BillServiceImpl implements BillService {
     @Autowired
     private BillDao billDao;
     @Autowired
+    private FinanceNumberService financeNumberService;
+    @Autowired
     private JsonHelper jsonHelper;
 
     @Override
-    public void generateBill(Bill bill) {
+    public String generateBill(Bill bill) {
         TBill po = billDao.findByRefNumber(bill.getTransType().name(),bill.getRefBizNumber());
 
         if(po == null){
             po = new TBill();
         }else{
-            return;
+            throw new GenericException(80000L);
         }
 
+        String billNumber = financeNumberService.generateBillNumber(bill);
+        bill.setBillNumber(billNumber);
         BeanUtils.copyProperties(bill,po);
         po.setTransType(bill.getTransType().name());
         po.setStatusCode(bill.getStatus().name());
@@ -52,6 +58,8 @@ public class BillServiceImpl implements BillService {
         po.setContent(content);
 
         billDao.save(po);
+
+        return billNumber;
     }
 
     @Override
@@ -65,6 +73,9 @@ public class BillServiceImpl implements BillService {
 
                 if (condition.getTransType()!=null&&!"".equals(condition.getTransType())){
                     predicateList.add(criteriaBuilder.equal(root.get("transType"),condition.getTransType()));
+                }
+                if (condition.getBillNumber()!=null&&!"".equals(condition.getBillNumber())){
+                    predicateList.add(criteriaBuilder.equal(root.get("billNumber"),condition.getBillNumber()));
                 }
                 if (condition.getRefBizNumber()!=null&&!"".equals(condition.getRefBizNumber())){
                     predicateList.add(criteriaBuilder.equal(root.get("refBizNumber"),condition.getRefBizNumber()));

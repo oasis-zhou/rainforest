@@ -6,7 +6,7 @@ import rf.foundation.model.ResponsePage;
 
 public interface BillService {
 
-    void generateBill(Bill bill);
+    String generateBill(Bill bill);
 
     ResponsePage<Bill> findBills(QueryCondition condition);
 }

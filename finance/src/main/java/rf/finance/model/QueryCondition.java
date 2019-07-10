@@ -16,6 +16,7 @@ import java.util.Date;
 public class QueryCondition {
 
     private String transType;
+    private String billNumber;
     private String refBizNumber;
     private String refExtNumber;
     private String payerPayee;

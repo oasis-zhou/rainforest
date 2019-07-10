@@ -17,7 +17,6 @@ import java.util.Map;
 @Service
 public class CustomerNumberServiceImpl implements CustomerNumberService {
 
-
     @Value("${guid.org.code}")
     private String orgCode;
 

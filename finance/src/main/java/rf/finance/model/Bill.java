@@ -13,6 +13,7 @@ import java.util.Date;
 public class Bill extends ModelComponent {
 
     private TransactionType transType;
+    private String billNumber;
     private String refBizNumber;
     private String refExtNumber;
     private Date transDate;

@@ -21,7 +21,8 @@
         <module>sales-platform</module>
         <module>business-operation-platform</module>
         <module>eval</module>
-        <module>insurance-horizon</module>
+        <module>collaboration-horizon</module>
+        <module>sales-horizon</module>
     </modules>
 
     <name>rf</name>
@@ -70,10 +71,10 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-starter-security</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
         <!-- spring cache -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

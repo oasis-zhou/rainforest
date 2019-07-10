@@ -22,7 +22,9 @@ public class PolicyIssue implements FunctionSlice<Policy> {
         policy.setContractStatus(ContractStatus.EFFECTIVE);
         if(policy.getIssueDate() == null)
             policy.setIssueDate(new Date());
-        policyService.issuePolicy(policy);
+        if(policy.getProposalDate() == null)
+            policy.setProposalDate(new Date());
 
+        policyService.issuePolicy(policy);
     }
 }
