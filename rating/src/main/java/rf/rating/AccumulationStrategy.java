@@ -1,9 +1,9 @@
-package rf.eval;
+package rf.rating;
 
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 
-public class AccumulationStrategy implements EvalStrategy {
+public class AccumulationStrategy implements RatingStrategy {
 
 	private Accumulator accumulator;
 
@@ -11,15 +11,15 @@ public class AccumulationStrategy implements EvalStrategy {
 		this.accumulator = accumulator;
 	}
 
-	public void execute(EvalNode node){
+	public void execute(RatingNode node){
 
 		accumulate(node);
 	}
 
-	private void accumulate(EvalNode node){
-		Evaluator evaluator = node.getCurrentEvaluator();
-		if(evaluator != null)
-			evaluator.eval(node);
+	private void accumulate(RatingNode node){
+		Calculator calculator = node.getCurrentCalculator();
+		if(calculator != null)
+			calculator.eval(node);
 
 		if(node.getSubNodes().size() > 0){
 			node.getSubNodes().forEach((subNode) -> accumulate(subNode));

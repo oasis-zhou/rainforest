@@ -1,8 +1,8 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 
 public interface Distributor {
 
-	public void distribute(EvalNode node);
+	public void distribute(RatingNode node);
 }

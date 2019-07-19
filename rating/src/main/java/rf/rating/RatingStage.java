@@ -1,33 +1,33 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.util.List;
 
-public class EvalStage {
+public class RatingStage {
 
-    private EvalStrategy strategy;
-    private Evaluator evaluator;
+    private RatingStrategy strategy;
+    private Calculator calculator;
     private String purpose;
 
-    public EvalStage(EvalStrategy strategy,Evaluator evaluator,String purpose){
+    public RatingStage(RatingStrategy strategy, Calculator calculator, String purpose){
         this.strategy = strategy;
-        this.evaluator = evaluator;
+        this.calculator = calculator;
         this.purpose = purpose;
     }
 
-    public void doEval(EvalNode node){
-        setPurposeAndEvaluator(node,purpose,evaluator);
+    public void doEval(RatingNode node){
+        setPurposeAndEvaluator(node,purpose, calculator);
         strategy.execute(node);
     }
 
-    private void setPurposeAndEvaluator(EvalNode node, String prupose,Evaluator evaluator){
+    private void setPurposeAndEvaluator(RatingNode node, String prupose, Calculator calculator){
         node.setCurrentPurpose(purpose);
-        node.setCurrentEvaluator(evaluator);
+        node.setCurrentCalculator(calculator);
 
-        List<EvalNode> subNodes = node.getAllSubNodes();
+        List<RatingNode> subNodes = node.getAllSubNodes();
         subNodes.forEach(subNode -> {
             subNode.setCurrentPurpose(purpose);
-            subNode.setCurrentEvaluator(evaluator);
+            subNode.setCurrentCalculator(calculator);
         });
     }
 

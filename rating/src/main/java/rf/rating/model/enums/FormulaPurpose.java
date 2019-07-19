@@ -1,4 +1,4 @@
-package rf.eval.model.enums;
+package rf.rating.model.enums;
 
 
 public enum FormulaPurpose {

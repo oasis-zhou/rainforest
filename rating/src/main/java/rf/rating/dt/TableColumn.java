@@ -1,4 +1,4 @@
-package rf.eval.dt;
+package rf.rating.dt;
 
 import lombok.Data;
 import rf.foundation.model.ModelComponent;

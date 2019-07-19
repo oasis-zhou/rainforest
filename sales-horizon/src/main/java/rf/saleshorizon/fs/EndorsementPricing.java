@@ -6,10 +6,10 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rf.eval.EvalConstant;
-import rf.eval.EvalEngine;
-import rf.eval.EvalJob;
-import rf.eval.model.EvalNode;
+import rf.rating.RatingConstants;
+import rf.rating.RatingEngine;
+import rf.rating.RatingJob;
+import rf.rating.model.RatingNode;
 import rf.foundation.model.BaseModel;
 import rf.foundation.model.Pair;
 import rf.foundation.pub.FunctionSlice;
@@ -36,7 +36,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
     @Autowired
     private ProductService productService;
     @Autowired
-    private EvalEngine evalEngine;
+    private RatingEngine ratingEngine;
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
@@ -60,8 +60,8 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
         List<FormulaSpec> formulaSpecs = endorsementSpec.getAllSubComponentsByType(FormulaSpec.class);
 
-        EvalNode node = buildEvalNode(endorsement,original,newOne,formulaSpecs);
-        EvalJob endoPremiumJob = evalEngine.endosementPremium();
+        RatingNode node = buildEvalNode(endorsement,original,newOne,formulaSpecs);
+        RatingJob endoPremiumJob = ratingEngine.endosementPremium();
         endoPremiumJob.process(node);
 
         endorsement.removeSubComponentsByType(EndorsementFee.class);
@@ -79,9 +79,9 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
     }
 
 
-    public EvalNode buildEvalNode(Endorsement bizObject,Policy original,Policy newOne,List<FormulaSpec> formulaSpecs){
+    public RatingNode buildEvalNode(Endorsement bizObject, Policy original, Policy newOne, List<FormulaSpec> formulaSpecs){
 
-        EvalNode root = new EvalNode();
+        RatingNode root = new RatingNode();
         root.setRefBizObject(bizObject);
 
         List<FormulaSpec> pFormulaSpecs = Lists.newArrayList();
@@ -97,8 +97,8 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
         root.setExpressions(ModelConverter.converFromFormulaSpecs(pFormulaSpecs));
 
         Map<String,Object> factors = root.getFactors();
-        factors.put(EvalConstant.ENDORSEMENT_TYPE_FACTOR, bizObject.getEndorsementType());
-        factors.put(EvalConstant.ENDO_EFF_DATE,new Date(bizObject.getEffectiveDate().getTime()));
+        factors.put(RatingConstants.ENDORSEMENT_TYPE_FACTOR, bizObject.getEndorsementType());
+        factors.put(RatingConstants.ENDO_EFF_DATE,new Date(bizObject.getEffectiveDate().getTime()));
 
         BigDecimal proRate = BigDecimal.ONE;
 
@@ -109,7 +109,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
         }
 
-        factors.put(EvalConstant.ENDO_PRO_RATE,proRate);
+        factors.put(RatingConstants.ENDO_PRO_RATE,proRate);
 
         //generate policy data pair
 
@@ -127,13 +127,13 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
             pair.getSubPairs().addAll(coveragePairs);
         }
-        //build endorsement rating model
+        //build endorsement rf model
         List<Pair> subPairs = rootPair.getSubPairs();
         for(Pair pair : subPairs){
 
             List<Pair> subSubPairs = pair.getSubPairs();
             for(Pair subPair : subSubPairs){
-                EvalNode cNode = new EvalNode();
+                RatingNode cNode = new RatingNode();
                 cNode.getFactors().putAll(root.getFactors());
 
                 BaseModel oCoverage = (BaseModel)subPair.getOriginalObj();
@@ -141,16 +141,16 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
 
                 if(oCoverage == null && nCoverage != null){
                     cNode.setRefBizObject(nCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, BigDecimal.ZERO);
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                    cNode.getFactors().put(RatingConstants.ORIGINAL_PREMIUM, BigDecimal.ZERO);
+                    cNode.getFactors().put(RatingConstants.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(RatingConstants.FEE_TYPE_SNP).getValue());
                 }else if(oCoverage != null && nCoverage != null){
                     cNode.setRefBizObject(nCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
+                    cNode.getFactors().put(RatingConstants.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(RatingConstants.FEE_TYPE_SNP).getValue());
+                    cNode.getFactors().put(RatingConstants.NEW_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(RatingConstants.FEE_TYPE_SNP).getValue());
                 }else if(oCoverage != null && nCoverage == null){
                     cNode.setRefBizObject(oCoverage);
-                    cNode.getFactors().put(EvalConstant.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(EvalConstant.FEE_TYPE_SNP).getValue());
-                    cNode.getFactors().put(EvalConstant.NEW_PREMIUM,BigDecimal.ZERO);
+                    cNode.getFactors().put(RatingConstants.ORIGINAL_PREMIUM, ((Coverage)nCoverage).getPolicyFeeByCode(RatingConstants.FEE_TYPE_SNP).getValue());
+                    cNode.getFactors().put(RatingConstants.NEW_PREMIUM,BigDecimal.ZERO);
                 }
 
                 cNode.setExpressions(ModelConverter.converFromFormulaSpecs(cFormulaSpecs));
@@ -199,7 +199,7 @@ public class EndorsementPricing implements FunctionSlice<Endorsement> {
         return feeSpecMap;
     }
 
-    private void processResult(EvalNode node,EndorsementFee endoFee,Map<String,FeeSpec> feeSpecMap){
+    private void processResult(RatingNode node, EndorsementFee endoFee, Map<String,FeeSpec> feeSpecMap){
         Map<String,Object> values = node.getValues();
         BaseModel bizObject = node.getRefBizObject();
 

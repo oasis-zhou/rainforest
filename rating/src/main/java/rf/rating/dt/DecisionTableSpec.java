@@ -1,4 +1,4 @@
-package rf.eval.dt;
+package rf.rating.dt;
 
 import com.google.common.collect.Maps;
 import lombok.Data;

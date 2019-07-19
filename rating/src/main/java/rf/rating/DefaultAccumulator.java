@@ -1,6 +1,6 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
@@ -9,12 +9,12 @@ import java.util.Map;
 public class DefaultAccumulator implements Accumulator {
 
 	@Override
-	public void accumulate(EvalNode node) {
+	public void accumulate(RatingNode node) {
 		Map<String, Object> pValues = node.getCurrentValues();
 
-		List<EvalNode> subNodes = node.getSubNodes();
+		List<RatingNode> subNodes = node.getSubNodes();
 
-		for(EvalNode subNode : subNodes){
+		for(RatingNode subNode : subNodes){
 
 			Map<String, Object> cValues = subNode.getCurrentValues();
 

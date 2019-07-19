@@ -1,4 +1,4 @@
-package rf.eval.model;
+package rf.rating.model;
 
 import com.google.common.collect.Lists;
 

@@ -1,4 +1,4 @@
-package rf.eval;
+package rf.rating;
 
 import com.google.common.collect.Maps;
 
@@ -8,22 +8,22 @@ import groovy.lang.Script;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rf.eval.model.EvalNode;
-import rf.eval.model.Expression;
+import rf.rating.model.RatingNode;
+import rf.rating.model.Expression;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class RuleEvaluator implements Evaluator{
+public class RuleCalculator implements Calculator {
 
-    private static Logger logger = LoggerFactory.getLogger(FormulaEvaluator.class);
+    private static Logger logger = LoggerFactory.getLogger(FormulaCalculator.class);
 
     private Map<String, Object> scriptCache = new ConcurrentHashMap<String, Object>();
 
     @Override
-    public Map<String,Object> eval(EvalNode node){
+    public Map<String,Object> eval(RatingNode node){
         Map<String,Object> values = Maps.newHashMap();
 
         node.getExpressions().forEach((expression) -> {

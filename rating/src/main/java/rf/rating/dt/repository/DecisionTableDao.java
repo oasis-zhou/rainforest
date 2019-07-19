@@ -1,9 +1,9 @@
-package rf.eval.dt.repository;
+package rf.rating.dt.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import rf.eval.dt.repository.pojo.TDecisionTable;
+import rf.rating.dt.repository.pojo.TDecisionTable;
 
 
 public interface DecisionTableDao extends CrudRepository<TDecisionTable, String> {

@@ -1,4 +1,4 @@
-package rf.eval.dt;
+package rf.rating.dt;
 
 
 public enum DTStatus {

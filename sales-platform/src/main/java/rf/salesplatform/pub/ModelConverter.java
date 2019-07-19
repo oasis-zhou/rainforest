@@ -1,7 +1,7 @@
 package rf.salesplatform.pub;
 
 import com.google.common.collect.Lists;
-import rf.eval.model.Expression;
+import rf.rating.model.Expression;
 import rf.product.model.FormulaSpec;
 import rf.product.model.RuleSpec;
 

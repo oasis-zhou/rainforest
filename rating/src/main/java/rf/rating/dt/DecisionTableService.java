@@ -1,4 +1,4 @@
-package rf.eval.dt;
+package rf.rating.dt;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rf.eval.dt.repository.DecisionTableDao;
-import rf.eval.dt.repository.pojo.TDecisionTable;
+import rf.rating.dt.repository.DecisionTableDao;
+import rf.rating.dt.repository.pojo.TDecisionTable;
 import rf.foundation.cache.GuavaCacheManager;
 import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;

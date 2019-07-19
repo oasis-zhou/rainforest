@@ -1,4 +1,4 @@
-package rf.eval;
+package rf.rating;
 
 import com.google.common.collect.Maps;
 import groovy.lang.Binding;
@@ -7,8 +7,8 @@ import groovy.lang.Script;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rf.eval.model.EvalNode;
-import rf.eval.model.Expression;
+import rf.rating.model.RatingNode;
+import rf.rating.model.Expression;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,28 +16,28 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class LimitEvaluator implements Evaluator {
+public class LimitCalculator implements Calculator {
 
-    private static Logger logger = LoggerFactory.getLogger(LimitEvaluator.class);
+    private static Logger logger = LoggerFactory.getLogger(LimitCalculator.class);
 
     private Map<String, Object> scriptCache = new ConcurrentHashMap<String, Object>();
 
     @Override
-    public Map<String,Object> eval(EvalNode node){
+    public Map<String,Object> eval(RatingNode node){
 
         Map<String,Object> limitAmountM = Maps.newHashMap();
 
-        String pattern = (String)node.getFactors().get(EvalConstant.LIMIT_PATTERN);
+        String pattern = (String)node.getFactors().get(RatingConstants.LIMIT_PATTERN);
 
         limitAmountM = RoundingUtils.round(getValue(node.getFactors()),null);
 
-        if(EvalConstant.APO.equals(pattern)){
+        if(RatingConstants.APO.equals(pattern)){
             node.getValues().putAll(limitAmountM);
-        }else if(EvalConstant.APUPO.equals(pattern)){
+        }else if(RatingConstants.APUPO.equals(pattern)){
             node.getValues().putAll(limitAmountM);
-        }else if(EvalConstant.APUPO_MA.equals(pattern)){
+        }else if(RatingConstants.APUPO_MA.equals(pattern)){
             node.getValues().putAll(limitAmountM);
-        }else if(EvalConstant.APUPO_MN.equals(pattern)){
+        }else if(RatingConstants.APUPO_MN.equals(pattern)){
             node.getValues().putAll(limitAmountM);
 
         }
@@ -54,45 +54,45 @@ public class LimitEvaluator implements Evaluator {
     public Map getValue(Map<String, Object> factorTable){
 
         Map<String,BigDecimal> result = Maps.newHashMap();
-        String pattern = (String)factorTable.get(EvalConstant.LIMIT_PATTERN);
+        String pattern = (String)factorTable.get(RatingConstants.LIMIT_PATTERN);
 
-        String limitKey = EvalConstant.AOA_LIMIT_AMOUNT;
-        String limitType = (String)factorTable.get(EvalConstant.LIMIT_INDEMNITY_TYPE);
-        if(limitType != null && !limitType.equals(EvalConstant.INDEMNITY_AOA)){
-            limitKey = EvalConstant.AOP_LIMIT_AMOUNT;
+        String limitKey = RatingConstants.AOA_LIMIT_AMOUNT;
+        String limitType = (String)factorTable.get(RatingConstants.LIMIT_INDEMNITY_TYPE);
+        if(limitType != null && !limitType.equals(RatingConstants.INDEMNITY_AOA)){
+            limitKey = RatingConstants.AOP_LIMIT_AMOUNT;
         }
         BigDecimal amount = BigDecimal.ZERO;
 
-        if(EvalConstant.APO.equals(pattern)){
-            BigDecimal limitAmount = (BigDecimal)factorTable.get(EvalConstant.LIMIT_AMOUNT);
+        if(RatingConstants.APO.equals(pattern)){
+            BigDecimal limitAmount = (BigDecimal)factorTable.get(RatingConstants.LIMIT_AMOUNT);
             if(limitAmount != null){
                 amount = limitAmount;
                 result.put(limitKey, amount);
             }
-        }else if(EvalConstant.APUPO.equals(pattern)){
-            BigDecimal unitAmount = (BigDecimal)factorTable.get(EvalConstant.LIMIT_UNIT_AMOUNT);
-            BigDecimal numberOfUnit = (BigDecimal)factorTable.get(EvalConstant.LIMIT_NUMBER_OF_UNIT);
-            String unitType = (String)factorTable.get(EvalConstant.LIMIT_UNIT_TYPE);
+        }else if(RatingConstants.APUPO.equals(pattern)){
+            BigDecimal unitAmount = (BigDecimal)factorTable.get(RatingConstants.LIMIT_UNIT_AMOUNT);
+            BigDecimal numberOfUnit = (BigDecimal)factorTable.get(RatingConstants.LIMIT_NUMBER_OF_UNIT);
+            String unitType = (String)factorTable.get(RatingConstants.LIMIT_UNIT_TYPE);
 
             amount = unitAmount;
             result.put(limitKey, amount);
 
-        }else if(EvalConstant.APUPO_MA.equals(pattern)){
+        }else if(RatingConstants.APUPO_MA.equals(pattern)){
 
-            BigDecimal maxUnitAmount = (BigDecimal)factorTable.get(EvalConstant.LIMIT_MAX_UNIT_AMOUNT);
+            BigDecimal maxUnitAmount = (BigDecimal)factorTable.get(RatingConstants.LIMIT_MAX_UNIT_AMOUNT);
             if(maxUnitAmount != null){
                 amount = maxUnitAmount;
                 result.put(limitKey, amount);
             }
-        }else if(EvalConstant.APUPO_MN.equals(pattern)){
-            BigDecimal unitAmount = (BigDecimal)factorTable.get(EvalConstant.LIMIT_UNIT_AMOUNT);
-            BigDecimal numberOfUnit = (BigDecimal)factorTable.get(EvalConstant.LIMIT_NUMBER_OF_UNIT);
-            BigDecimal maxNumberOfUnit = (BigDecimal)factorTable.get(EvalConstant.LIMIT_MAX_NUMBER_OF_UNIT);
+        }else if(RatingConstants.APUPO_MN.equals(pattern)){
+            BigDecimal unitAmount = (BigDecimal)factorTable.get(RatingConstants.LIMIT_UNIT_AMOUNT);
+            BigDecimal numberOfUnit = (BigDecimal)factorTable.get(RatingConstants.LIMIT_NUMBER_OF_UNIT);
+            BigDecimal maxNumberOfUnit = (BigDecimal)factorTable.get(RatingConstants.LIMIT_MAX_NUMBER_OF_UNIT);
             amount = ((BigDecimal)unitAmount).multiply((BigDecimal) maxNumberOfUnit)
                     .divide((BigDecimal) numberOfUnit,50, BigDecimal.ROUND_HALF_UP);
             result.put(limitKey, amount);
-        }else if(EvalConstant.FORMULA.equals(pattern)){
-            Expression expression = (Expression)factorTable.get(EvalConstant.LIMIT_FORMULA);
+        }else if(RatingConstants.FORMULA.equals(pattern)){
+            Expression expression = (Expression)factorTable.get(RatingConstants.LIMIT_FORMULA);
             Map r = evalWithLimit(expression,factorTable);
             BigDecimal limit = (BigDecimal)r.get("LIMIT");
             result.put(limitKey, limit);

@@ -1,29 +1,29 @@
-package rf.eval;
+package rf.rating;
 
 
 import org.springframework.stereotype.Service;
-import rf.eval.model.enums.FormulaPurpose;
+import rf.rating.model.enums.FormulaPurpose;
 
 @Service
-public class EvalEngine {
+public class RatingEngine {
 
-    public EvalJob newbizPremium(){
+    public RatingJob newbizPremium(){
 
-        EvalJob job = new EvalJob();
+        RatingJob job = new RatingJob();
 
         AccumulationStrategy limitStrategy = new AccumulationStrategy(new LimitAccumulator());
 
         AccumulationStrategy premiumStrategy = new AccumulationStrategy(new DefaultAccumulator());
 
-        EvalStage limitStage = new EvalStage(limitStrategy,new LimitEvaluator(), FormulaPurpose.LIMIT.name());
+        RatingStage limitStage = new RatingStage(limitStrategy,new LimitCalculator(), FormulaPurpose.LIMIT.name());
 
-        EvalStage premiumStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.PREMIUM.name());
+        RatingStage premiumStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.PREMIUM.name());
 
-        EvalStage taxfeeStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.TAX_FEE.name());
+        RatingStage taxfeeStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.TAX_FEE.name());
 
-        EvalStage commissionStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.COMMISSION.name());
+        RatingStage commissionStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.COMMISSION.name());
 
-        EvalStage appStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.APP.name());
+        RatingStage appStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.APP.name());
 
         job.addStage(limitStage)
                 .addStage(premiumStage)
@@ -34,19 +34,19 @@ public class EvalEngine {
         return job;
     }
 
-    public EvalJob endosementPremium() {
+    public RatingJob endosementPremium() {
 
-        EvalJob job = new EvalJob();
+        RatingJob job = new RatingJob();
 
         AccumulationStrategy premiumStrategy = new AccumulationStrategy(new DefaultAccumulator());
 
-        EvalStage premiumStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.PREMIUM.name());
+        RatingStage premiumStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.PREMIUM.name());
 
-        EvalStage taxfeeStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.TAX_FEE.name());
+        RatingStage taxfeeStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.TAX_FEE.name());
 
-        EvalStage commissionStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.COMMISSION.name());
+        RatingStage commissionStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.COMMISSION.name());
 
-        EvalStage appStage = new EvalStage(premiumStrategy,new FormulaEvaluator(),FormulaPurpose.APP.name());
+        RatingStage appStage = new RatingStage(premiumStrategy,new FormulaCalculator(),FormulaPurpose.APP.name());
 
         job.addStage(premiumStage)
                 .addStage(taxfeeStage)
@@ -56,12 +56,12 @@ public class EvalEngine {
         return job;
     }
 
-    public EvalJob ruleJob() {
-        EvalJob job = new EvalJob();
+    public RatingJob ruleJob() {
+        RatingJob job = new RatingJob();
 
         MergeStrategy mergeStrategy = new MergeStrategy();
 
-        EvalStage ruleStage = new EvalStage(mergeStrategy,new RuleEvaluator(),FormulaPurpose.RULE.name());
+        RatingStage ruleStage = new RatingStage(mergeStrategy,new RuleCalculator(),FormulaPurpose.RULE.name());
 
         job.addStage(ruleStage);
 

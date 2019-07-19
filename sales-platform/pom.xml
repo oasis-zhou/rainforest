@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>rainforest</groupId>
-            <artifactId>eval</artifactId>
+            <artifactId>rating</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

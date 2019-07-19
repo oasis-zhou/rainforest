@@ -1,6 +1,6 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import java.util.Map;
 public class DefaultDistributor implements Distributor {
 
 	@Override
-	public void distribute(EvalNode node){
+	public void distribute(RatingNode node){
 
 		Map<String, Object> factors = node.getFactors();
 		
-		List<EvalNode> subNodes = node.getSubNodes();
+		List<RatingNode> subNodes = node.getSubNodes();
 
 		int calCount = 0;
 		int subSize = subNodes.size();
@@ -23,13 +23,13 @@ public class DefaultDistributor implements Distributor {
 		percentage = BigDecimal.ONE.divide(new BigDecimal(subSize),50, BigDecimal.ROUND_HALF_UP);
 		
 		Map sumSubValueM = new HashMap();
-		for (EvalNode subNode : subNodes) {
+		for (RatingNode subNode : subNodes) {
 			Map<String, Object> subFactors = subNode.getFactors();
 
 			if (calCount != subSize - 1) {
 				
-				BigDecimal factorValue = (BigDecimal) factors.get(EvalConstant.DISTRIBUTION_FACTOR);
-				BigDecimal subFactorValue = (BigDecimal) subFactors.get(EvalConstant.DISTRIBUTION_FACTOR);
+				BigDecimal factorValue = (BigDecimal) factors.get(RatingConstants.DISTRIBUTION_FACTOR);
+				BigDecimal subFactorValue = (BigDecimal) subFactors.get(RatingConstants.DISTRIBUTION_FACTOR);
 				
 				if (factorValue != null && factorValue.compareTo(BigDecimal.ZERO) != 0 
 						&& subFactorValue != null && subFactorValue.compareTo(BigDecimal.ZERO) != 0) {				
@@ -39,7 +39,7 @@ public class DefaultDistributor implements Distributor {
 				Iterator itr = factors.keySet().iterator();
 				while (itr.hasNext()) {            	  
 					String valueKey = (String) itr.next();
-					if(!valueKey.equals(EvalConstant.DISTRIBUTION_FACTOR)){
+					if(!valueKey.equals(RatingConstants.DISTRIBUTION_FACTOR)){
 						BigDecimal distributionValue = (BigDecimal) factors.get(valueKey);
 
 						BigDecimal subValue = distributionValue.multiply(percentage);
@@ -61,7 +61,7 @@ public class DefaultDistributor implements Distributor {
 				Iterator itr = factors.keySet().iterator();
 				while (itr.hasNext()) {
 					String valueKey = (String) itr.next();
-					if(!valueKey.equals(EvalConstant.DISTRIBUTION_FACTOR)){
+					if(!valueKey.equals(RatingConstants.DISTRIBUTION_FACTOR)){
 						BigDecimal distributionValue = (BigDecimal) factors.get(valueKey);
 						BigDecimal sumSubValue = (BigDecimal) sumSubValueM.get(valueKey);
 						if(sumSubValue == null)

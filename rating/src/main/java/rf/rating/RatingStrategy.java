@@ -1,8 +1,8 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 
-public interface EvalStrategy {
+public interface RatingStrategy {
 
-	public void execute(EvalNode node);
+	public void execute(RatingNode node);
 }

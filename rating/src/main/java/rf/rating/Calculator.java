@@ -1,10 +1,10 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.util.Map;
 
 
-public interface Evaluator {
+public interface Calculator {
 
-    public Map<String,Object> eval(EvalNode node);
+    public Map<String,Object> eval(RatingNode node);
 }

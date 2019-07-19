@@ -1,4 +1,4 @@
-package rf.eval;
+package rf.rating;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

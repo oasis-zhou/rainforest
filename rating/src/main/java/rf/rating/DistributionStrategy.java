@@ -1,12 +1,12 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 
 
-public class DistributionStrategy implements EvalStrategy {
+public class DistributionStrategy implements RatingStrategy {
 
 	private Distributor distributor;
 
@@ -15,21 +15,21 @@ public class DistributionStrategy implements EvalStrategy {
 	}
 	
 	@Override
-	public void execute(EvalNode node) {
+	public void execute(RatingNode node) {
 		
 		Map<String, Object> factors = node.getFactors();
 		
 		Iterator i = factors.keySet().iterator();
 		while (i.hasNext()) {            	  
 			String valueKey = (String) i.next();
-			if(!valueKey.equals(EvalConstant.DISTRIBUTION_FACTOR)){
+			if(!valueKey.equals(RatingConstants.DISTRIBUTION_FACTOR)){
 				BigDecimal distributionValue = (BigDecimal) factors.get(valueKey);
 				node.getValues().put(valueKey, distributionValue);
 			}
 		}
 	}
 	
-	private void distribute(EvalNode node){
+	private void distribute(RatingNode node){
 		if(node.getSubNodes().size() > 0) {
 			distributor.distribute(node);
 			node.getSubNodes().forEach((subNode) -> distribute(subNode));

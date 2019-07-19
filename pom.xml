@@ -20,9 +20,9 @@
         <module>customer</module>
         <module>sales-platform</module>
         <module>business-operation-platform</module>
-        <module>eval</module>
         <module>collaboration-horizon</module>
         <module>sales-horizon</module>
+        <module>rating</module>
     </modules>
 
     <name>rf</name>
@@ -51,6 +51,7 @@
         <jodatime.version>2.9.4</jodatime.version>
         <mysql.connector.version>8.0.16</mysql.connector.version>
         <ipfs.version>v1.2.3</ipfs.version>
+        <web3j.version>4.2.0</web3j.version>
     </properties>
 
     <repositories>
@@ -122,7 +123,6 @@
             <artifactId>jedis</artifactId>
             <version>${jedis.version}</version>
         </dependency>
-
         <!--spring集成redis所需common-pool2-->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -133,13 +133,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.3</version>
         </dependency>
-
         <!-- RESTful APIs swagger2 -->
         <dependency>
             <groupId>io.springfox</groupId>
@@ -183,13 +181,11 @@
             <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
@@ -220,13 +216,11 @@
             <artifactId>poi-ooxml-schemas</artifactId>
             <version>${poi.version}</version>
         </dependency>
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
         </dependency>
-
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
@@ -237,13 +231,16 @@
             <artifactId>java-ipfs-api</artifactId>
             <version>${ipfs.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>${web3j.version}</version>
+        </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.4</version>
         </dependency>
-
     </dependencies>
     </dependencyManagement>
 

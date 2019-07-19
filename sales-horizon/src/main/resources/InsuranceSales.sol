@@ -59,11 +59,16 @@ contract InsuranceSales is Ownable {
     using String for string;
 
     mapping(string => string) _products;
+
     mapping(string => string) _policies;
     mapping(string => address) _policyToIssuer;
 
+    mapping(string => string) _endorsements;
+    mapping(string => address) _endorsementToIssuer;
+
     mapping(string => string) _noticeOfLosses;
     mapping(string => address) _noticeToApplier;
+
     mapping(string => string) _claims;
     mapping(string => string[]) _policyToClaims;
 
@@ -71,6 +76,7 @@ contract InsuranceSales is Ownable {
 
     event ReleaseProduct(address indexed owner, string indexed productCode);
     event IssuePolicy(address indexed owner, address indexed issuer, string indexed policyNumber);
+    event IssueEndorsement(address indexed owner, address indexed issuer, string indexed endorsementNumber);
     event ApplyNoticeOfLoss(address indexed owner, address indexed applier, string indexed noticeNumber,string policyNumber);
     event ApproveSalesAgreement(address indexed owner, address indexed approver, string indexed productCode);
     event SyncClaim(address indexed owner, string indexed policyNumber,string indexed claimNumber);
@@ -93,8 +99,7 @@ contract InsuranceSales is Ownable {
     }
 
     function approveAgreement(address channel, string memory productCode) public onlyOwner {
-        string[] storage products = _salesAgreements[channel];
-        products.push(productCode);
+        _salesAgreements[channel].push(productCode);
 
         emit ApproveSalesAgreement(channel,_owner,productCode);
     }
@@ -133,7 +138,31 @@ contract InsuranceSales is Ownable {
         policy = _policies[policyNumber];
     }
 
+    function issueEndorsement(string memory endorsementNumber, string memory policyNumber, string memory endorsement) public {
+        bool isOwner = checkPolicyOwner(msg.sender, policyNumber);
+        require(isOwner,"Caller are not the policy owner!");
+
+        _endorsements[endorsementNumber] = endorsement;
+        _endorsementToIssuer[endorsementNumber] = msg.sender;
+
+        emit IssueEndorsement(_owner,msg.sender,endorsementNumber);
+    }
+
+    function findEndorsement(string memory endorsementNumber) public view returns (string memory endosement) {
+        bool isOwner = false;
+        address endosementOwner = _endorsementToIssuer[endorsementNumber];
+        if(msg.sender == endosementOwner || msg.sender == _owner) {
+            isOwner = true;
+        }
+        require(isOwner,"Caller are not the endorsement owner!");
+
+        endosement = _endorsements[endorsementNumber];
+    }
+
     function applyNoticeOfLoss(string memory noticeNumber, string memory policyNumber, string memory noticeOfLoss) public {
+        bool isOwner = checkPolicyOwner(msg.sender, policyNumber);
+        require(isOwner,"Caller are not the policy owner!");
+
         string storage policy = _policies[policyNumber];
         bytes memory policyByte = bytes(policy);
         if(policyByte.length > 0) {
@@ -162,8 +191,7 @@ contract InsuranceSales is Ownable {
             _claims[claimNumber] = claim;
         } else {
             _claims[claimNumber] = claim;
-            string[] storage policyClaims = _policyToClaims[policyNumber];
-            policyClaims.push(claimNumber);
+            _policyToClaims[policyNumber].push(claimNumber);
         }
 
         emit SyncClaim(_owner,policyNumber,claimNumber);
@@ -209,6 +237,16 @@ contract InsuranceSales is Ownable {
 
     }
 
+    function checkPolicyOwner(address owner, string memory policyNumber) internal view returns (bool) {
+        bool isOwner = false;
+        address policyOwner = _policyToIssuer[policyNumber];
+        if(owner == policyOwner || owner == _owner) {
+            isOwner = true;
+        }
+
+        return isOwner;
+    }
+
     function checkSalesAuth(address channel, string memory productCode) internal view returns (bool) {
         bool salesAuth = false;
         string[] storage agreements = _salesAgreements[channel];
@@ -220,7 +258,6 @@ contract InsuranceSales is Ownable {
 
         return salesAuth;
     }
-    
 }
 
 
@@ -229,7 +266,7 @@ library String {
     function append(string memory self, string memory str) internal pure returns (string memory) {
         bytes memory selfByte = bytes(self);
         bytes memory strByte = bytes(str);
-        
+
         string memory newStr = new string(selfByte.length + strByte.length);
         bytes memory newStrByte = bytes(newStr);
         uint n = 0;
@@ -239,7 +276,7 @@ library String {
         for (uint i = 0; i < strByte.length; i++) {
             newStrByte[n++] = strByte[i];
         }
-        
+
         return string(newStrByte);
     }
 

@@ -1,8 +1,8 @@
 package rf.foundation.utils;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
+import java.util.Base64;
+import java.util.Base64.Encoder;
+import java.util.Base64.Decoder;
 import javax.crypto.Cipher;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -203,11 +203,13 @@ public class RSAUtils {
     }
 
     public static byte[] decryptBASE64(String data) throws Exception{
-        return new BASE64Decoder().decodeBuffer(data);
+        Decoder decoder = Base64.getDecoder();
+        return decoder.decode(data);
     }
 
     public static String encryptBASE64(byte[] data) {
-        return new BASE64Encoder().encode(data);
+        Encoder encoder = Base64.getEncoder();
+        return encoder.encodeToString(data);
     }
 
 

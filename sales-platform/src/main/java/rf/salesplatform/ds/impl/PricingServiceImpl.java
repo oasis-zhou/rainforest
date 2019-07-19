@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rf.eval.EvalConstant;
-import rf.eval.EvalEngine;
-import rf.eval.EvalJob;
-import rf.eval.model.EvalNode;
-import rf.eval.model.Expression;
+import rf.rating.RatingConstants;
+import rf.rating.RatingEngine;
+import rf.rating.RatingJob;
+import rf.rating.model.RatingNode;
+import rf.rating.model.Expression;
 import rf.foundation.model.BaseModel;
 import rf.foundation.utils.ObjFieldUtil;
 import rf.policyadmin.model.*;
@@ -36,15 +36,15 @@ public class PricingServiceImpl implements PricingService {
     @Autowired
     private ProductService productService;
     @Autowired
-    private EvalEngine evalEngine;
+    private RatingEngine ratingEngine;
 
     @Override
     public void price(Policy policy){
         ProductSpec product = productService.findProduct(policy.getProductCode());
         Map<String, FeeSpec> feeSpecMap = getFeeSpecs(product);
 
-        EvalNode node = buildEvalNode(policy);
-        EvalJob newbizPremiumJob = evalEngine.newbizPremium();
+        RatingNode node = buildEvalNode(policy);
+        RatingJob newbizPremiumJob = ratingEngine.newbizPremium();
         newbizPremiumJob.process(node);
         processResult(node,feeSpecMap);
 
@@ -53,8 +53,8 @@ public class PricingServiceImpl implements PricingService {
         });
     }
 
-    private EvalNode buildEvalNode(Policy policy){
-        EvalNode root = new EvalNode();
+    private RatingNode buildEvalNode(Policy policy){
+        RatingNode root = new RatingNode();
         root.setRefBizObject(policy);
         root.getFactors().putAll(ObjFieldUtil.getFieldValues(policy));
         root.getFactors().putAll(policy.getDynamicFields());
@@ -74,7 +74,7 @@ public class PricingServiceImpl implements PricingService {
             List<Coverage> coverageList = subject.getAllSubComponentsByType(Coverage.class);
 
             for(Coverage coverage : coverageList){
-                EvalNode subNode = new EvalNode();
+                RatingNode subNode = new RatingNode();
                 subNode.setRefBizObject(coverage);
                 subNode.getFactors().putAll(root.getFactors());
                 subNode.getFactors().putAll(ObjFieldUtil.getFieldValues(subject));
@@ -164,7 +164,7 @@ public class PricingServiceImpl implements PricingService {
         return feeSpecMap;
     }
 
-    private void processResult(EvalNode node,Map<String,FeeSpec> feeSpecMap){
+    private void processResult(RatingNode node, Map<String,FeeSpec> feeSpecMap){
         Map<String,Object> values = node.getValues();
         BaseModel bizObject = node.getRefBizObject();
 
@@ -189,12 +189,12 @@ public class PricingServiceImpl implements PricingService {
         });
 
         if(bizObject instanceof Policy){
-            ((Policy)bizObject).setAOAAmount((BigDecimal)values.get(EvalConstant.AOA_LIMIT_AMOUNT));
-            ((Policy)bizObject).setAOPAmount((BigDecimal)values.get(EvalConstant.AOP_LIMIT_AMOUNT));
+            ((Policy)bizObject).setAOAAmount((BigDecimal)values.get(RatingConstants.AOA_LIMIT_AMOUNT));
+            ((Policy)bizObject).setAOPAmount((BigDecimal)values.get(RatingConstants.AOP_LIMIT_AMOUNT));
         }
         if(bizObject instanceof Coverage){
-            ((Coverage)bizObject).setAOAAmount((BigDecimal)values.get(EvalConstant.AOA_LIMIT_AMOUNT));
-            ((Coverage)bizObject).setAOPAmount((BigDecimal) values.get(EvalConstant.AOP_LIMIT_AMOUNT));
+            ((Coverage)bizObject).setAOAAmount((BigDecimal)values.get(RatingConstants.AOA_LIMIT_AMOUNT));
+            ((Coverage)bizObject).setAOPAmount((BigDecimal) values.get(RatingConstants.AOP_LIMIT_AMOUNT));
         }
 
     }

@@ -1,4 +1,4 @@
-package rf.eval.dt;
+package rf.rating.dt;
 
 import com.google.common.collect.Lists;
 import org.joda.time.DateTime;

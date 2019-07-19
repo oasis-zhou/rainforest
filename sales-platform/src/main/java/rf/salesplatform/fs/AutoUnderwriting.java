@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rf.eval.EvalEngine;
-import rf.eval.EvalJob;
-import rf.eval.model.EvalNode;
-import rf.eval.model.Expression;
+import rf.rating.RatingEngine;
+import rf.rating.RatingJob;
+import rf.rating.model.RatingNode;
+import rf.rating.model.Expression;
 import rf.foundation.exception.GenericException;
 import rf.foundation.pub.FunctionSlice;
 import rf.foundation.utils.ObjFieldUtil;
@@ -29,7 +29,7 @@ public class AutoUnderwriting implements FunctionSlice<Policy> {
     @Autowired
     private ProductService productService;
     @Autowired
-    private EvalEngine evalEngine;
+    private RatingEngine ratingEngine;
 
 
     @Override
@@ -41,8 +41,8 @@ public class AutoUnderwriting implements FunctionSlice<Policy> {
 
         List<Expression> expressionList = ModelConverter.convertFromRuleSpecs(getRules(product, ruleSetCode));
 
-        EvalNode node = buildEvalNode(policy, expressionList);
-        EvalJob autoUnderwritingJob = evalEngine.ruleJob();
+        RatingNode node = buildEvalNode(policy, expressionList);
+        RatingJob autoUnderwritingJob = ratingEngine.ruleJob();
         autoUnderwritingJob.process(node);
 
         Map<String,Object> result = node.getValues();
@@ -59,8 +59,8 @@ public class AutoUnderwriting implements FunctionSlice<Policy> {
 //        policy.getUnderwritingReason().putAll(result);
     }
 
-    private EvalNode buildEvalNode(Policy policy, List<Expression> expressionList){
-        EvalNode root = new EvalNode();
+    private RatingNode buildEvalNode(Policy policy, List<Expression> expressionList){
+        RatingNode root = new RatingNode();
         root.setRefBizObject(policy);
         root.getFactors().putAll(ObjFieldUtil.getFieldValues(policy));
         root.getFactors().putAll(policy.getDynamicFields());
@@ -68,7 +68,7 @@ public class AutoUnderwriting implements FunctionSlice<Policy> {
         List<InsuredObject> subjectList = policy.getSubComponentsByType(InsuredObject.class);
         for(InsuredObject subject : subjectList){
 
-            EvalNode subNode = new EvalNode();
+            RatingNode subNode = new RatingNode();
             subNode.setRefBizObject(subject);
             subNode.getFactors().putAll(root.getFactors());
             subNode.getFactors().putAll(ObjFieldUtil.getFieldValues(subject));

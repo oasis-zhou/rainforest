@@ -1,8 +1,8 @@
 package rf.foundation.utils;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
+import java.util.Base64;
+import java.util.Base64.Encoder;
+import java.util.Base64.Decoder;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -42,7 +42,8 @@ public class AESUtils {
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         byte[] result = cipher.doFinal(byteContent);
         //base64处理
-        return new BASE64Encoder().encode(result);
+        Encoder encoder = Base64.getEncoder();
+        return encoder.encodeToString(result);
     }
 
     /**
@@ -53,7 +54,8 @@ public class AESUtils {
      * @throws Exception
      */
     public static String decrypt(String data, String key) throws Exception {
-        byte[] buf = new BASE64Decoder().decodeBuffer(data); //base64处理
+        Decoder decoder = Base64.getDecoder();
+        byte[] buf = decoder.decode(data); //base64处理
 
         //构造秘钥生成器
         KeyGenerator kgen = KeyGenerator.getInstance("AES");

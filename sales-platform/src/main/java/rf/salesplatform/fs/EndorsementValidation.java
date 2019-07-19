@@ -2,10 +2,10 @@ package rf.salesplatform.fs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rf.eval.EvalEngine;
-import rf.eval.EvalJob;
-import rf.eval.model.EvalNode;
-import rf.eval.model.Expression;
+import rf.rating.RatingEngine;
+import rf.rating.RatingJob;
+import rf.rating.model.RatingNode;
+import rf.rating.model.Expression;
 import rf.foundation.exception.GenericException;
 import rf.foundation.pub.FunctionSlice;
 import rf.foundation.utils.ObjFieldUtil;
@@ -36,7 +36,7 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
     @Autowired
     private EndorsementService endorsementService;
     @Autowired
-    private EvalEngine evalEngine;
+    private RatingEngine ratingEngine;
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
@@ -70,8 +70,8 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
 
         List<Expression> expressionList = ModelConverter.convertFromRuleSpecs(ruleSpecs);
 
-        EvalNode node = buildEvalNode(endorsement,policy, expressionList);
-        EvalJob endoValidationJob = evalEngine.ruleJob();
+        RatingNode node = buildEvalNode(endorsement,policy, expressionList);
+        RatingJob endoValidationJob = ratingEngine.ruleJob();
         endoValidationJob.process(node);
 
         Map<String,Object> result = node.getValues();
@@ -80,8 +80,8 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
             throw new GenericException(result.toString());
     }
 
-    private EvalNode buildEvalNode(Endorsement endorsement,Policy policy, List<Expression> expressionList){
-        EvalNode root = new EvalNode();
+    private RatingNode buildEvalNode(Endorsement endorsement, Policy policy, List<Expression> expressionList){
+        RatingNode root = new RatingNode();
         root.setRefBizObject(endorsement);
         root.getFactors().putAll(ObjFieldUtil.getFieldValues(policy));
         root.getFactors().putAll(policy.getDynamicFields());

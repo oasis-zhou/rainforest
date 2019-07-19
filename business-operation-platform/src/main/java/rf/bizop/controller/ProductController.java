@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import rf.bizop.pub.Constants;
-import rf.eval.dt.DecisionTableService;
-import rf.eval.dt.DecisionTableSpec;
-import rf.eval.dt.ImportDecisionTableService;
+import rf.rating.dt.DecisionTableService;
+import rf.rating.dt.DecisionTableSpec;
+import rf.rating.dt.ImportDecisionTableService;
 import rf.foundation.exception.GenericException;
 import rf.product.ds.ProductService;
 import rf.product.model.ProductSpec;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * @ClassName ProductController

@@ -1,20 +1,20 @@
-package rf.eval;
+package rf.rating;
 
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.util.List;
 import java.util.Map;
 
 
-public class MergeStrategy implements EvalStrategy {
+public class MergeStrategy implements RatingStrategy {
 
-    public void execute(EvalNode node){
+    public void execute(RatingNode node){
         mergeAll(node);
     }
 
-    private void mergeAll(EvalNode node){
-        Evaluator evaluator = node.getCurrentEvaluator();
-        if(evaluator != null)
-            evaluator.eval(node);
+    private void mergeAll(RatingNode node){
+        Calculator calculator = node.getCurrentCalculator();
+        if(calculator != null)
+            calculator.eval(node);
         if(node.getSubNodes().size() > 0) {
             node.getSubNodes().forEach(subNode -> mergeAll(subNode));
             merge(node);
@@ -22,12 +22,12 @@ public class MergeStrategy implements EvalStrategy {
 
     }
 
-    private void merge(EvalNode node){
+    private void merge(RatingNode node){
         Map<String, Object> pValues = node.getValues();
 
-        List<EvalNode> subNodes = node.getSubNodes();
+        List<RatingNode> subNodes = node.getSubNodes();
 
-        for(EvalNode subNode : subNodes){
+        for(RatingNode subNode : subNodes){
             Map<String, Object> cValues = subNode.getValues();
             pValues.putAll(cValues);
         }

@@ -1,22 +1,22 @@
-package rf.eval;
+package rf.rating;
 
 import com.google.common.collect.Lists;
-import rf.eval.model.EvalNode;
+import rf.rating.model.RatingNode;
 import java.util.List;
 
 
-public class EvalJob {
-    private List<EvalStage> stages = Lists.newArrayList();
+public class RatingJob {
+    private List<RatingStage> stages = Lists.newArrayList();
 
-    public void process(EvalNode node){
+    public void process(RatingNode node){
         if(stages != null && stages.size() > 0){
-            for(EvalStage stage : stages){
+            for(RatingStage stage : stages){
                 stage.doEval(node);
             }
         }
     }
 
-    public EvalJob addStage(EvalStage stage) {
+    public RatingJob addStage(RatingStage stage) {
         this.stages.add(stage);
         return this;
     }

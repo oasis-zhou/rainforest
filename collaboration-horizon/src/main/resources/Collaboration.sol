@@ -67,13 +67,17 @@ contract Collaboration is Ownable {
     mapping(string => string) private _orgPubKey;
     mapping(string => address) private _orgAddress;
 
-    event SendTransaction(address indexed sender, address indexed participant, string indexed transactionNumber);
-    event SendMessage(address indexed sender, address indexed owner, string indexed msgID);
+    event SendTransaction(address indexed owner, address indexed sender, string indexed transactionNumber);
+    event SendMessage(address indexed owner, address indexed sender, string indexed msgID);
     event WithdrawPendingMessage(address indexed owner, string indexed msgID);
 
     function register(string memory orgCode, string memory pubKey, address orgAddress) public onlyOwner {
         _orgPubKey[orgCode] = pubKey;
         _orgAddress[orgCode] = orgAddress;
+    }
+
+    function findOrgPubKey(string memory orgCode) public view returns (string memory pubKey) {
+        pubKey = _orgPubKey[orgCode];
     }
 
     function sendTransaction(string memory transactionNumber, string memory transaction, string memory participant) public {
@@ -89,13 +93,13 @@ contract Collaboration is Ownable {
             }
             require(isParticipant,"The transaction is existed, Caller are not the participant!");
         }
-       
+
         _transactions[transactionNumber] = transaction;
         address[] storage participants = _ownershipTransactions[transactionNumber];
         participants.push(msg.sender);
         participants.push(_orgAddress[participant]);
 
-        emit SendTransaction(msg.sender, _orgAddress[participant], transactionNumber);
+        emit SendTransaction(_orgAddress[participant], msg.sender, transactionNumber);
     }
 
     function findTransaction(string memory transactionNumber) public view returns (string memory transaction) {
@@ -114,10 +118,9 @@ contract Collaboration is Ownable {
     function sendMessage(string memory msgID, string memory message, string memory owner) public {
         _messages[msgID] = message;
         _messageToOwner[msgID] = _orgAddress[owner];
-        string[] storage msgs = _ownershipPendingMessages[_orgAddress[owner]];
-        msgs.push(msgID);
+        _ownershipPendingMessages[_orgAddress[owner]].push(msgID);
 
-        emit SendMessage(msg.sender, _orgAddress[owner], msgID);
+        emit SendMessage(_orgAddress[owner], msg.sender, msgID);
     }
 
     function findMessage(string memory msgID) public view returns (string memory message) {
@@ -129,11 +132,13 @@ contract Collaboration is Ownable {
         string[] memory msgs = _ownershipPendingMessages[msg.sender];
         msgIDs = "";
         for (uint i = 0; i < msgs.length; i++) {
-            if( i == 0) {
-                msgIDs = msgs[i];
-            } else {
-                msgIDs = msgIDs.append(",");
-                msgIDs = msgIDs.append(msgs[i]);
+            if(bytes(msgs[i]).length > 0) {
+                if( i == 0) {
+                    msgIDs = msgs[i];
+                } else {
+                    msgIDs = msgIDs.append(",");
+                    msgIDs = msgIDs.append(msgs[i]);
+                }
             }
         }
     }
@@ -145,11 +150,13 @@ contract Collaboration is Ownable {
         string[] storage msgs = _ownershipPendingMessages[msg.sender];
         for (uint i = 0; i < msgs.length; i++) {
             if (keccak256(bytes(msgs[i])) == keccak256(bytes(msgID))) {
+                // 删除待处理消息，同时释放空间，可能存在和并发写入的冲突问题
                 for (uint j = i; j < msgs.length-1; j++){
                     msgs[j] = msgs[j+1];
                 }
                 delete msgs[msgs.length - 1];
                 msgs.length--;
+                // delete msgs[i];
             }
         }
 
@@ -163,7 +170,7 @@ library String {
     function append(string memory self, string memory str) internal pure returns (string memory) {
         bytes memory selfByte = bytes(self);
         bytes memory strByte = bytes(str);
-        
+
         string memory newStr = new string(selfByte.length + strByte.length);
         bytes memory newStrByte = bytes(newStr);
         uint n = 0;
@@ -173,9 +180,8 @@ library String {
         for (uint i = 0; i < strByte.length; i++) {
             newStrByte[n++] = strByte[i];
         }
-        
+
         return string(newStrByte);
     }
 
 }
-    

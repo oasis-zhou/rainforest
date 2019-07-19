@@ -1,27 +1,27 @@
-package rf.eval.model;
+package rf.rating.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import rf.eval.Evaluator;
 import rf.foundation.model.BaseModel;
+import rf.rating.Calculator;
 
 import java.util.List;
 import java.util.Map;
 
 
-public class EvalNode {
+public class RatingNode {
     private Map<String,Object> factors = Maps.newHashMap();
     private Map<String,Object> values = Maps.newHashMap();
     private List<Expression> expressions = Lists.newArrayList();
-    private List<EvalNode> subNodes = Lists.newArrayList();
-    private Evaluator currentEvaluator;
+    private List<RatingNode> subNodes = Lists.newArrayList();
+    private Calculator currentCalculator;
     private String currentPurpose;
     private Map<String,Object> currentValues = Maps.newHashMap();
     private BaseModel refBizObject;
 
-    public List<EvalNode> getAllSubNodes() {
-        List<EvalNode> subComponents = Lists.newArrayList();
-        for (EvalNode sub : this.subNodes) {
+    public List<RatingNode> getAllSubNodes() {
+        List<RatingNode> subComponents = Lists.newArrayList();
+        for (RatingNode sub : this.subNodes) {
                 subComponents.add(sub);
             subComponents.addAll(sub.getAllSubNodes());
         }
@@ -53,20 +53,20 @@ public class EvalNode {
         this.expressions = expressions;
     }
 
-    public List<EvalNode> getSubNodes() {
+    public List<RatingNode> getSubNodes() {
         return subNodes;
     }
 
-    public void setSubNodes(List<EvalNode> subNodes) {
+    public void setSubNodes(List<RatingNode> subNodes) {
         this.subNodes = subNodes;
     }
 
-    public Evaluator getCurrentEvaluator() {
-        return currentEvaluator;
+    public Calculator getCurrentCalculator() {
+        return currentCalculator;
     }
 
-    public void setCurrentEvaluator(Evaluator currentEvaluator) {
-        this.currentEvaluator = currentEvaluator;
+    public void setCurrentCalculator(Calculator currentCalculator) {
+        this.currentCalculator = currentCalculator;
     }
 
     public String getCurrentPurpose() {

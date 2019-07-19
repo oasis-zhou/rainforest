@@ -1,4 +1,4 @@
-package rf.eval.dt.repository.pojo;
+package rf.rating.dt.repository.pojo;
 
 import lombok.Data;
 import rf.foundation.model.BaseEntity;
