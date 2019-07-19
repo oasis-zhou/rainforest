@@ -59,35 +59,36 @@ contract InsuranceSales is Ownable {
     using String for string;
 
     mapping(string => string) _products;
+    mapping(string => address) _productToOwner;
 
     mapping(string => string) _policies;
-    mapping(string => address) _policyToIssuer;
+    mapping(string => address) _policyToOwner;
+    mapping(address => string[]) _pendingPolicies;
 
     mapping(string => string) _endorsements;
-    mapping(string => address) _endorsementToIssuer;
-
-    mapping(string => string) _noticeOfLosses;
-    mapping(string => address) _noticeToApplier;
-
-    mapping(string => string) _claims;
-    mapping(string => string[]) _policyToClaims;
+    mapping(string => address) _endorsementToOwner;
+    mapping(address => string[]) _pendingEndorsements;
 
     mapping(address => string[]) _salesAgreements;
 
     event ReleaseProduct(address indexed owner, string indexed productCode);
     event IssuePolicy(address indexed owner, address indexed issuer, string indexed policyNumber);
+    event WithdrawPendingPolicy(address indexed owner, string indexed policyNumber);
     event IssueEndorsement(address indexed owner, address indexed issuer, string indexed endorsementNumber);
-    event ApplyNoticeOfLoss(address indexed owner, address indexed applier, string indexed noticeNumber,string policyNumber);
+    event WithdrawPendingEndorsement(address indexed owner, string indexed endorsementNumber);
     event ApproveSalesAgreement(address indexed owner, address indexed approver, string indexed productCode);
-    event SyncClaim(address indexed owner, string indexed policyNumber,string indexed claimNumber);
+    
 
-    function releaseProduct(string memory productCode, string memory productSpec) public onlyOwner {
+    function releaseProduct(address owner,string memory productCode, string memory productSpec) public onlyOwner {
         _products[productCode] = productSpec;
+        _productToOwner[productCode] = owner;
 
-        emit ReleaseProduct(_owner,productCode);
+        emit ReleaseProduct(owner,productCode);
     }
 
     function findProduct(string memory productCode) public view onlyOwner returns (string memory productSpec) {
+        require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
+
         productSpec = _products[productCode];
     }
 
@@ -98,13 +99,17 @@ contract InsuranceSales is Ownable {
         productSpec = _products[productCode];
     }
 
-    function approveAgreement(address channel, string memory productCode) public onlyOwner {
+    function approveAgreement(address channel, string memory productCode) public {
+        require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
+
         _salesAgreements[channel].push(productCode);
 
         emit ApproveSalesAgreement(channel,_owner,productCode);
     }
 
-    function withdrawAgreement(address channel, string memory productCode) public onlyOwner {
+    function withdrawAgreement(address channel, string memory productCode) public {
+        require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
+
         string[] storage products = _salesAgreements[channel];
         for (uint i = 0; i < products.length; i++) {
             if (keccak256(bytes(products[i])) == keccak256(bytes(productCode))) {
@@ -121,37 +126,70 @@ contract InsuranceSales is Ownable {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
         require(salesAuth,"Caller don't have the sales agreement for this product!");
 
+        address owner = _productToOwner[productCode];
         _policies[policyNumber] = policy;
-        _policyToIssuer[policyNumber] = msg.sender;
+        _policyToOwner[policyNumber] = owner;
+        _pendingPolicies[owner].push(policyNumber);
 
-        emit IssuePolicy(_owner,msg.sender,policyNumber);
+        emit IssuePolicy(owner,msg.sender,policyNumber);
     }
 
     function findPolicy(string memory policyNumber) public view returns (string memory policy) {
-        bool isOwner = false;
-        address policyOwner = _policyToIssuer[policyNumber];
-        if(msg.sender == policyOwner || msg.sender == _owner) {
-            isOwner = true;
-        }
-        require(isOwner,"Caller are not the policy owner!");
+        require(msg.sender == _policyToOwner[policyNumber],"Caller are not the policy owner!");
 
         policy = _policies[policyNumber];
     }
 
-    function issueEndorsement(string memory endorsementNumber, string memory policyNumber, string memory endorsement) public {
-        bool isOwner = checkPolicyOwner(msg.sender, policyNumber);
-        require(isOwner,"Caller are not the policy owner!");
+    function findPendingPolicies() public view returns (string memory policies) {
+        string[] memory policyNumbers = _pendingPolicies[msg.sender];
+        policies = "";
+        for (uint i = 0; i < policyNumbers.length; i++) {
+            if(bytes(policyNumbers[i]).length > 0) {
+                if( i == 0) {
+                    policies = policyNumbers[i];
+                } else {
+                    policies = policies.append(",");
+                    policies = policies.append(policyNumbers[i]);
+                }
+            }
+        }
+    }
 
+    function withdrawPendingPolicy(string memory policyNumber) public {
+        require(msg.sender == _policyToOwner[policyNumber],"Caller is not the policy owner!");
+
+        string[] storage policies = _pendingPolicies[msg.sender];
+        for (uint i = 0; i < policies.length; i++) {
+            if (keccak256(bytes(policies[i])) == keccak256(bytes(policyNumber))) {
+                // 删除待处理保单，同时释放空间，可能存在和并发写入的冲突问题
+                for (uint j = i; j < policies.length-1; j++){
+                    policies[j] = policies[j+1];
+                }
+                delete policies[policies.length - 1];
+                policies.length--;
+                // delete policies[i];
+            }
+        }
+
+        emit WithdrawPendingPolicy(msg.sender,policyNumber);
+    }
+
+    function issueEndorsement(string memory endorsementNumber, string memory productCode, string memory endorsement) public {
+        bool salesAuth = checkSalesAuth(msg.sender,productCode);
+        require(salesAuth,"Caller don't have the sales agreement for this product!");
+
+        address owner = _productToOwner[productCode];
         _endorsements[endorsementNumber] = endorsement;
-        _endorsementToIssuer[endorsementNumber] = msg.sender;
+        _endorsementToOwner[endorsementNumber] = owner;
+        _pendingEndorsements[owner].push(endorsementNumber);
 
-        emit IssueEndorsement(_owner,msg.sender,endorsementNumber);
+        emit IssueEndorsement(owner,msg.sender,endorsementNumber);
     }
 
     function findEndorsement(string memory endorsementNumber) public view returns (string memory endosement) {
         bool isOwner = false;
-        address endosementOwner = _endorsementToIssuer[endorsementNumber];
-        if(msg.sender == endosementOwner || msg.sender == _owner) {
+        address endosementOwner = _endorsementToOwner[endorsementNumber];
+        if(msg.sender == endosementOwner) {
             isOwner = true;
         }
         require(isOwner,"Caller are not the endorsement owner!");
@@ -159,92 +197,38 @@ contract InsuranceSales is Ownable {
         endosement = _endorsements[endorsementNumber];
     }
 
-    function applyNoticeOfLoss(string memory noticeNumber, string memory policyNumber, string memory noticeOfLoss) public {
-        bool isOwner = checkPolicyOwner(msg.sender, policyNumber);
-        require(isOwner,"Caller are not the policy owner!");
-
-        string storage policy = _policies[policyNumber];
-        bytes memory policyByte = bytes(policy);
-        if(policyByte.length > 0) {
-            _noticeOfLosses[noticeNumber] = noticeOfLoss;
-            _noticeToApplier[noticeNumber] = msg.sender;
-        }
-
-        emit ApplyNoticeOfLoss(_owner,msg.sender,noticeNumber,policyNumber);
-    }
-
-    function findNoticeOfLoss(string memory noticeNumber) public view returns (string memory noticeOfLoss) {
-         bool isOwner = false;
-        address noticeOcwner = _noticeToApplier[noticeNumber];
-        if(msg.sender == noticeOcwner || msg.sender == _owner) {
-            isOwner = true;
-        }
-        require(isOwner,"Caller are not the notice of loss owner!");
-
-        noticeOfLoss = _noticeOfLosses[noticeNumber];
-    }
-
-    function syncClaim(string memory claimNumber, string memory policyNumber, string memory claim) public onlyOwner {
-        string storage claimInfo = _claims[claimNumber];
-        bytes memory claimInfoByte = bytes(claimInfo);
-        if(claimInfoByte.length > 0) {
-            _claims[claimNumber] = claim;
-        } else {
-            _claims[claimNumber] = claim;
-            _policyToClaims[policyNumber].push(claimNumber);
-        }
-
-        emit SyncClaim(_owner,policyNumber,claimNumber);
-    }
-
-    function findClaim(string memory claimNumber, string memory policyNumber) public view returns (string memory claim) {
-        bool isMatch;
-        string[] storage policyClaims = _policyToClaims[policyNumber];
-        for(uint i = 0; i < policyClaims.length; i++) {
-            if (keccak256(bytes(policyClaims[i])) == keccak256(bytes(claimNumber))) {
-                isMatch = true;
+    function findPendingEndorsements() public view returns (string memory endorsments) {
+        string[] memory endoNumbers = _pendingEndorsements[msg.sender];
+        endorsments = "";
+        for (uint i = 0; i < endoNumbers.length; i++) {
+            if(bytes(endoNumbers[i]).length > 0) {
+                if( i == 0) {
+                    endorsments = endoNumbers[i];
+                } else {
+                    endorsments = endorsments.append(",");
+                    endorsments = endorsments.append(endoNumbers[i]);
+                }
             }
         }
-        require(isMatch, "The policy and the claim are not match!");
-        bool isOwner = false;
-        address policyOwner = _policyToIssuer[policyNumber];
-        if(msg.sender == policyOwner || msg.sender == _owner) {
-            isOwner = true;
-        }
-        require(isOwner,"Caller are not the claim owner!");
-
-        claim = _claims[claimNumber];
     }
 
-    function findClaimsByPolicy(string memory policyNumber) public view returns (string memory claims) {
-        bool isOwner = false;
-        address policyOwner = _policyToIssuer[policyNumber];
-        if(msg.sender == policyOwner || msg.sender == _owner) {
-            isOwner = true;
-        }
-        require(isOwner,"Caller are not the policy owner!");
+    function withdrawPendingEndorsement(string memory endorsementNumber) public {
+        require(msg.sender == _endorsementToOwner[endorsementNumber],"Caller is not the endorsement owner!");
 
-        claims = "";
-        string[] storage policyClaims = _policyToClaims[policyNumber];
-        for(uint i = 0; i < policyClaims.length; i++) {
-            if(i == 0) {
-                claims = policyClaims[i];
-            } else {
-                claims = claims.append(",");
-                claims = claims.append(policyClaims[i]);
+        string[] storage endorsments = _pendingEndorsements[msg.sender];
+        for (uint i = 0; i < endorsments.length; i++) {
+            if (keccak256(bytes(endorsments[i])) == keccak256(bytes(endorsementNumber))) {
+                // 删除待处理批改，同时释放空间，可能存在和并发写入的冲突问题
+                for (uint j = i; j < endorsments.length-1; j++){
+                    endorsments[j] = endorsments[j+1];
+                }
+                delete endorsments[endorsments.length - 1];
+                endorsments.length--;
+                // delete endorsments[i];
             }
         }
 
-    }
-
-    function checkPolicyOwner(address owner, string memory policyNumber) internal view returns (bool) {
-        bool isOwner = false;
-        address policyOwner = _policyToIssuer[policyNumber];
-        if(owner == policyOwner || owner == _owner) {
-            isOwner = true;
-        }
-
-        return isOwner;
+        emit WithdrawPendingEndorsement(msg.sender,endorsementNumber);
     }
 
     function checkSalesAuth(address channel, string memory productCode) internal view returns (bool) {

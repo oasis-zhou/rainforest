@@ -59,7 +59,7 @@ contract Collaboration is Ownable {
 
     mapping(string => string) private _messages;
     mapping(string => address) private _messageToOwner;
-    mapping(address => string[]) private _ownershipPendingMessages;
+    mapping(address => string[]) private _pendingMessages;
 
     mapping(string => string) private _transactions;
     mapping(string => address[]) private _ownershipTransactions;
@@ -118,7 +118,7 @@ contract Collaboration is Ownable {
     function sendMessage(string memory msgID, string memory message, string memory owner) public {
         _messages[msgID] = message;
         _messageToOwner[msgID] = _orgAddress[owner];
-        _ownershipPendingMessages[_orgAddress[owner]].push(msgID);
+        _pendingMessages[_orgAddress[owner]].push(msgID);
 
         emit SendMessage(_orgAddress[owner], msg.sender, msgID);
     }
@@ -129,7 +129,7 @@ contract Collaboration is Ownable {
     }
 
     function findPendingMessagesByOwner() public view returns (string memory msgIDs) {
-        string[] memory msgs = _ownershipPendingMessages[msg.sender];
+        string[] memory msgs = _pendingMessages[msg.sender];
         msgIDs = "";
         for (uint i = 0; i < msgs.length; i++) {
             if(bytes(msgs[i]).length > 0) {
@@ -147,7 +147,7 @@ contract Collaboration is Ownable {
 
         require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
 
-        string[] storage msgs = _ownershipPendingMessages[msg.sender];
+        string[] storage msgs = _pendingMessages[msg.sender];
         for (uint i = 0; i < msgs.length; i++) {
             if (keccak256(bytes(msgs[i])) == keccak256(bytes(msgID))) {
                 // 删除待处理消息，同时释放空间，可能存在和并发写入的冲突问题
