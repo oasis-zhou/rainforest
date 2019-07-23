@@ -58,18 +58,20 @@ contract Ownable {
 contract InsuranceSales is Ownable {
     using String for string;
 
-    mapping(string => string) _products;
-    mapping(string => address) _productToOwner;
+    mapping(address => bool) private _organization;
 
-    mapping(string => string) _policies;
-    mapping(string => address) _policyToOwner;
-    mapping(address => string[]) _pendingPolicies;
+    mapping(string => string) private _products;
+    mapping(string => address) private _productToOwner;
 
-    mapping(string => string) _endorsements;
-    mapping(string => address) _endorsementToOwner;
-    mapping(address => string[]) _pendingEndorsements;
+    mapping(string => string) private _policies;
+    mapping(string => address) private _policyToOwner;
+    mapping(address => string[]) private _pendingPolicies;
 
-    mapping(address => string[]) _salesAgreements;
+    mapping(string => string) private _endorsements;
+    mapping(string => address) private _endorsementToOwner;
+    mapping(address => string[]) private _pendingEndorsements;
+
+    mapping(address => string[]) private _salesAgreements;
 
     event ReleaseProduct(address indexed owner, string indexed productCode);
     event IssuePolicy(address indexed owner, address indexed issuer, string indexed policyNumber);
@@ -77,29 +79,45 @@ contract InsuranceSales is Ownable {
     event IssueEndorsement(address indexed owner, address indexed issuer, string indexed endorsementNumber);
     event WithdrawPendingEndorsement(address indexed owner, string indexed endorsementNumber);
     event ApproveSalesAgreement(address indexed owner, address indexed approver, string indexed productCode);
-    
 
-    function releaseProduct(address owner,string memory productCode, string memory productSpec) public onlyOwner {
-        _products[productCode] = productSpec;
-        _productToOwner[productCode] = owner;
+    event RegisterOrg(address indexed owner, address indexed orgAddress);
 
-        emit ReleaseProduct(owner,productCode);
+    modifier onlyRegistration() {
+        require(_organization[msg.sender], "Caller is not registered!");
+        _;
     }
 
-    function findProduct(string memory productCode) public view onlyOwner returns (string memory productSpec) {
+    function registerOrg(address org) public onlyOwner {
+        _organization[org] = true;
+
+        emit RegisterOrg(_owner, org);
+    }
+
+    function findOrg(address org) public view returns (bool) {
+        return _organization[org];
+    }
+
+    function releaseProduct(string memory productCode, string memory productSpec) public onlyRegistration {
+        _products[productCode] = productSpec;
+        _productToOwner[productCode] = msg.sender;
+
+        emit ReleaseProduct(msg.sender,productCode);
+    }
+
+    function findProduct(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
         productSpec = _products[productCode];
     }
 
-    function findProductFromChannel(string memory productCode) public view returns (string memory productSpec) {
+    function findProductFromChannel(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
         require(salesAuth,"Caller don't have the sales agreement for this product!");
 
         productSpec = _products[productCode];
     }
 
-    function approveAgreement(address channel, string memory productCode) public {
+    function approveAgreement(address channel, string memory productCode) public onlyRegistration {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
         _salesAgreements[channel].push(productCode);
@@ -107,7 +125,7 @@ contract InsuranceSales is Ownable {
         emit ApproveSalesAgreement(channel,_owner,productCode);
     }
 
-    function withdrawAgreement(address channel, string memory productCode) public {
+    function withdrawAgreement(address channel, string memory productCode) public onlyRegistration {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
         string[] storage products = _salesAgreements[channel];
@@ -122,7 +140,7 @@ contract InsuranceSales is Ownable {
         }
     }
 
-    function issuePolicy(string memory policyNumber, string memory productCode, string memory policy) public {
+    function issuePolicy(string memory policyNumber, string memory productCode, string memory policy) public onlyRegistration {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
         require(salesAuth,"Caller don't have the sales agreement for this product!");
 
@@ -134,13 +152,13 @@ contract InsuranceSales is Ownable {
         emit IssuePolicy(owner,msg.sender,policyNumber);
     }
 
-    function findPolicy(string memory policyNumber) public view returns (string memory policy) {
+    function findPolicy(string memory policyNumber) public view onlyRegistration returns (string memory policy)  {
         require(msg.sender == _policyToOwner[policyNumber],"Caller are not the policy owner!");
 
         policy = _policies[policyNumber];
     }
 
-    function findPendingPolicies() public view returns (string memory policies) {
+    function findPendingPolicies() public view onlyRegistration returns (string memory policies) {
         string[] memory policyNumbers = _pendingPolicies[msg.sender];
         policies = "";
         for (uint i = 0; i < policyNumbers.length; i++) {
@@ -155,7 +173,7 @@ contract InsuranceSales is Ownable {
         }
     }
 
-    function withdrawPendingPolicy(string memory policyNumber) public {
+    function withdrawPendingPolicy(string memory policyNumber) public onlyRegistration {
         require(msg.sender == _policyToOwner[policyNumber],"Caller is not the policy owner!");
 
         string[] storage policies = _pendingPolicies[msg.sender];
@@ -174,7 +192,7 @@ contract InsuranceSales is Ownable {
         emit WithdrawPendingPolicy(msg.sender,policyNumber);
     }
 
-    function issueEndorsement(string memory endorsementNumber, string memory productCode, string memory endorsement) public {
+    function issueEndorsement(string memory endorsementNumber, string memory productCode, string memory endorsement) public onlyRegistration {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
         require(salesAuth,"Caller don't have the sales agreement for this product!");
 
@@ -186,10 +204,10 @@ contract InsuranceSales is Ownable {
         emit IssueEndorsement(owner,msg.sender,endorsementNumber);
     }
 
-    function findEndorsement(string memory endorsementNumber) public view returns (string memory endosement) {
+    function findEndorsement(string memory endorsementNumber) public view onlyRegistration returns (string memory endosement) {
         bool isOwner = false;
         address endosementOwner = _endorsementToOwner[endorsementNumber];
-        if(msg.sender == endosementOwner) {
+        if (msg.sender == endosementOwner) {
             isOwner = true;
         }
         require(isOwner,"Caller are not the endorsement owner!");
@@ -197,7 +215,7 @@ contract InsuranceSales is Ownable {
         endosement = _endorsements[endorsementNumber];
     }
 
-    function findPendingEndorsements() public view returns (string memory endorsments) {
+    function findPendingEndorsements() public view onlyRegistration returns (string memory endorsments) {
         string[] memory endoNumbers = _pendingEndorsements[msg.sender];
         endorsments = "";
         for (uint i = 0; i < endoNumbers.length; i++) {
@@ -212,7 +230,7 @@ contract InsuranceSales is Ownable {
         }
     }
 
-    function withdrawPendingEndorsement(string memory endorsementNumber) public {
+    function withdrawPendingEndorsement(string memory endorsementNumber) public onlyRegistration {
         require(msg.sender == _endorsementToOwner[endorsementNumber],"Caller is not the endorsement owner!");
 
         string[] storage endorsments = _pendingEndorsements[msg.sender];

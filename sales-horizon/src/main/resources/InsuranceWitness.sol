@@ -56,9 +56,9 @@ contract Ownable {
 
 contract InsuranceWitness is Ownable {
 
-    mapping(string => address) _organization;
-    mapping(string => address) _orgToContract;
-    mapping(string => string) _productToOrg;
+    mapping(string => address) private _organization;
+    mapping(string => address) private _orgToContract;
+    mapping(string => string) private _productToOrg;
 
     event RegisterOrg(address indexed owner, address indexed orgAccount, address indexed contractAddress);
     event RegisterProduct(address indexed owner, string indexed orgCode, string indexed productCode);

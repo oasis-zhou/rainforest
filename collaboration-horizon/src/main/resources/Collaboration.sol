@@ -66,21 +66,28 @@ contract Collaboration is Ownable {
 
     mapping(string => string) private _orgPubKey;
     mapping(string => address) private _orgAddress;
+    mapping(address => bool) private _organization;
 
     event SendTransaction(address indexed owner, address indexed sender, string indexed transactionNumber);
     event SendMessage(address indexed owner, address indexed sender, string indexed msgID);
     event WithdrawPendingMessage(address indexed owner, string indexed msgID);
 
+    modifier onlyRegistration() {
+        require(_organization[msg.sender], "Caller is not registered!");
+        _;
+    }
+
     function register(string memory orgCode, string memory pubKey, address orgAddress) public onlyOwner {
         _orgPubKey[orgCode] = pubKey;
         _orgAddress[orgCode] = orgAddress;
+        _organization[orgAddress] = true;
     }
 
-    function findOrgPubKey(string memory orgCode) public view returns (string memory pubKey) {
+    function findOrgPubKey(string memory orgCode) public view onlyRegistration returns (string memory pubKey) {
         pubKey = _orgPubKey[orgCode];
     }
 
-    function sendTransaction(string memory transactionNumber, string memory transaction, string memory participant) public {
+    function sendTransaction(string memory transactionNumber, string memory transaction, string memory participant) public onlyRegistration {
         string storage tmpTransaction = _transactions[transactionNumber];
         bytes memory transactionByte = bytes(tmpTransaction);
         if(transactionByte.length > 0 ) {
@@ -102,7 +109,7 @@ contract Collaboration is Ownable {
         emit SendTransaction(_orgAddress[participant], msg.sender, transactionNumber);
     }
 
-    function findTransaction(string memory transactionNumber) public view returns (string memory transaction) {
+    function findTransaction(string memory transactionNumber) public view onlyRegistration returns (string memory transaction) {
         address[] storage participants = _ownershipTransactions[transactionNumber];
         bool isParticipant = false;
         for(uint i = 0; i < participants.length; i++){
@@ -115,7 +122,7 @@ contract Collaboration is Ownable {
         transaction = _transactions[transactionNumber];
     }
 
-    function sendMessage(string memory msgID, string memory message, string memory owner) public {
+    function sendMessage(string memory msgID, string memory message, string memory owner) public onlyRegistration {
         _messages[msgID] = message;
         _messageToOwner[msgID] = _orgAddress[owner];
         _pendingMessages[_orgAddress[owner]].push(msgID);
@@ -123,12 +130,12 @@ contract Collaboration is Ownable {
         emit SendMessage(_orgAddress[owner], msg.sender, msgID);
     }
 
-    function findMessage(string memory msgID) public view returns (string memory message) {
+    function findMessage(string memory msgID) public view onlyRegistration returns (string memory message) {
         require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
         message = _messages[msgID];
     }
 
-    function findPendingMessagesByOwner() public view returns (string memory msgIDs) {
+    function findPendingMessagesByOwner() public view onlyRegistration returns (string memory msgIDs) {
         string[] memory msgs = _pendingMessages[msg.sender];
         msgIDs = "";
         for (uint i = 0; i < msgs.length; i++) {
@@ -143,7 +150,7 @@ contract Collaboration is Ownable {
         }
     }
 
-    function withdrawPendingMessage(string memory msgID) public {
+    function withdrawPendingMessage(string memory msgID) public onlyRegistration {
 
         require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
 
