@@ -16,7 +16,6 @@ import rf.claim.model.QueryCondition;
 import rf.claim.model.enums.NoticeStatus;
 import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
-import javax.websocket.server.PathParam;
 
 /**
  * @ClassName ClaimController
@@ -66,7 +65,7 @@ public class ClaimController {
     }
 
     @GetMapping("/loss/notice/{noticeNumber}")
-    public ResponseEntity getNoticeOfLoss(@PathParam("noticeNumber") String noticeNumber){
+    public ResponseEntity getNoticeOfLoss(@PathVariable("noticeNumber") String noticeNumber){
         NoticeOfLoss noticeOfLoss = noticeOfLossService.loadNoticeOfLoss(noticeNumber);
         return new ResponseEntity(noticeOfLoss,HttpStatus.OK);
     }

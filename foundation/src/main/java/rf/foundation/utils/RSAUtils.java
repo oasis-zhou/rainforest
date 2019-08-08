@@ -68,7 +68,7 @@ public class RSAUtils {
         PublicKey pubKey = keyFactory.generatePublic(keySpec);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(pubKey);
-        signature.update(data.getBytes("utf-8"));
+        signature.update(decryptBASE64(data));
         // 验证签名是否正常
         return signature.verify(decryptBASE64(sign));
     }
@@ -91,7 +91,7 @@ public class RSAUtils {
         // 对数据解密
         Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] result = cipher.doFinal(data.getBytes("utf-8"));
+        byte[] result = cipher.doFinal(decryptBASE64(data));
         return new String(result);
     }
 
@@ -113,7 +113,7 @@ public class RSAUtils {
         // 对数据解密
         Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
-        byte[] result = cipher.doFinal(data.getBytes("utf-8"));
+        byte[] result = cipher.doFinal(decryptBASE64(data));
         return new String(result);
     }
 
@@ -211,6 +211,5 @@ public class RSAUtils {
         Encoder encoder = Base64.getEncoder();
         return encoder.encodeToString(data);
     }
-
 
 }

@@ -18,8 +18,13 @@ import java.util.List;
 public class CollaborationServiceImpl implements CollaborationService {
 
     @Override
-    public String sendTransaction(Transaction transaction) {
+    public String createTransaction(Transaction transaction) {
         return null;
+    }
+
+    @Override
+    public void updateTransaction(Transaction transaction) {
+
     }
 
     @Override

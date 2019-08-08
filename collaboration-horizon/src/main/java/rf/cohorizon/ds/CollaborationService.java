@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface CollaborationService {
 
-    String sendTransaction(Transaction transaction);
+    String createTransaction(Transaction transaction);
+    void updateTransaction(Transaction transaction);
     Transaction getTransaction(String transactionNumber);
 
     String sendMessage(Message message);

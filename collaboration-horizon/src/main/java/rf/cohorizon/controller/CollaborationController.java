@@ -14,8 +14,6 @@ import rf.foundation.pub.Guid;
 import rf.foundation.utils.AESUtils;
 import rf.foundation.utils.JsonHelper;
 import rf.foundation.utils.RSAUtils;
-
-import javax.websocket.server.PathParam;
 import java.util.List;
 
 /**
@@ -41,7 +39,7 @@ public class CollaborationController {
     private JsonHelper jsonHelper;
 
     @PostMapping("/transaction")
-    public ResponseEntity sendTransaction(@RequestBody Transaction transaction){
+    public ResponseEntity createTransaction(@RequestBody Transaction transaction){
 
         try {
             String randomKey = Guid.random(10);
@@ -54,7 +52,34 @@ public class CollaborationController {
             transaction.getCryptoKeys().put(pubKey,fromCryptoKey);
             transaction.getCryptoKeys().put(toPubKey,toCryptoKey);
 
-            collaborationService.sendTransaction(transaction);
+            collaborationService.createTransaction(transaction);
+
+        } catch (Exception e) {
+            throw new GenericException(10003L);
+        }
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/transaction")
+    public ResponseEntity updateTransaction(@RequestBody Transaction transaction){
+        Transaction tran = collaborationService.getTransaction(transaction.getTransactionNumber());
+
+        try {
+            String cryptoKey = tran.getCryptoKeys().get(pubKey);
+            String randomKey = RSAUtils.decryptByPrivateKey(cryptoKey, privateKey);
+
+            String cryptoData = AESUtils.encrypt(transaction.getBusinessData(), randomKey);
+            String fromCryptoKey = RSAUtils.encryptByPublicKey(randomKey,pubKey);
+            String toPubKey = identityService.getPubKey(transaction.getTo());
+            String toCryptoKey = RSAUtils.encryptByPublicKey(randomKey,toPubKey);
+
+            tran.setBusinessData(cryptoData);
+            tran.setFrom(transaction.getFrom());
+            tran.setTo(transaction.getTo());
+            tran.getCryptoKeys().put(pubKey,fromCryptoKey);
+            tran.getCryptoKeys().put(toPubKey,toCryptoKey);
+
+            collaborationService.updateTransaction(tran);
 
         } catch (Exception e) {
             throw new GenericException(10003L);
@@ -63,7 +88,7 @@ public class CollaborationController {
     }
 
     @GetMapping("/transaction/{transactionNumber}")
-    public ResponseEntity getTransaction(@PathParam("transactionNumber") String transactionNumber) {
+    public ResponseEntity getTransaction(@PathVariable("transactionNumber") String transactionNumber) {
         Transaction transaction = collaborationService.getTransaction(transactionNumber);
         try {
             String cryptoKey = transaction.getCryptoKeys().get(pubKey);
@@ -116,7 +141,7 @@ public class CollaborationController {
     }
 
     @GetMapping("/message/{msgID}")
-    public ResponseEntity getMessage(@PathParam("msgID") String msgID){
+    public ResponseEntity getMessage(@PathVariable("msgID") String msgID){
         Message message = collaborationService.getMessage(msgID);
         try {
             String cryptoKey = message.getCryptoKey();
@@ -133,7 +158,7 @@ public class CollaborationController {
     }
 
     @PostMapping("/message/archive/{msgID}")
-    public ResponseEntity archiveMessage(@PathParam("msgID") String msgID){
+    public ResponseEntity archiveMessage(@PathVariable("msgID") String msgID){
         collaborationService.archiveMessage(msgID);
         return new ResponseEntity(HttpStatus.OK);
     }

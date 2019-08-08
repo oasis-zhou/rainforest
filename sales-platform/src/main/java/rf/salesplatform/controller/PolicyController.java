@@ -22,8 +22,6 @@ import rf.policyadmin.model.trans.PolicyTransformer;
 import rf.salesplatform.event.PolicyIssueEvent;
 import rf.salesplatform.fs.*;
 import rf.salesplatform.pub.Constants;
-
-import javax.websocket.server.PathParam;
 import java.util.Map;
 
 
@@ -106,7 +104,7 @@ public class PolicyController {
 
     @Transactional
     @PostMapping(value = "/issue/{proposalNumber}")
-    public ResponseEntity issueProposal(@PathParam("proposalNumber") String proposalNumber) {
+    public ResponseEntity issueProposal(@PathVariable("proposalNumber") String proposalNumber) {
         Policy policy = policyService.loadPolicyByProposalNumber(proposalNumber);
         Map<String, Object> context = Maps.newHashMap();
 
@@ -137,7 +135,7 @@ public class PolicyController {
     }
 
     @GetMapping(value = "/{policyNumber}")
-    public ResponseEntity loadPolicy(@PathParam("policyNumber") String policyNumber) {
+    public ResponseEntity loadPolicy(@PathVariable("policyNumber") String policyNumber) {
 
         Policy policy = policyService.loadPolicyByPolicyNumber(policyNumber);
         return new ResponseEntity(policy, HttpStatus.OK);
@@ -145,7 +143,7 @@ public class PolicyController {
 
 
     @GetMapping(value = "proposal/{proposalNumber}")
-    public ResponseEntity loadPolicyByProposalNumber(@PathParam("proposalNumber") String proposalNumber) {
+    public ResponseEntity loadPolicyByProposalNumber(@PathVariable("proposalNumber") String proposalNumber) {
 
         Policy policy = policyService.loadPolicyByProposalNumber(proposalNumber);
         return new ResponseEntity(policy, HttpStatus.OK);

@@ -5,17 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rf.foundation.model.ResponsePage;
 import rf.policyadmin.ds.EndorsementService;
-import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.QueryCondition;
-
-import javax.websocket.server.PathParam;
 import java.util.List;
 
 @RestController
@@ -35,7 +29,7 @@ public class EndorsementController {
 
 
     @GetMapping(value = "query/{policyNumber}")
-    public ResponseEntity findEndorsements(@PathParam("policyNumber")  String policyNumber){
+    public ResponseEntity findEndorsements(@PathVariable("policyNumber")  String policyNumber){
 
         List<Endorsement> endorsementList = endorsementService.findEndorsements(policyNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);

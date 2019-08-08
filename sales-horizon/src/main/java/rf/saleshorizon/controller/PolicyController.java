@@ -15,8 +15,6 @@ import rf.policyadmin.model.trans.PolicyTransformer;
 import rf.saleshorizon.ds.PolicyService;
 import rf.saleshorizon.fs.*;
 import rf.saleshorizon.pub.Constants;
-
-import javax.websocket.server.PathParam;
 import java.util.Map;
 
 
@@ -86,14 +84,14 @@ public class PolicyController {
     }
 
     @GetMapping(value = "/{policyNumber}")
-    public ResponseEntity loadPolicy(@PathParam("policyNumber") String policyNumber) {
+    public ResponseEntity loadPolicy(@PathVariable("policyNumber") String policyNumber) {
 
         Policy policy = policyService.pullFromChain(policyNumber);
         return new ResponseEntity(policy, HttpStatus.OK);
     }
 
     @GetMapping(value = "proposal/{proposalNumber}")
-    public ResponseEntity loadPolicyByProposalNumber(@PathParam("proposalNumber") String proposalNumber) {
+    public ResponseEntity loadPolicyByProposalNumber(@PathVariable("proposalNumber") String proposalNumber) {
 
         Policy policy = policyService.pullFromChain(proposalNumber);
         return new ResponseEntity(policy, HttpStatus.OK);

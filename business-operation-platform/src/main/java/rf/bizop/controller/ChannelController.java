@@ -14,8 +14,6 @@ import rf.channel.model.QueryCondition;
 import rf.channel.model.SalesAgreementSpec;
 import rf.foundation.model.ResponsePage;
 
-import javax.websocket.server.PathParam;
-
 /**
  * @ClassName ChannelController
  * @Description: TODO
@@ -42,7 +40,7 @@ public class ChannelController {
     }
 
     @GetMapping(value = "/load/{channelCode}")
-    public ResponseEntity getChannel(@PathParam("channelCode") String channelCode){
+    public ResponseEntity getChannel(@PathVariable("channelCode") String channelCode){
 
         ChannelSpec channelSpec = channelService.loadChannel(channelCode);
 

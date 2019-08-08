@@ -8,16 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rf.foundation.model.ResponsePage;
 import rf.foundation.utils.JsonHelper;
-import rf.policyadmin.ds.EndorsementService;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.PolicyIndex;
 import rf.policyadmin.model.QueryCondition;
-import rf.policyadmin.model.enums.ContractStatus;
-import rf.policyadmin.model.trans.PolicyTransformer;
-import javax.websocket.server.PathParam;
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -45,7 +39,7 @@ public class PolicyController {
     }
 
     @GetMapping(value = "/{policyNumber}")
-    public ResponseEntity loadPolicy(@PathParam("policyNumber") String policyNumber) {
+    public ResponseEntity loadPolicy(@PathVariable("policyNumber") String policyNumber) {
 
         Policy policy = policyService.loadPolicyByPolicyNumber(policyNumber);
         return new ResponseEntity(policy, HttpStatus.OK);
@@ -53,7 +47,7 @@ public class PolicyController {
 
 
     @GetMapping(value = "proposal/{proposalNumber}")
-    public ResponseEntity loadPolicyByProposalNumber(@PathParam("proposalNumber") String proposalNumber) {
+    public ResponseEntity loadPolicyByProposalNumber(@PathVariable("proposalNumber") String proposalNumber) {
 
         Policy policy = policyService.loadPolicyByProposalNumber(proposalNumber);
         return new ResponseEntity(policy, HttpStatus.OK);

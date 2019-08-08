@@ -21,7 +21,6 @@ import rf.foundation.utils.JsonHelper;
 import rf.policyadmin.ds.PolicyService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
-import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
 
@@ -48,7 +47,7 @@ public class ClaimController {
     private JsonHelper jsonHelper;
 
     @PostMapping("/loss/notice/apply/{policyNumber}")
-    public ResponseEntity applyNoticeOfLoss(@PathParam("policyNumber") String policyNumber){
+    public ResponseEntity applyNoticeOfLoss(@PathVariable("policyNumber") String policyNumber){
         Policy policy = policyService.loadPolicyByPolicyNumber(policyNumber);
         if(policy == null)
             throw new GenericException(30012L);
@@ -84,7 +83,7 @@ public class ClaimController {
     }
 
     @GetMapping("/loss/notice/{noticeNumber}")
-    public ResponseEntity getNoticeOfLoss(@PathParam("noticeNumber") String noticeNumber){
+    public ResponseEntity getNoticeOfLoss(@PathVariable("noticeNumber") String noticeNumber){
         NoticeOfLoss noticeOfLoss = noticeOfLossService.loadNoticeOfLoss(noticeNumber);
         return new ResponseEntity(noticeOfLoss,HttpStatus.OK);
     }

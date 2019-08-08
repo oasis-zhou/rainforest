@@ -9,8 +9,6 @@ import rf.customer.model.Customer;
 import rf.customer.model.QueryCondition;
 import rf.foundation.model.ResponsePage;
 
-import javax.websocket.server.PathParam;
-
 /**
  * @ClassName CustomerController
  * @Description: TODO
@@ -33,7 +31,7 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/load/{code}")
-    public ResponseEntity loadCustomer(@PathParam("code") String code) {
+    public ResponseEntity loadCustomer(@PathVariable("code") String code) {
         Customer customer = customerService.loadByCode(code);
 
         return new ResponseEntity(customer, HttpStatus.OK);

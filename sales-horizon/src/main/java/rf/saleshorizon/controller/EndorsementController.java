@@ -25,8 +25,6 @@ import rf.saleshorizon.fs.EndorsementPricing;
 import rf.saleshorizon.fs.EndorsementValidation;
 import rf.saleshorizon.fs.UpdatePolicyByCancellation;
 import rf.saleshorizon.pub.Constants;
-
-import javax.websocket.server.PathParam;
 import java.util.Date;
 import java.util.Map;
 
@@ -142,7 +140,7 @@ public class EndorsementController {
     }
 
     @GetMapping(value = "query/{endorsementNumber}")
-    public ResponseEntity findEndorsements(@PathParam("endorsementNumber")  String endorsementNumber){
+    public ResponseEntity findEndorsements(@PathVariable("endorsementNumber")  String endorsementNumber){
 
         Endorsement endorsementList = endorsementService.pullFromChain(endorsementNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);
