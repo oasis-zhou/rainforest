@@ -14,17 +14,12 @@ import rf.cohorizon.ds.IdentityService;
 public class IdentityServiceImpl implements IdentityService {
 
     @Override
-    public String getToken() {
-        return null;
-    }
-
-    @Override
-    public void register(String org, String pubKey) {
+    public void register(String orgCode, String pubKey) {
 
     }
 
     @Override
-    public String getPubKey(String org) {
+    public String getPubKey(String orgCode) {
         return null;
     }
 }

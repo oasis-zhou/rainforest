@@ -23,8 +23,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     @Override
-    public void updateTransaction(Transaction transaction) {
-
+    public String updateTransaction(Transaction transaction) {
+        return null;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     @Override
-    public List<Message> findAllMessages() {
+    public List<Message> queryOwnerMessages() {
         return null;
     }
 
@@ -48,7 +48,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     @Override
-    public String archiveMessage(String msgID) {
+    public String delOwnerMessage(String msgID) {
         return null;
     }
 }
