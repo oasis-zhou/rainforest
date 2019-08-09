@@ -1,6 +1,8 @@
 package rf.cohorizon.ds;
 
+import rf.cohorizon.model.Registration;
+
 public interface IdentityService {
-    void register(String orgCode, String pubKey);
+    String register(Registration registration);
     String getPubKey(String orgCode);
 }

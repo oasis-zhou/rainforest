@@ -21,6 +21,8 @@ public class Transaction implements Serializable {
 
     private String transactionNumber;
     private String businessData;
+    private String from;
+    private String to;
     private Set<String> participants = Sets.newHashSet();
     private Map<String,String> cryptoKeys = Maps.newHashMap();
 

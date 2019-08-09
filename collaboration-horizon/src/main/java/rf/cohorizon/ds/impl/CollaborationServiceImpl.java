@@ -1,9 +1,17 @@
 package rf.cohorizon.ds.impl;
 
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import rf.cohorizon.contract.Collaboration;
+import rf.cohorizon.contract.ContractFactory;
 import rf.cohorizon.ds.CollaborationService;
 import rf.cohorizon.model.Message;
 import rf.cohorizon.model.Transaction;
+import rf.foundation.exception.GenericException;
+import rf.foundation.utils.JsonHelper;
 
 import java.util.List;
 
@@ -17,38 +25,113 @@ import java.util.List;
 @Service
 public class CollaborationServiceImpl implements CollaborationService {
 
-    @Override
-    public String createTransaction(Transaction transaction) {
-        return null;
-    }
+    @Autowired
+    private ContractFactory contractFactory;
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Override
-    public String updateTransaction(Transaction transaction) {
-        return null;
+    public String sendTransaction(Transaction transaction) {
+        String tx = null;
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            String participant = transaction.getTo();
+            transaction.setFrom(null);
+            transaction.setTo(null);
+            RemoteCall<TransactionReceipt> remoteCall = collaboration.sendTransaction(transaction.getTransactionNumber(), jsonHelper.toJSON(transaction), participant);
+
+            tx = remoteCall.send().getTransactionHash();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+
+        return tx;
     }
 
     @Override
     public Transaction getTransaction(String transactionNumber) {
-        return null;
+        Transaction transaction = null;
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            RemoteCall<String> remoteCall = collaboration.findTransaction(transactionNumber);
+            byte[] response = remoteCall.send().getBytes();
+
+            transaction = jsonHelper.fromJSON(new String(response),Transaction.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+
+        return transaction;
     }
 
     @Override
     public String sendMessage(Message message) {
-        return null;
+        String tx = null;
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            RemoteCall<TransactionReceipt> remoteCall = collaboration.sendMessage(message.getMsgID(), jsonHelper.toJSON(message), message.getTo());
+
+            tx = remoteCall.send().getTransactionHash();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+
+        return tx;
     }
 
     @Override
     public List<Message> queryOwnerMessages() {
-        return null;
+        List<Message> messages = Lists.newArrayList();
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            RemoteCall<String> remoteCall = collaboration.findPendingMessagesByOwner();
+            byte[] response = remoteCall.send().getBytes();
+            String msgIDStr = new String(response);
+            String[] msgIDs = msgIDStr.split(",");
+
+            for (String msgID : msgIDs) {
+                messages.add(getMessage(msgID));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+
+        return messages;
     }
 
     @Override
     public Message getMessage(String msgID) {
-        return null;
+        Message message = null;
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            RemoteCall<String> remoteCall = collaboration.findMessage(msgID);
+            byte[] response = remoteCall.send().getBytes();
+
+            message = jsonHelper.fromJSON(new String(response),Message.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+
+        return message;
     }
 
     @Override
     public String delOwnerMessage(String msgID) {
-        return null;
+        String tx = null;
+        try {
+            Collaboration collaboration = contractFactory.loadContract();
+            RemoteCall<TransactionReceipt> remoteCall = collaboration.withdrawPendingMessage(msgID);
+
+            tx = remoteCall.send().getTransactionHash();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+        return tx;
     }
 }

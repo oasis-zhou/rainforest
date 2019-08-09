@@ -6,8 +6,7 @@ import rf.cohorizon.model.Transaction;
 import java.util.List;
 
 public interface CollaborationService {
-    String createTransaction(Transaction transaction);
-    String updateTransaction(Transaction transaction);
+    String sendTransaction(Transaction transaction);
     Transaction getTransaction(String transactionNumber);
 
     String sendMessage(Message message);

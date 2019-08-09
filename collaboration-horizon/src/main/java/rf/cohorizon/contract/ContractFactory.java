@@ -26,11 +26,14 @@ public class ContractFactory {
 
     @Value("${contract.address}")
     private String contractAddress;
-
     @Value("${node.url}")
     private String nodeUrl;
+    @Value("${account.keystore.password}")
+    private String password;
 
     private Web3j web3j;
+
+    private Collaboration collaboration;
 
     public final static String DEFAULT_PASSWORD = "1qaz2wsx";
 
@@ -43,7 +46,9 @@ public class ContractFactory {
     }
 
     public Collaboration loadContract() {
-        return Collaboration.load(contractAddress, getWweb3(), loadCredentials(), new DefaultGasProvider());
+        if(collaboration == null)
+            collaboration = Collaboration.load(contractAddress, getWweb3(), loadCredentials(), new DefaultGasProvider());
+        return collaboration;
     }
 
     public Collaboration loadContract(String address, String password, String keystore) {
@@ -77,11 +82,9 @@ public class ContractFactory {
         try {
             String keystorePath = "classpath:keystore.json";
             Resource resource = AppContext.getApplicationContext().getResource(keystorePath);
-
-            Credentials credentials = WalletUtils.loadCredentials(DEFAULT_PASSWORD, resource.getFile());
+            Credentials credentials = WalletUtils.loadCredentials(password, resource.getFile());
 
             return credentials;
-
         } catch (Exception e) {
             throw new GenericException(e);
         }
@@ -92,7 +95,7 @@ public class ContractFactory {
         String keystore = null;
         try {
             ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = org.web3j.crypto.Wallet.createStandard(DEFAULT_PASSWORD, ecKeyPair);
+            WalletFile walletFile = org.web3j.crypto.Wallet.createStandard(password, ecKeyPair);
             keystore = JSON.toJSONString(walletFile);
 
         } catch (Exception e) {

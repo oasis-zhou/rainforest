@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import rf.cohorizon.ds.CollaborationService;
 import rf.cohorizon.ds.IdentityService;
 import rf.cohorizon.model.Message;
+import rf.cohorizon.model.Registration;
 import rf.cohorizon.model.Transaction;
 import rf.foundation.exception.GenericException;
 import rf.foundation.pub.Guid;
 import rf.foundation.utils.AESUtils;
-import rf.foundation.utils.JsonHelper;
 import rf.foundation.utils.RSAUtils;
+
 import java.util.List;
 import java.util.Set;
 
@@ -40,20 +41,27 @@ public class CollaborationController {
     @Autowired
     private CollaborationService collaborationService;
 
+    @PostMapping("/registration")
+    public ResponseEntity register(@RequestBody Registration registration){
+        String response = identityService.register(registration);
+        return new ResponseEntity(response,HttpStatus.OK);
+    }
+
     @PostMapping("/transaction")
     public ResponseEntity createTransaction(@RequestBody Transaction transaction){
-
         try {
             String randomKey = Guid.random(10);
             String cryptoData = AESUtils.encrypt(transaction.getBusinessData(), randomKey);
             transaction.setBusinessData(cryptoData);
+            transaction.getParticipants().add(transaction.getFrom());
+            transaction.getParticipants().add(transaction.getTo());
             Set<String> participants = transaction.getParticipants();
             for (String participant : participants) {
                 String pubKey = identityService.getPubKey(participant);
                 String cryptoKey = RSAUtils.encryptByPublicKey(randomKey,pubKey);
                 transaction.getCryptoKeys().put(pubKey,cryptoKey);
             }
-            String response = collaborationService.createTransaction(transaction);
+            String response = collaborationService.sendTransaction(transaction);
 
             return new ResponseEntity(response,HttpStatus.OK);
         } catch (GenericException e){
@@ -73,7 +81,11 @@ public class CollaborationController {
             String randomKey = RSAUtils.decryptByPrivateKey(cryptoKey, privateKey);
             String cryptoData = AESUtils.encrypt(transaction.getBusinessData(), randomKey);
             tran.setBusinessData(cryptoData);
+            tran.setFrom(transaction.getFrom());
+            tran.setTo(transaction.getTo());
 
+            transaction.getParticipants().add(transaction.getFrom());
+            transaction.getParticipants().add(transaction.getTo());
             Set<String> participants = transaction.getParticipants();
             tran.getParticipants().addAll(participants);
             for (String participant : participants) {
@@ -82,7 +94,7 @@ public class CollaborationController {
                 tran.getCryptoKeys().put(pubKey,cryptoKey);
             }
 
-            String response = collaborationService.updateTransaction(tran);
+            String response = collaborationService.sendTransaction(tran);
             return new ResponseEntity(response,HttpStatus.OK);
         } catch (GenericException e){
             throw e;
