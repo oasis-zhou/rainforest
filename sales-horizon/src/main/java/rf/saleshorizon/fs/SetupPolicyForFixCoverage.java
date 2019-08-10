@@ -10,7 +10,7 @@ import rf.product.model.CoverageSpec;
 import rf.product.model.DeductibleSpec;
 import rf.product.model.LimitSpec;
 import rf.product.model.ProductSpec;
-import rf.saleshorizon.ds.ProductService;
+import rf.saleshorizon.ds.BlockChainService;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -24,12 +24,12 @@ import java.util.Map;
 public class SetupPolicyForFixCoverage implements FunctionSlice<Policy> {
 
     @Autowired
-    private ProductService productService;
+    private BlockChainService blockChainService;
 
     @Override
     public void execute(Policy policy, Map<String, Object> context) {
 
-        ProductSpec product = productService.pullFromChain(policy.getProductCode());
+        ProductSpec product = blockChainService.findProduct(policy.getProductCode());
 
         policy.setProductName(product.getName());
         if(policy.getBusinessOrgan() == null)

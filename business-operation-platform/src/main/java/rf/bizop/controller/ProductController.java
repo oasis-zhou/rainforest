@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import rf.bizop.contract.ContractFactory;
+import rf.bizop.ds.BlockChainService;
 import rf.bizop.pub.Constants;
+import rf.foundation.utils.JsonHelper;
 import rf.rating.dt.DecisionTableService;
 import rf.rating.dt.DecisionTableSpec;
 import rf.rating.dt.ImportDecisionTableService;
@@ -43,6 +43,10 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private DecisionTableService decisionTableService;
+    @Autowired
+    private BlockChainService blockChainService;
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Transactional
     @PostMapping(value = "/save")
@@ -76,17 +80,20 @@ public class ProductController {
     }
 
     @Transactional
-    @PostMapping(value = "/deploy")
+    @PostMapping(value = "/release")
     public ResponseEntity deployProduct(ProductSpec spec){
         productService.saveProduct(spec);
 
         if(Constants.OPERATION_MODE_DECENTRALIZED.equals(operationMode)) {
-            //TODO 发布产品信息到区块链
+            blockChainService.releaseProduct(spec);
         }
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    public void loadProduct(){
+    @GetMapping(value = "/query/{productCode}")
+    public ResponseEntity loadProduct(@PathVariable("productCode") String productCode){
+        ProductSpec spec = productService.findProduct(productCode);
 
+        return new ResponseEntity(spec,HttpStatus.OK);
     }
 }

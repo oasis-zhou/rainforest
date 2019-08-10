@@ -75,6 +75,14 @@
             <groupId>com.github.ipfs</groupId>
             <artifactId>java-ipfs-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -16,7 +16,6 @@ import rf.policyadmin.model.Policy;
 import rf.product.model.ProductSpec;
 import rf.product.model.RuleSetSpec;
 import rf.product.model.RuleSpec;
-import rf.saleshorizon.ds.ProductService;
 import rf.saleshorizon.pub.Constants;
 import rf.saleshorizon.pub.ModelConverter;
 

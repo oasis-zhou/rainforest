@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.enums.EndorsementStatus;
-import rf.saleshorizon.ds.EndorsementService;
+import rf.saleshorizon.ds.BlockChainService;
 
 import java.util.Date;
 import java.util.Map;
@@ -14,12 +14,12 @@ import java.util.Map;
 public class EndorsementIssue implements FunctionSlice<Endorsement> {
 
     @Autowired
-    private EndorsementService endorsementService;
+    private BlockChainService blockChainService;
 
     @Override
     public void execute(Endorsement endorsement, Map<String, Object> context){
         endorsement.setIssueDate(new Date());
         endorsement.setEndorsementStatus(EndorsementStatus.ISSUE);
-       endorsementService.pushToChain(endorsement);
+        blockChainService.issueEndorsement(endorsement);
     }
 }

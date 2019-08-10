@@ -6,7 +6,7 @@ import rf.foundation.pub.FunctionSlice;
 import rf.policyadmin.ds.BusinessNumberService;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.ContractStatus;
-import rf.saleshorizon.ds.PolicyService;
+import rf.saleshorizon.ds.BlockChainService;
 
 import java.util.Date;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class PolicyIssue implements FunctionSlice<Policy> {
 
     @Autowired
-    private PolicyService policyService;
+    private BlockChainService blockChainService;
     @Autowired
     private BusinessNumberService businessNumberService;
 
@@ -26,6 +26,6 @@ public class PolicyIssue implements FunctionSlice<Policy> {
         if(policy.getIssueDate() == null)
             policy.setIssueDate(new Date());
         policy.setPolicyNumber(businessNumberService.generatePolicyNumber(policy));
-        policyService.pushToChain(policy);
+        blockChainService.issuePolicy(policy);
     }
 }

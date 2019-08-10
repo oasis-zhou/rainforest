@@ -12,7 +12,7 @@ import rf.foundation.pub.FunctionSliceBundle;
 import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.Quotation;
 import rf.policyadmin.model.trans.PolicyTransformer;
-import rf.saleshorizon.ds.PolicyService;
+import rf.saleshorizon.ds.BlockChainService;
 import rf.saleshorizon.fs.*;
 import rf.saleshorizon.pub.Constants;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class PolicyController {
     @Autowired
     private PolicyTransformer policyTransformer;
     @Autowired
-    private PolicyService policyService;
+    private BlockChainService blockChainService;
 
     @Transactional
     @PostMapping(value = "/proposal")
@@ -86,14 +86,14 @@ public class PolicyController {
     @GetMapping(value = "/{policyNumber}")
     public ResponseEntity loadPolicy(@PathVariable("policyNumber") String policyNumber) {
 
-        Policy policy = policyService.pullFromChain(policyNumber);
+        Policy policy = blockChainService.findPolicy(policyNumber);
         return new ResponseEntity(policy, HttpStatus.OK);
     }
 
     @GetMapping(value = "proposal/{proposalNumber}")
     public ResponseEntity loadPolicyByProposalNumber(@PathVariable("proposalNumber") String proposalNumber) {
 
-        Policy policy = policyService.pullFromChain(proposalNumber);
+        Policy policy = blockChainService.findPolicy(proposalNumber);
         return new ResponseEntity(policy, HttpStatus.OK);
     }
 }

@@ -18,8 +18,7 @@ import rf.policyadmin.model.Policy;
 import rf.policyadmin.model.enums.CancellationType;
 import rf.policyadmin.model.enums.EndorsementApplicationType;
 import rf.policyadmin.model.enums.EndorsementType;
-import rf.saleshorizon.ds.EndorsementService;
-import rf.saleshorizon.ds.PolicyService;
+import rf.saleshorizon.ds.BlockChainService;
 import rf.saleshorizon.fs.EndorsementIssue;
 import rf.saleshorizon.fs.EndorsementPricing;
 import rf.saleshorizon.fs.EndorsementValidation;
@@ -35,9 +34,7 @@ public class EndorsementController {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private PolicyService policyService;
-    @Autowired
-    private EndorsementService endorsementService;
+    private BlockChainService blockChainService;
 
     @Transactional
     @PostMapping(value = "/cancellation")
@@ -45,7 +42,7 @@ public class EndorsementController {
 
         if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
             throw new GenericException(30015L);
-        Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        Policy policy = blockChainService.findPolicy(cancellation.getPolicyNumber());
         if(policy == null)
             throw new GenericException(30012L);
 
@@ -77,7 +74,7 @@ public class EndorsementController {
 
         if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
             throw new GenericException(30015L);
-        Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        Policy policy = blockChainService.findPolicy(cancellation.getPolicyNumber());
         if(policy == null)
             throw new GenericException(30012L);
 
@@ -112,7 +109,7 @@ public class EndorsementController {
 
         if(StringUtils.isEmpty(cancellation.getPolicyNumber()))
             throw new GenericException(30015L);
-        Policy policy = policyService.pullFromChain(cancellation.getPolicyNumber());
+        Policy policy = blockChainService.findPolicy(cancellation.getPolicyNumber());
         if(policy == null)
             throw new GenericException(30012L);
 
@@ -142,7 +139,7 @@ public class EndorsementController {
     @GetMapping(value = "query/{endorsementNumber}")
     public ResponseEntity findEndorsements(@PathVariable("endorsementNumber")  String endorsementNumber){
 
-        Endorsement endorsementList = endorsementService.pullFromChain(endorsementNumber);
+        Endorsement endorsementList = blockChainService.findEndorsement(endorsementNumber);
         return new ResponseEntity(endorsementList, HttpStatus.OK);
     }
 }

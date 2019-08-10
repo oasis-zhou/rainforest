@@ -16,7 +16,7 @@ import rf.policyadmin.model.enums.ContractStatus;
 import rf.product.model.EndorsementSpec;
 import rf.product.model.ProductSpec;
 import rf.product.model.RuleSpec;
-import rf.saleshorizon.ds.ProductService;
+import rf.saleshorizon.ds.BlockChainService;
 import rf.saleshorizon.pub.Constants;
 import rf.saleshorizon.pub.ModelConverter;
 
@@ -28,7 +28,7 @@ import java.util.Map;
 public class EndorsementValidation implements FunctionSlice<Endorsement> {
 
     @Autowired
-    private ProductService productService;
+    private BlockChainService blockChainService;
     @Autowired
     private RatingEngine ratingEngine;
 
@@ -45,7 +45,7 @@ public class EndorsementValidation implements FunctionSlice<Endorsement> {
         //verify the endorsement application date
         verifyApplyDate(endorsement,policy);
 
-        ProductSpec product = productService.pullFromChain(endorsement.getProductCode());
+        ProductSpec product = blockChainService.findProduct(endorsement.getProductCode());
         List<EndorsementSpec> endorsementSpecs = product.getAllSubComponentsByType(EndorsementSpec.class);
         EndorsementSpec endorsementSpec = null;
         for(EndorsementSpec spec : endorsementSpecs){

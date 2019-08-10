@@ -1,4 +1,4 @@
-package rf.saleshorizon.contract;
+package rf.bizop.contract;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
