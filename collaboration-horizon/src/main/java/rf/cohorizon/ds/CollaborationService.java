@@ -10,7 +10,7 @@ public interface CollaborationService {
     Transaction getTransaction(String transactionNumber);
 
     String sendMessage(Message message);
-    List<Message> queryOwnerMessages();
+    List<Message> queryPendingMessages();
     Message getMessage(String msgID);
-    String delOwnerMessage(String msgID);
+    String delPendingMessage(String msgID);
 }

@@ -142,8 +142,8 @@ public class CollaborationController {
     }
 
     @GetMapping("/pending/messages")
-    public ResponseEntity queryOwnerMessages(){
-        List<Message> messages = collaborationService.queryOwnerMessages();
+    public ResponseEntity queryPendingMessages(){
+        List<Message> messages = collaborationService.queryPendingMessages();
         try {
             for (Message msg : messages) {
                 String cryptoKey = msg.getCryptoKey();
@@ -180,7 +180,7 @@ public class CollaborationController {
 
     @PostMapping("/message/archive/{msgID}")
     public ResponseEntity archiveMessage(@PathVariable("msgID") String msgID){
-        String response = collaborationService.delOwnerMessage(msgID);
+        String response = collaborationService.delPendingMessage(msgID);
         return new ResponseEntity(response,HttpStatus.OK);
     }
 }

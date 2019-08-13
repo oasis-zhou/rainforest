@@ -83,7 +83,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     @Override
-    public List<Message> queryOwnerMessages() {
+    public List<Message> queryPendingMessages() {
         List<Message> messages = Lists.newArrayList();
         try {
             Collaboration collaboration = contractFactory.loadContract();
@@ -121,7 +121,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     @Override
-    public String delOwnerMessage(String msgID) {
+    public String delPendingMessage(String msgID) {
         String tx = null;
         try {
             Collaboration collaboration = contractFactory.loadContract();
