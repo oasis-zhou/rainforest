@@ -19,7 +19,7 @@ public class Message implements Serializable {
     private String transactionNumber;
     private String from;
     private String to;
-    private String content;
+    private String payload;
     private String pubKey;
     private String cryptoKey;
 

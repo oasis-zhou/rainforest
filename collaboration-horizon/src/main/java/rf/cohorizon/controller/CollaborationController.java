@@ -124,10 +124,10 @@ public class CollaborationController {
     public ResponseEntity sendMessage(@RequestBody Message message) {
         try {
             String randomKey = Guid.random(10);
-            String cryptoData = AESUtils.encrypt(message.getContent(), randomKey);
+            String cryptoData = AESUtils.encrypt(message.getPayload(), randomKey);
             String toPubKey = identityService.getPubKey(message.getTo());
             String toCryptoKey = RSAUtils.encryptByPublicKey(randomKey,toPubKey);
-            message.setContent(cryptoData);
+            message.setPayload(cryptoData);
             message.setPubKey(toPubKey);
             message.setCryptoKey(toCryptoKey);
 
@@ -148,8 +148,8 @@ public class CollaborationController {
             for (Message msg : messages) {
                 String cryptoKey = msg.getCryptoKey();
                 String randomKey = RSAUtils.decryptByPrivateKey(cryptoKey, privateKey);
-                String data = AESUtils.decrypt(msg.getContent(), randomKey);
-                msg.setContent(data);
+                String data = AESUtils.decrypt(msg.getPayload(), randomKey);
+                msg.setPayload(data);
                 msg.setPubKey(null);
                 msg.setCryptoKey(null);
             }
@@ -166,8 +166,8 @@ public class CollaborationController {
         try {
             String cryptoKey = message.getCryptoKey();
             String randomKey = RSAUtils.decryptByPrivateKey(cryptoKey, privateKey);
-            String data = AESUtils.decrypt(message.getContent(),randomKey);
-            message.setContent(data);
+            String data = AESUtils.decrypt(message.getPayload(),randomKey);
+            message.setPayload(data);
             message.setPubKey(null);
             message.setCryptoKey(null);
 
