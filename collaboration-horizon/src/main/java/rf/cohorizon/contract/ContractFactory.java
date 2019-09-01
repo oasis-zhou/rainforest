@@ -15,9 +15,6 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import rf.foundation.context.AppContext;
 import rf.foundation.exception.GenericException;
 
-import java.io.File;
-import java.math.BigInteger;
-
 /**
  * Created by admin on 2018/9/6.
  */

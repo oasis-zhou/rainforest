@@ -57,6 +57,8 @@ contract Ownable {
 contract Collaboration is Ownable {
     using String for string;
 
+    uint private maxMessageNumber = 100;
+
     mapping(string => string) private _messages;
     mapping(string => address) private _messageToOwner;
     mapping(address => string[]) private _pendingMessages;
@@ -77,6 +79,10 @@ contract Collaboration is Ownable {
         _;
     }
 
+    function resetMessageNumber(uint8 number) public onlyOwner {
+        maxMessageNumber = number;
+    }
+
     function register(string memory orgCode, string memory pubKey, address orgAddress) public onlyOwner {
         _orgPubKey[orgCode] = pubKey;
         _orgAddress[orgCode] = orgAddress;
@@ -87,7 +93,7 @@ contract Collaboration is Ownable {
         pubKey = _orgPubKey[orgCode];
     }
 
-    function sendTransaction(string memory transactionNumber, string memory transaction, string memory participant) public onlyRegistration {
+    function sendTransaction(string memory transactionNumber, string memory transaction, string memory receiver) public onlyRegistration {
         string storage tmpTransaction = _transactions[transactionNumber];
         bytes memory transactionByte = bytes(tmpTransaction);
         if(transactionByte.length > 0 ) {
@@ -104,9 +110,9 @@ contract Collaboration is Ownable {
         _transactions[transactionNumber] = transaction;
         address[] storage participants = _ownershipTransactions[transactionNumber];
         participants.push(msg.sender);
-        participants.push(_orgAddress[participant]);
+        participants.push(_orgAddress[receiver]);
 
-        emit SendTransaction(_orgAddress[participant], msg.sender, transactionNumber);
+        emit SendTransaction(_orgAddress[receiver], msg.sender, transactionNumber);
     }
 
     function findTransaction(string memory transactionNumber) public view onlyRegistration returns (string memory transaction) {
@@ -155,7 +161,11 @@ contract Collaboration is Ownable {
         require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
 
         string[] storage msgs = _pendingMessages[msg.sender];
-        for (uint i = 0; i < msgs.length; i++) {
+        uint length = msgs.length;
+        if (length > maxMessageNumber) {
+            length = maxMessageNumber;
+        }
+        for (uint i = 0; i < length; i++) {
             if (keccak256(bytes(msgs[i])) == keccak256(bytes(msgID))) {
                 // 删除待处理消息，同时释放空间，可能存在和并发写入的冲突问题
                 for (uint j = i; j < msgs.length-1; j++){

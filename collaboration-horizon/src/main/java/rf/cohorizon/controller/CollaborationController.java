@@ -61,6 +61,10 @@ public class CollaborationController {
                 String cryptoKey = RSAUtils.encryptByPublicKey(randomKey,pubKey);
                 transaction.getCryptoKeys().put(pubKey,cryptoKey);
             }
+
+            transaction.setFrom(null);
+            transaction.setTo(null);
+
             String response = collaborationService.sendTransaction(transaction);
 
             return new ResponseEntity(response,HttpStatus.OK);
@@ -81,8 +85,6 @@ public class CollaborationController {
             String randomKey = RSAUtils.decryptByPrivateKey(cryptoKey, privateKey);
             String cryptoData = AESUtils.encrypt(transaction.getBusinessData(), randomKey);
             tran.setBusinessData(cryptoData);
-            tran.setFrom(transaction.getFrom());
-            tran.setTo(transaction.getTo());
 
             transaction.getParticipants().add(transaction.getFrom());
             transaction.getParticipants().add(transaction.getTo());

@@ -35,10 +35,8 @@ public class CollaborationServiceImpl implements CollaborationService {
         String tx = null;
         try {
             Collaboration collaboration = contractFactory.loadContract();
-            String participant = transaction.getTo();
-            transaction.setFrom(null);
-            transaction.setTo(null);
-            RemoteCall<TransactionReceipt> remoteCall = collaboration.sendTransaction(transaction.getTransactionNumber(), jsonHelper.toJSON(transaction), participant);
+            String receiver = transaction.getTo();
+            RemoteCall<TransactionReceipt> remoteCall = collaboration.sendTransaction(transaction.getTransactionNumber(), jsonHelper.toJSON(transaction), receiver);
 
             tx = remoteCall.send().getTransactionHash();
         } catch (Exception e) {
