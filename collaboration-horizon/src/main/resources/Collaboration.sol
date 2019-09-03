@@ -144,7 +144,11 @@ contract Collaboration is Ownable {
     function findPendingMessagesByOwner() public view onlyRegistration returns (string memory msgIDs) {
         string[] memory msgs = _pendingMessages[msg.sender];
         msgIDs = "";
-        for (uint i = 0; i < msgs.length; i++) {
+        uint length = msgs.length;
+        if (length > maxMessageNumber) {
+            length = maxMessageNumber;
+        }
+        for (uint i = 0; i < length; i++) {
             if(bytes(msgs[i]).length > 0) {
                 if( i == 0) {
                     msgIDs = msgs[i];
@@ -157,15 +161,10 @@ contract Collaboration is Ownable {
     }
 
     function withdrawPendingMessage(string memory msgID) public onlyRegistration {
-
         require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
 
         string[] storage msgs = _pendingMessages[msg.sender];
-        uint length = msgs.length;
-        if (length > maxMessageNumber) {
-            length = maxMessageNumber;
-        }
-        for (uint i = 0; i < length; i++) {
+        for (uint i = 0; i < msgs.length; i++) {
             if (keccak256(bytes(msgs[i])) == keccak256(bytes(msgID))) {
                 // 删除待处理消息，同时释放空间，可能存在和并发写入的冲突问题
                 for (uint j = i; j < msgs.length-1; j++){
