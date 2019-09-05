@@ -11,9 +11,12 @@ import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 import rf.foundation.context.AppContext;
 import rf.foundation.exception.GenericException;
+
 
 /**
  * Created by admin on 2018/9/6.
@@ -43,8 +46,10 @@ public class ContractFactory {
     }
 
     public Collaboration loadContract() {
-        if(collaboration == null)
-            collaboration = Collaboration.load(contractAddress, getWweb3(), loadCredentials(), new DefaultGasProvider());
+        if(collaboration == null) {
+            TransactionManager rawTransactionManager = new RawTransactionManager(getWweb3(), loadCredentials(), TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, 100);
+            collaboration = Collaboration.load(contractAddress, getWweb3(), rawTransactionManager, new DefaultGasProvider());
+        }
         return collaboration;
     }
 
@@ -92,7 +97,7 @@ public class ContractFactory {
         String keystore = null;
         try {
             ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = org.web3j.crypto.Wallet.createStandard(password, ecKeyPair);
+            WalletFile walletFile = Wallet.createStandard(password, ecKeyPair);
             keystore = JSON.toJSONString(walletFile);
 
         } catch (Exception e) {
