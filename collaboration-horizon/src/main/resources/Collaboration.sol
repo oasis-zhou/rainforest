@@ -104,7 +104,6 @@ contract Collaboration is Ownable {
                     isParticipant = true;
                 }
             }
-            // require(isParticipant,"The transaction is existed, Caller are not the participant!");
             if(!isParticipant)
                 revert("The transaction is existed, Caller are not the participant!");
         }
@@ -125,7 +124,8 @@ contract Collaboration is Ownable {
                 isParticipant = true;
             }
         }
-        require(isParticipant,"Caller are not the participant!");
+        if(!isParticipant)
+            revert("Caller are not the participant!");
 
         transaction = _transactions[transactionNumber];
     }
