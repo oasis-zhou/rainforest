@@ -14,8 +14,11 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 import rf.foundation.context.AppContext;
 import rf.foundation.exception.GenericException;
+
+import java.math.BigInteger;
 
 
 /**
@@ -24,37 +27,45 @@ import rf.foundation.exception.GenericException;
 @Component
 public class ContractFactory {
 
+    private static final int DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH = 60;
+    private static final int DEFAULT_POLLING_FREQUENCY = 300;
+    private static final BigInteger GAS_LIMIT = BigInteger.valueOf(1_000_000_000L);
+    private static final BigInteger GAS_PRICE = BigInteger.valueOf(1_000_000_000L);
+
     @Value("${contract.address}")
     private String contractAddress;
     @Value("${node.url}")
     private String nodeUrl;
     @Value("${account.keystore.password}")
     private String password;
+    @Value("${account.keystore}")
+    private String keystore;
+
+    private static final StaticGasProvider gasProvider = new StaticGasProvider(GAS_PRICE,GAS_LIMIT);
 
     private Web3j web3j;
 
     private Collaboration collaboration;
-
-    public final static String DEFAULT_PASSWORD = "1qaz2wsx";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public RemoteCall<Collaboration> deployContract() {
-        return Collaboration.deploy(getWweb3(),loadCredentials(),new DefaultGasProvider());
+        return Collaboration.deploy(getWweb3(),loadCredentials(password,keystore),gasProvider);
     }
 
     public Collaboration loadContract() {
         if(collaboration == null) {
-            TransactionManager rawTransactionManager = new RawTransactionManager(getWweb3(), loadCredentials(), TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, 100);
-            collaboration = Collaboration.load(contractAddress, getWweb3(), rawTransactionManager, new DefaultGasProvider());
+            Credentials credentials = loadCredentials(password,keystore);
+            TransactionManager rawTransactionManager = new RawTransactionManager(getWweb3(), credentials, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, DEFAULT_POLLING_FREQUENCY);
+            collaboration = Collaboration.load(contractAddress, getWweb3(), rawTransactionManager, gasProvider);
         }
         return collaboration;
     }
 
     public Collaboration loadContract(String address, String password, String keystore) {
-        return Collaboration.load(address, getWweb3(), loadCredentials(password, keystore), new DefaultGasProvider());
+        return Collaboration.load(address, getWweb3(), loadCredentials(password, keystore), gasProvider);
     }
 
     public Credentials loadCredentials(String password, String keystore) {
@@ -92,12 +103,11 @@ public class ContractFactory {
         }
     }
 
-    public String generateKeystore(){
-        ECKeyPair ecKeyPair = null;
+    public static String generateKeystore(String password){
         String keystore = null;
         try {
-            ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = Wallet.createStandard(password, ecKeyPair);
+            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+            WalletFile walletFile = org.web3j.crypto.Wallet.createStandard(password, ecKeyPair);
             keystore = JSON.toJSONString(walletFile);
 
         } catch (Exception e) {
