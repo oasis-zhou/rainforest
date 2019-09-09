@@ -33,17 +33,19 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <p>Generated with web3j version 4.3.0.
  */
 public class OwnedUpgradeabilityProxy extends Contract {
-    private static final String BINARY = "608060405234801561001057600080fd5b50610023336001600160e01b0361002816565b61005d565b604080517f636f6d2e736869652e70726f78792e6f776e65720000000000000000000000008152905190819003601401902055565b6104d68061006c6000396000f3fe60806040526004361061003f5760003560e01c8063025313a2146100b55780633659cfe6146100e65780635c60da1b1461011b578063f1739cae14610130575b6000610049610163565b90506001600160a01b0381166100905760405162461bcd60e51b81526004018080602001828103825260218152602001806104816021913960400191505060405180910390fd5b60405136600082376000803683855af43d806000843e8180156100b1578184f35b8184fd5b3480156100c157600080fd5b506100ca610199565b604080516001600160a01b039092168252519081900360200190f35b3480156100f257600080fd5b506101196004803603602081101561010957600080fd5b50356001600160a01b03166101c6565b005b34801561012757600080fd5b506100ca610163565b34801561013c57600080fd5b506101196004803603602081101561015357600080fd5b50356001600160a01b0316610239565b604080517f636f6d2e736869652e70726f78792e696d706c656d656e746174696f6e0000008152905190819003601d0190205490565b604080517331b7b69739b434b297383937bc3c9737bbb732b960611b815290519081900360140190205490565b6101ce610199565b6001600160a01b0316336001600160a01b03161461022d576040805162461bcd60e51b815260206004820152601760248201527643616c6c65722069736e277420746865206f776e65722160481b604482015290519081900360640190fd5b6102368161034f565b50565b610241610199565b6001600160a01b0316336001600160a01b0316146102a0576040805162461bcd60e51b815260206004820152601760248201527643616c6c65722069736e277420746865206f776e65722160481b604482015290519081900360640190fd5b6001600160a01b0381166102fb576040805162461bcd60e51b815260206004820152601860248201527f4e6577206f776e65722063616e2774206265206e756c6c210000000000000000604482015290519081900360640190fd5b7f5a3e66efaa1e445ebd894728a69d6959842ea1e97bd79b892797106e270efcd9610324610199565b604080516001600160a01b03928316815291841660208301528051918290030190a1610236816103ed565b6000610359610163565b9050816001600160a01b0316816001600160a01b031614156103ac5760405162461bcd60e51b815260040180806020018281038252603281526020018061044f6032913960400191505060405180910390fd5b6103b582610419565b6040516001600160a01b038316907fbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b90600090a25050565b604080517331b7b69739b434b297383937bc3c9737bbb732b960611b8152905190819003601401902055565b604080517f636f6d2e736869652e70726f78792e696d706c656d656e746174696f6e0000008152905190819003601d0190205556fe546865206e657720696d706c656d656e746174696f6e2063616e27742062652073616d652077697468206f6c64206f6e652154686520696d706c656d656e746174696f6e2063616e2774206265206e756c6c21a265627a7a723058201fb47d9cb4fd62de24e165c12d00ca58f5f49305675c94e4e799bbb05dcc6f7964736f6c634300050a0032";
-
-    public static final String FUNC_PROXYOWNER = "proxyOwner";
+    private static final String BINARY = "608060405234801561001057600080fd5b506105bc806100206000396000f3fe60806040526004361061004a5760003560e01c80633659cfe6146100545780634f1ef286146100875780635c60da1b146101075780638da5cb5b14610138578063a6f9dae11461014d575b610052610180565b005b34801561006057600080fd5b506100526004803603602081101561007757600080fd5b50356001600160a01b031661019a565b6100526004803603604081101561009d57600080fd5b6001600160a01b0382351691908101906040810160208201356401000000008111156100c857600080fd5b8201836020820111156100da57600080fd5b803590602001918460018302840111640100000000831117156100fc57600080fd5b5090925090506101d4565b34801561011357600080fd5b5061011c610281565b604080516001600160a01b039092168252519081900360200190f35b34801561014457600080fd5b5061011c6102be565b34801561015957600080fd5b506100526004803603602081101561017057600080fd5b50356001600160a01b03166102e9565b6101886103a3565b610198610193610403565b610439565b565b6101a261045d565b6001600160a01b0316336001600160a01b031614156101c9576101c481610484565b6101d1565b6101d1610180565b50565b6101dc61045d565b6001600160a01b0316336001600160a01b03161415610274576101fe83610484565b6000836001600160a01b031683836040518083838082843760405192019450600093509091505080830381855af49150503d806000811461025b576040519150601f19603f3d011682016040523d82523d6000602084013e610260565b606091505b505090508061026e57600080fd5b5061027c565b61027c610180565b505050565b600061028b61045d565b6001600160a01b0316336001600160a01b031614156102b3576102ac610403565b90506102bb565b6102bb610180565b90565b60006102c861045d565b6001600160a01b0316336001600160a01b031614156102b3576102ac61045d565b6102f161045d565b6001600160a01b0316336001600160a01b031614156101c9576001600160a01b03811661034f5760405162461bcd60e51b81526004018080602001828103825260368152602001806105206036913960400191505060405180910390fd5b7fb532073b38c83145e3e5135377a08bf9aab55bc0fd7c1179cd4fb995d2a5159c61037861045d565b604080516001600160a01b03928316815291841660208301528051918290030190a16101c4816104c4565b6103ab61045d565b6001600160a01b0316336001600160a01b031614156103fb5760405162461bcd60e51b81526004018080602001828103825260328152602001806105566032913960400191505060405180910390fd5b610198610198565b604080517f636f6d2e736869652e70726f78792e696d706c656d656e746174696f6e0000008152905190819003601d0190205490565b3660008037600080366000845af43d6000803e808015610458573d6000f35b3d6000fd5b604080516d31b7b69739b434b29737bbb732b960911b8152905190819003600e0190205490565b61048d816104ea565b6040516001600160a01b038216907fbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b90600090a250565b604080516d31b7b69739b434b29737bbb732b960911b8152905190819003600e01902055565b604080517f636f6d2e736869652e70726f78792e696d706c656d656e746174696f6e0000008152905190819003601d0190205556fe43616e6e6f74206368616e676520746865204f776e6572206f6620612070726f787920746f20746865207a65726f206164647265737343616e6e6f742063616c6c2066616c6c6261636b2066756e6374696f6e2066726f6d207468652070726f7879206f776e6572a265627a7a723058207e54e9d21920e9aaa4c68379dd05f02d7467df0fce5a9f9253adcd6fdefe3e1c64736f6c634300050a0032";
 
     public static final String FUNC_UPGRADETO = "upgradeTo";
 
+    public static final String FUNC_UPGRADETOANDCALL = "upgradeToAndCall";
+
     public static final String FUNC_IMPLEMENTATION = "implementation";
 
-    public static final String FUNC_TRANSFERPROXYOWNERSHIP = "transferProxyOwnership";
+    public static final String FUNC_OWNER = "owner";
 
-    public static final Event PROXYOWNERSHIPTRANSFERRED_EVENT = new Event("ProxyOwnershipTransferred", 
+    public static final String FUNC_CHANGEOWNER = "changeOwner";
+
+    public static final Event OWNERCHANGED_EVENT = new Event("OwnerChanged", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}));
     ;
 
@@ -69,41 +71,52 @@ public class OwnedUpgradeabilityProxy extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public RemoteCall<String> proxyOwner() {
-        final Function function = new Function(FUNC_PROXYOWNER, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
-    }
-
-    public RemoteCall<TransactionReceipt> upgradeTo(String implementation) {
+    public RemoteCall<TransactionReceipt> upgradeTo(String newImplementation) {
         final Function function = new Function(
                 FUNC_UPGRADETO, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(implementation)), 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(newImplementation)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteCall<String> implementation() {
-        final Function function = new Function(FUNC_IMPLEMENTATION, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
+    public RemoteCall<TransactionReceipt> upgradeToAndCall(String newImplementation, byte[] data, BigInteger weiValue) {
+        final Function function = new Function(
+                FUNC_UPGRADETOANDCALL, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(newImplementation), 
+                new org.web3j.abi.datatypes.DynamicBytes(data)), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function, weiValue);
     }
 
-    public RemoteCall<TransactionReceipt> transferProxyOwnership(String newOwner) {
+    public RemoteCall<TransactionReceipt> implementation() {
         final Function function = new Function(
-                FUNC_TRANSFERPROXYOWNERSHIP, 
+                FUNC_IMPLEMENTATION, 
+                Arrays.<Type>asList(), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteCall<TransactionReceipt> owner() {
+        final Function function = new Function(
+                FUNC_OWNER, 
+                Arrays.<Type>asList(), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteCall<TransactionReceipt> changeOwner(String newOwner) {
+        final Function function = new Function(
+                FUNC_CHANGEOWNER, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(newOwner)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
-    public List<ProxyOwnershipTransferredEventResponse> getProxyOwnershipTransferredEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(PROXYOWNERSHIPTRANSFERRED_EVENT, transactionReceipt);
-        ArrayList<ProxyOwnershipTransferredEventResponse> responses = new ArrayList<ProxyOwnershipTransferredEventResponse>(valueList.size());
+    public List<OwnerChangedEventResponse> getOwnerChangedEvents(TransactionReceipt transactionReceipt) {
+        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(OWNERCHANGED_EVENT, transactionReceipt);
+        ArrayList<OwnerChangedEventResponse> responses = new ArrayList<OwnerChangedEventResponse>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
-            ProxyOwnershipTransferredEventResponse typedResponse = new ProxyOwnershipTransferredEventResponse();
+            OwnerChangedEventResponse typedResponse = new OwnerChangedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.previousOwner = (String) eventValues.getNonIndexedValues().get(0).getValue();
             typedResponse.newOwner = (String) eventValues.getNonIndexedValues().get(1).getValue();
@@ -112,12 +125,12 @@ public class OwnedUpgradeabilityProxy extends Contract {
         return responses;
     }
 
-    public Flowable<ProxyOwnershipTransferredEventResponse> proxyOwnershipTransferredEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<Log, ProxyOwnershipTransferredEventResponse>() {
+    public Flowable<OwnerChangedEventResponse> ownerChangedEventFlowable(EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<Log, OwnerChangedEventResponse>() {
             @Override
-            public ProxyOwnershipTransferredEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(PROXYOWNERSHIPTRANSFERRED_EVENT, log);
-                ProxyOwnershipTransferredEventResponse typedResponse = new ProxyOwnershipTransferredEventResponse();
+            public OwnerChangedEventResponse apply(Log log) {
+                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(OWNERCHANGED_EVENT, log);
+                OwnerChangedEventResponse typedResponse = new OwnerChangedEventResponse();
                 typedResponse.log = log;
                 typedResponse.previousOwner = (String) eventValues.getNonIndexedValues().get(0).getValue();
                 typedResponse.newOwner = (String) eventValues.getNonIndexedValues().get(1).getValue();
@@ -126,10 +139,10 @@ public class OwnedUpgradeabilityProxy extends Contract {
         });
     }
 
-    public Flowable<ProxyOwnershipTransferredEventResponse> proxyOwnershipTransferredEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
+    public Flowable<OwnerChangedEventResponse> ownerChangedEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
         EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
-        filter.addSingleTopic(EventEncoder.encode(PROXYOWNERSHIPTRANSFERRED_EVENT));
-        return proxyOwnershipTransferredEventFlowable(filter);
+        filter.addSingleTopic(EventEncoder.encode(OWNERCHANGED_EVENT));
+        return ownerChangedEventFlowable(filter);
     }
 
     public List<UpgradedEventResponse> getUpgradedEvents(TransactionReceipt transactionReceipt) {
@@ -185,13 +198,13 @@ public class OwnedUpgradeabilityProxy extends Contract {
         return deployRemoteCall(OwnedUpgradeabilityProxy.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    public static RemoteCall<OwnedUpgradeabilityProxy> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return deployRemoteCall(OwnedUpgradeabilityProxy.class, web3j, transactionManager, contractGasProvider, BINARY, "");
-    }
-
     @Deprecated
     public static RemoteCall<OwnedUpgradeabilityProxy> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         return deployRemoteCall(OwnedUpgradeabilityProxy.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static RemoteCall<OwnedUpgradeabilityProxy> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+        return deployRemoteCall(OwnedUpgradeabilityProxy.class, web3j, transactionManager, contractGasProvider, BINARY, "");
     }
 
     @Deprecated
@@ -199,7 +212,7 @@ public class OwnedUpgradeabilityProxy extends Contract {
         return deployRemoteCall(OwnedUpgradeabilityProxy.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
     }
 
-    public static class ProxyOwnershipTransferredEventResponse {
+    public static class OwnerChangedEventResponse {
         public Log log;
 
         public String previousOwner;
