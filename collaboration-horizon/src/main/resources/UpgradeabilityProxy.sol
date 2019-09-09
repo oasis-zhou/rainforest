@@ -15,9 +15,9 @@ contract Proxy {
   * @dev Fallback function allowing to perform a delegatecall to the given implementation.
   * This function will return whatever the implementation call returns
   */
-  function () payable public {
+  function () external payable {
     address _impl = implementation();
-    require(_impl != address(0));
+    require(_impl != address(0),"The implementation can't be null!");
 
     assembly {
       let ptr := mload(0x40)
@@ -48,11 +48,6 @@ contract UpgradeabilityProxy is Proxy {
   bytes32 private constant implementationPosition = keccak256("com.shie.proxy.implementation");
 
   /**
-   * @dev Constructor function
-   */
-  function UpgradeabilityProxy() public {}
-
-  /**
    * @dev Tells the address of the current implementation
    * @return address of the current implementation
    */
@@ -80,7 +75,7 @@ contract UpgradeabilityProxy is Proxy {
    */
   function _upgradeTo(address newImplementation) internal {
     address currentImplementation = implementation();
-    require(currentImplementation != newImplementation);
+    require(currentImplementation != newImplementation,"The new implementation can't be same with old one!");
     setImplementation(newImplementation);
     emit Upgraded(newImplementation);
   }
@@ -104,7 +99,7 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy {
   /**
   * @dev the constructor sets the original owner of the contract to the sender account.
   */
-  function OwnedUpgradeabilityProxy() public {
+  constructor() public {
     setUpgradeabilityOwner(msg.sender);
   }
 
@@ -142,7 +137,7 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy {
    * @param newOwner The address to transfer ownership to.
    */
   function transferProxyOwnership(address newOwner) public onlyProxyOwner {
-    require(newOwner != address(0));
+    require(newOwner != address(0),"New owner can't be null!");
     emit ProxyOwnershipTransferred(proxyOwner(), newOwner);
     setUpgradeabilityOwner(newOwner);
   }
@@ -155,15 +150,4 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy {
     _upgradeTo(implementation);
   }
 
-  /**
-   * @dev Allows the proxy owner to upgrade the current version of the proxy and call the new implementation
-   * to initialize whatever is needed through a low level call.
-   * @param implementation representing the address of the new implementation to be set.
-   * @param data represents the msg.data to bet sent in the low level call. This parameter may include the function
-   * signature of the implementation to be called with the needed payload
-   */
-  function upgradeToAndCall(address implementation, bytes data) payable public onlyProxyOwner {
-    upgradeTo(implementation);
-    require(this.call.value(msg.value)(data));
-  }
 }

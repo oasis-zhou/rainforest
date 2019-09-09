@@ -54,10 +54,12 @@ contract Ownable {
     }
 }
 
-contract Collaboration is Ownable {
+contract Collaboration {
     using String for string;
 
     uint private maxMessageNumber = 100;
+    // Storage position of the owner of the contract
+    bytes32 private constant proxyOwnerPosition = keccak256("com.shie.proxy.owner");
 
     mapping(string => string) private _messages;
     mapping(string => address) private _messageToOwner;
@@ -77,6 +79,29 @@ contract Collaboration is Ownable {
     modifier onlyRegistration() {
         require(_organization[msg.sender], "Caller is not registered!");
         _;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == getOwner(),"Caller isn't the owner!");
+        _;
+    }
+
+    constructor() public {
+        setUpOwner(msg.sender);
+    }
+
+    function setUpOwner(address newProxyOwner) internal {
+        bytes32 position = proxyOwnerPosition;
+        assembly {
+            sstore(position, newProxyOwner)
+        }
+    }
+
+    function getOwner() public view returns (address owner) {
+        bytes32 position = proxyOwnerPosition;
+        assembly {
+            owner := sload(position)
+        }
     }
 
     function resetMessageNumber(uint8 number) public onlyOwner {
