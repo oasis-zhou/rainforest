@@ -230,11 +230,11 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy {
     }
   }
 
-  /**
-   * @dev Only fall back when the sender is not the owner.
-   */
-  function _willFallback() internal {
-    require(msg.sender != _owner(), "Cannot call fallback function from the proxy owner");
-    super._willFallback();
-  }
+  // /**
+  //  * @dev Only fall back when the sender is not the owner.
+  //  */
+  // function _willFallback() internal {
+  //   require(msg.sender != _owner(), "Cannot call fallback function from the proxy owner");
+  //   super._willFallback();
+  // }
 }
