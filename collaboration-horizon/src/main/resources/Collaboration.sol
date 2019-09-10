@@ -1,56 +1,80 @@
 pragma solidity ^0.5.0;
 
-contract Collaboration {
-    using String for string;
+import './UpgradeabilityProxy.sol';
 
-    uint private maxMessageNumber = 100;
+contract CollaborationBase {
+
+    uint internal maxMessageNumber = 100;
     // Storage position of the owner of the contract
-    bytes32 private constant OWNER_SLOT = keccak256("com.shie.owner");
+    bytes32 internal constant OWNER_SLOT = keccak256("com.shie.owner");
 
-    mapping(string => string) private _messages;
-    mapping(string => address) private _messageToOwner;
-    mapping(address => string[]) private _pendingMessages;
+    mapping(string => string) internal _messages;
+    mapping(string => address) internal _messageToOwner;
+    mapping(address => string[]) internal _pendingMessages;
 
-    mapping(string => string) private _transactions;
-    mapping(string => address[]) private _ownershipTransactions;
+    mapping(string => string) internal _transactions;
+    mapping(string => address[]) internal _ownershipTransactions;
 
-    mapping(string => string) private _orgPubKey;
-    mapping(string => address) private _orgAddress;
-    mapping(address => bool) private _organization;
+    mapping(string => string) internal _orgPubKey;
+    mapping(string => address) internal _orgAddress;
+    mapping(address => bool) internal _organization;
 
-    event SendTransaction(address indexed owner, address indexed sender, string indexed transactionNumber);
-    event SendMessage(address indexed owner, address indexed sender, string indexed msgID);
-    event WithdrawPendingMessage(address indexed owner, string indexed msgID);
+    event OwnerChanged(address previousOwner, address newOwner);
+
+    modifier onlyOwner() {
+        require(msg.sender == _owner(),"Caller isn't the owner!");
+        _;
+    }
 
     modifier onlyRegistration() {
         require(_organization[msg.sender], "Caller is not registered!");
         _;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == getOwner(),"Caller isn't the owner!");
-        _;
-    }
-
     constructor() public {
-        setUpOwner(msg.sender);
+        _setOwner(msg.sender);
     }
 
-    function setUpOwner(address newOwner) internal {
+    /**
+    * @return The address of the owner.
+    */
+    function owner() public view onlyOwner returns (address) {
+        return _owner();
+    }
+
+    /**
+   * @dev Changes the owner.
+   * Only the current owner can call this function.
+   * @param newOwner Address to transfer proxy owneristration to.
+   */
+  function changeOwner(address newOwner) public onlyOwner {
+    require(newOwner != address(0), "Cannot change the Owner to the zero address");
+    emit OwnerChanged(_owner(), newOwner);
+    _setOwner(newOwner);
+  }
+
+    /**
+    * @return The owner slot.
+    */
+    function _owner() internal view returns (address ownerAddress) {
+        bytes32 slot = OWNER_SLOT;
+        assembly {
+            ownerAddress := sload(slot)
+        }
+    }
+
+    /**
+    * @dev Sets the address of the owner.
+    * @param newOwner Address of the new owner.
+    */
+    function _setOwner(address newOwner) internal {
         bytes32 slot = OWNER_SLOT;
         assembly {
             sstore(slot, newOwner)
         }
     }
 
-    function getOwner() public view returns (address owner) {
-        bytes32 slot = OWNER_SLOT;
-        assembly {
-            owner := sload(slot)
-        }
-    }
-
-    function resetMessageNumber(uint8 number) public onlyOwner {
+    function setQueryMsgMaxNumber(uint number) public onlyOwner {
         maxMessageNumber = number;
     }
 
@@ -59,6 +83,14 @@ contract Collaboration {
         _orgAddress[orgCode] = orgAddress;
         _organization[orgAddress] = true;
     }
+}
+
+contract Collaboration is CollaborationBase{
+    using String for string;
+
+    event SendTransaction(address indexed owner, address indexed sender, string indexed transactionNumber);
+    event SendMessage(address indexed owner, address indexed sender, string indexed msgID);
+    event WithdrawPendingMessage(address indexed owner, string indexed msgID);
 
     function findOrgPubKey(string memory orgCode) public view onlyRegistration returns (string memory pubKey) {
         pubKey = _orgPubKey[orgCode];
@@ -151,6 +183,27 @@ contract Collaboration {
 
         emit WithdrawPendingMessage(msg.sender, msgID);
     }
+}
+
+
+contract CollaborationProxy is UpgradeabilityProxy,CollaborationBase {
+
+  /**
+   * @return The address of the implementation.
+   */
+  function implementation() external view onlyOwner returns (address) {
+    return _implementation();
+  }
+
+  /**
+   * @dev Upgrade the backing implementation of the proxy.
+   * Only the Owner can call this function.
+   * @param newImplementation Address of the new implementation.
+   */
+  function upgradeTo(address newImplementation) external onlyOwner {
+    _upgradeTo(newImplementation);
+  }
+
 }
 
 
