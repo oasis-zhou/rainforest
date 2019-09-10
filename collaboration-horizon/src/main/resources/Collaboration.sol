@@ -5,7 +5,7 @@ contract Collaboration {
 
     uint private maxMessageNumber = 100;
     // Storage position of the owner of the contract
-    bytes32 private constant ownerPosition = keccak256("com.shie.owner");
+    bytes32 private constant OWNER_SLOT = keccak256("com.shie.owner");
 
     mapping(string => string) private _messages;
     mapping(string => address) private _messageToOwner;
@@ -36,17 +36,17 @@ contract Collaboration {
         setUpOwner(msg.sender);
     }
 
-    function setUpOwner(address newProxyOwner) internal {
-        bytes32 position = ownerPosition;
+    function setUpOwner(address newOwner) internal {
+        bytes32 slot = OWNER_SLOT;
         assembly {
-            sstore(position, newProxyOwner)
+            sstore(slot, newOwner)
         }
     }
 
     function getOwner() public view returns (address owner) {
-        bytes32 position = ownerPosition;
+        bytes32 slot = OWNER_SLOT;
         assembly {
-            owner := sload(position)
+            owner := sload(slot)
         }
     }
 
