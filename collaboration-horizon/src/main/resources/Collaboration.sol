@@ -183,6 +183,14 @@ contract Collaboration is CollaborationBase{
 
         emit WithdrawPendingMessage(msg.sender, msgID);
     }
+
+    function exportTransaction(string memory transactionNumber) public view onlyOwner returns (string memory transaction) {
+        transaction = _transactions[transactionNumber];
+    }
+
+    function exportMessage(string memory msgID) public view onlyOwner returns (string memory message) {
+        message = _messages[msgID];
+    }
 }
 
 
