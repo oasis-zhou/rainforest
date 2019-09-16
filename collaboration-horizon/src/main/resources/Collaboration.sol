@@ -30,7 +30,9 @@ contract CollaborationBase {
         require(_organization[msg.sender], "Caller is not registered!");
         _;
     }
-
+    /**
+     * @dev constructor function.
+     */
     constructor() public {
         _setOwner(msg.sender);
     }
@@ -74,14 +76,40 @@ contract CollaborationBase {
         }
     }
 
+    /**
+     * @dev Set the query pending message max number.
+     * @param number max number.
+     */
     function setQueryMsgMaxNumber(uint number) public onlyOwner {
         maxMessageNumber = number;
     }
 
+    /**
+     * @dev Register the organization, only contract owner can call this function.
+     * @param orgCode organization code.
+     * @param pubKey organization RSA public key.
+     * @param orgAddress organization account address.
+     */
     function register(string memory orgCode, string memory pubKey, address orgAddress) public onlyOwner {
         _orgPubKey[orgCode] = pubKey;
         _orgAddress[orgCode] = orgAddress;
         _organization[orgAddress] = true;
+    }
+
+    /**
+     * @dev Export the transaction data, only contract owner can call this function.
+     * @param transactionNumber the business transaction number.
+     */
+    function exportTransaction(string memory transactionNumber) public view onlyOwner returns (string memory transaction) {
+        transaction = _transactions[transactionNumber];
+    }
+
+    /**
+     * @dev Export the message data, only contract owner can call this function.
+     * @param msgID message id.
+     */
+    function exportMessage(string memory msgID) public view onlyOwner returns (string memory message) {
+        message = _messages[msgID];
     }
 }
 
