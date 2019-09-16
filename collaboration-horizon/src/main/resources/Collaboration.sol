@@ -83,14 +83,6 @@ contract CollaborationBase {
         _orgAddress[orgCode] = orgAddress;
         _organization[orgAddress] = true;
     }
-
-    function exportTransaction(string memory transactionNumber) public view onlyOwner returns (string memory transaction) {
-        transaction = _transactions[transactionNumber];
-    }
-
-    function exportMessage(string memory msgID) public view onlyOwner returns (string memory message) {
-        message = _messages[msgID];
-    }
 }
 
 contract Collaboration is CollaborationBase{

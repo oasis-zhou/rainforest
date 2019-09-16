@@ -13,7 +13,6 @@ import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import rf.foundation.context.AppContext;
 import rf.foundation.exception.GenericException;
@@ -34,6 +33,8 @@ public class ContractFactory {
 
     @Value("${contract.address}")
     private String contractAddress;
+    @Value("${proxy.address}")
+    private String proxyAddress;
     @Value("${node.url}")
     private String nodeUrl;
     @Value("${account.keystore.password}")
@@ -47,12 +48,20 @@ public class ContractFactory {
 
     private Collaboration collaboration;
 
+    private CollaborationProxy proxy;
+
+    private Collaboration collaborationProxy;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public RemoteCall<Collaboration> deployContract() {
         return Collaboration.deploy(getWweb3(),loadCredentials(password,keystore),gasProvider);
+    }
+
+    public RemoteCall<CollaborationProxy> deployProxy() {
+        return CollaborationProxy.deploy(getWweb3(),loadCredentials(password,keystore),gasProvider);
     }
 
     public Collaboration loadContract() {
@@ -62,6 +71,24 @@ public class ContractFactory {
             collaboration = Collaboration.load(contractAddress, getWweb3(), rawTransactionManager, gasProvider);
         }
         return collaboration;
+    }
+
+    public Collaboration loadContractWithProxy() {
+        if(collaborationProxy == null) {
+            Credentials credentials = loadCredentials(password,keystore);
+            TransactionManager rawTransactionManager = new RawTransactionManager(getWweb3(), credentials, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, DEFAULT_POLLING_FREQUENCY);
+            collaborationProxy = Collaboration.load(proxyAddress, getWweb3(), rawTransactionManager, gasProvider);
+        }
+        return collaborationProxy;
+    }
+
+    public CollaborationProxy loadProxy() {
+        if(proxy == null) {
+            Credentials credentials = loadCredentials(password,keystore);
+            TransactionManager rawTransactionManager = new RawTransactionManager(getWweb3(), credentials, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, DEFAULT_POLLING_FREQUENCY);
+            proxy = CollaborationProxy.load(proxyAddress, getWweb3(), rawTransactionManager, gasProvider);
+        }
+        return proxy;
     }
 
     public Collaboration loadContract(String address, String password, String keystore) {
@@ -107,7 +134,7 @@ public class ContractFactory {
         String keystore = null;
         try {
             ECKeyPair ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = org.web3j.crypto.Wallet.createStandard(password, ecKeyPair);
+            WalletFile walletFile = Wallet.createStandard(password, ecKeyPair);
             keystore = JSON.toJSONString(walletFile);
 
         } catch (Exception e) {
