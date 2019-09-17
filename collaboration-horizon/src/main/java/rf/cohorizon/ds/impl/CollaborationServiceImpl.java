@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import rf.cohorizon.contract.Collaboration;
 import rf.cohorizon.contract.ContractFactory;
 import rf.cohorizon.ds.CollaborationService;
@@ -14,7 +15,6 @@ import rf.cohorizon.model.Message;
 import rf.cohorizon.model.Transaction;
 import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;
-
 import java.util.List;
 
 
@@ -46,7 +46,9 @@ public class CollaborationServiceImpl implements CollaborationService {
             RemoteCall<TransactionReceipt> remoteCall = collaboration.sendTransaction(transaction.getTransactionNumber(), transactionJson, receiver);
 
             tx = remoteCall.send().getTransactionHash();
-        } catch (Exception e) {
+        } catch (TransactionException te) {
+            throw new GenericException(10012L);
+        }  catch (Exception e) {
             e.printStackTrace();
             throw new GenericException(e);
         }
@@ -65,6 +67,8 @@ public class CollaborationServiceImpl implements CollaborationService {
             byte[] response = remoteCall.send().getBytes();
             if (response.length > 0)
                 transaction = jsonHelper.fromJSON(new String(response),Transaction.class);
+        } catch (TransactionException te) {
+            throw new GenericException(10009L);
         } catch (Exception e) {
             e.printStackTrace();
             throw new GenericException(e);
@@ -83,6 +87,8 @@ public class CollaborationServiceImpl implements CollaborationService {
             RemoteCall<TransactionReceipt> remoteCall = collaboration.sendMessage(message.getMsgID(), msgJson, message.getTo());
 
             tx = remoteCall.send().getTransactionHash();
+        } catch (TransactionException te) {
+            throw new GenericException(10013L);
         } catch (Exception e) {
             e.printStackTrace();
             throw new GenericException(e);
@@ -145,6 +151,8 @@ public class CollaborationServiceImpl implements CollaborationService {
             RemoteCall<TransactionReceipt> remoteCall = collaboration.withdrawPendingMessage(msgID);
 
             tx = remoteCall.send().getTransactionHash();
+        } catch (TransactionException te) {
+            throw new GenericException(10008L);
         } catch (Exception e) {
             e.printStackTrace();
             throw new GenericException(e);
