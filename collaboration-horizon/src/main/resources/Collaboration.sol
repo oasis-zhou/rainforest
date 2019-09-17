@@ -126,8 +126,8 @@ contract Collaboration is CollaborationBase{
 
     function sendTransaction(string memory transactionNumber, string memory transaction, string memory receiver) public onlyRegistration {
         string storage tmpTransaction = _transactions[transactionNumber];
-        bytes memory transactionByte = bytes(tmpTransaction);
-        if(transactionByte.length > 0 ) {
+        bytes memory transactionBytes = bytes(tmpTransaction);
+        if(transactionBytes.length > 0 ) {
             address[] storage participants = _ownershipTransactions[transactionNumber];
             bool isParticipant = false;
             for(uint i = 0; i < participants.length; i++){
@@ -162,6 +162,12 @@ contract Collaboration is CollaborationBase{
     }
 
     function sendMessage(string memory msgID, string memory message, string memory owner) public onlyRegistration {
+        string storage tmpMsg = _messages[msgID];
+        bytes memory msgBytes = bytes(tmpMsg);
+        if (msgBytes.length > 0) {
+            if (_orgAddress[owner] != _messageToOwner[msgID])
+                revert("The message is existed, new message owner is different from the old owner!");
+        }
         _messages[msgID] = message;
         _messageToOwner[msgID] = _orgAddress[owner];
         _pendingMessages[_orgAddress[owner]].push(msgID);
