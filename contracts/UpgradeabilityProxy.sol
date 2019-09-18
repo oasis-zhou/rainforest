@@ -81,10 +81,10 @@ contract UpgradeabilityProxy is Proxy {
 
   /**
    * @dev Storage slot with the address of the current implementation.
-   * This is the keccak-256 hash of "com.shie.proxy.implementation" subtracted by 1, and is
+   * This is the keccak-256 hash of "proxy.implementation" subtracted by 1, and is
    * validated in the constructor.
    */
-  bytes32 internal constant IMPLEMENTATION_SLOT = keccak256("com.shie.proxy.implementation");
+  bytes32 internal constant IMPLEMENTATION_SLOT = keccak256("proxy.implementation");
 
   /**
    * @dev Returns the current implementation.

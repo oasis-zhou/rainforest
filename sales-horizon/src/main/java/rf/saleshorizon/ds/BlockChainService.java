@@ -14,5 +14,4 @@ public interface BlockChainService {
     Policy findPolicy(String policyNumber);
     Endorsement findEndorsement(String endorsementNumber);
 
-    String register(String accountAddress);
 }

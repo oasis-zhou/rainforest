@@ -1,10 +1,11 @@
-package rf.saleshorizon.controller;
+package rf.bizop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rf.saleshorizon.ds.BlockChainService;
+import rf.bizop.ds.BlockChainService;
+import rf.bizop.model.Registration;
 
 
 @RestController
@@ -15,8 +16,8 @@ public class RegistrationController {
     private BlockChainService blockChainService;
 
     @PostMapping("/registration")
-    public ResponseEntity register(@RequestParam String accountAddress){
-        String response = blockChainService.register(accountAddress);
+    public ResponseEntity register(@RequestBody Registration registration){
+        String response = blockChainService.register(registration);
 
         return new ResponseEntity(response,HttpStatus.OK);
     }

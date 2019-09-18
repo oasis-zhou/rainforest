@@ -1,5 +1,6 @@
 package rf.bizop.ds;
 
+import rf.bizop.model.Registration;
 import rf.policyadmin.model.Endorsement;
 import rf.policyadmin.model.Policy;
 import rf.product.model.ProductSpec;
@@ -19,4 +20,6 @@ public interface BlockChainService {
 
     String withdrawPendingPolicy(String policyNumber);
     String withdrawPendingEndorsement(String endorsementNumber);
+
+    String register(Registration registration);
 }

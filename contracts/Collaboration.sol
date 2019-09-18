@@ -6,7 +6,7 @@ contract CollaborationBase {
 
     uint internal maxMessageNumber = 100;
     // Storage position of the owner of the contract
-    bytes32 internal constant OWNER_SLOT = keccak256("com.shie.owner");
+    bytes32 internal constant OWNER_SLOT = keccak256("contract.owner");
 
     mapping(string => string) internal _messages;
     mapping(string => address) internal _messageToOwner;

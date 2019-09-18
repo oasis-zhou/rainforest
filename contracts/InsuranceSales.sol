@@ -1,77 +1,113 @@
 pragma solidity ^0.5.0;
 
+import './UpgradeabilityProxy.sol';
 
-contract Ownable {
-    address public _owner;
+contract InsuranceSalesBase {
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    uint internal maxQueryNumber = 100;
+    // Storage position of the owner of the contract
+    bytes32 internal constant OWNER_SLOT = keccak256("contract.owner");
 
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () internal {
-        _owner = msg.sender;
-        emit OwnershipTransferred(address(0), _owner);
-    }
+    mapping(string => string) internal _orgPubKey;
+    mapping(string => address) internal _orgAddress;
+    mapping(address => bool) internal _organization;
 
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view returns (address) {
-        return _owner;
-    }
+    mapping(string => string) internal _products;
+    mapping(string => address) internal _productToOwner;
 
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
+    mapping(string => string) internal _policies;
+    mapping(string => address[]) internal _policyToOwner;
+    mapping(address => string[]) internal _pendingPolicies;
+
+    mapping(string => string) internal _endorsements;
+    mapping(string => address[]) internal _endorsementToOwner;
+    mapping(address => string[]) internal _pendingEndorsements;
+
+    mapping(address => string[]) internal _salesAgreements;
+
+    event OwnerChanged(address previousOwner, address newOwner);
+    event RegisterOrg(address indexed owner, address indexed orgAddress);
+
     modifier onlyOwner() {
-        require(isOwner(), "Ownable: caller is not the owner");
+        require(msg.sender == _owner(),"Caller isn't the owner!");
         _;
     }
 
+    modifier onlyRegistration() {
+        require(_organization[msg.sender], "Caller is not registered!");
+        _;
+    }
     /**
-     * @dev Returns true if the caller is the current owner.
+     * @dev constructor function.
      */
-    function isOwner() public view returns (bool) {
-        return msg.sender == _owner;
+    constructor() public {
+        _setOwner(msg.sender);
     }
 
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
+    * @return The address of the owner.
+    */
+    function owner() public view onlyOwner returns (address) {
+        return _owner();
     }
 
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+   * @dev Changes the owner.
+   * Only the current owner can call this function.
+   * @param newOwner Address to transfer proxy owneristration to.
+   */
+  function changeOwner(address newOwner) public onlyOwner {
+    require(newOwner != address(0), "Cannot change the Owner to the zero address");
+    emit OwnerChanged(_owner(), newOwner);
+    _setOwner(newOwner);
+  }
+
+    /**
+    * @return The owner slot.
+    */
+    function _owner() internal view returns (address ownerAddress) {
+        bytes32 slot = OWNER_SLOT;
+        assembly {
+            ownerAddress := sload(slot)
+        }
+    }
+
+    /**
+    * @dev Sets the address of the owner.
+    * @param newOwner Address of the new owner.
+    */
+    function _setOwner(address newOwner) internal {
+        bytes32 slot = OWNER_SLOT;
+        assembly {
+            sstore(slot, newOwner)
+        }
+    }
+
+    /**
+     * @dev Set the query pending message max number.
+     * @param number max number.
      */
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
+    function setMaxQueryNumber(uint number) public onlyOwner {
+        maxQueryNumber = number;
+    }
+
+    /**
+     * @dev Register the organization, only contract owner can call this function.
+     * @param orgCode organization code.
+     * @param pubKey organization RSA public key.
+     * @param orgAddress organization account address.
+     */
+    function register(string memory orgCode, string memory pubKey, address orgAddress) public onlyOwner {
+        _orgPubKey[orgCode] = pubKey;
+        _orgAddress[orgCode] = orgAddress;
+        _organization[orgAddress] = true;
+
+        emit RegisterOrg(_owner(), orgAddress);
     }
 }
 
-
-contract InsuranceSales is Ownable {
+contract InsuranceSales is InsuranceSalesBase {
     using String for string;
-
-    mapping(address => bool) private _organization;
-
-    mapping(string => string) private _products;
-    mapping(string => address) private _productToOwner;
-
-    mapping(string => string) private _policies;
-    mapping(string => address) private _policyToOwner;
-    mapping(address => string[]) private _pendingPolicies;
-
-    mapping(string => string) private _endorsements;
-    mapping(string => address) private _endorsementToOwner;
-    mapping(address => string[]) private _pendingEndorsements;
-
-    mapping(address => string[]) private _salesAgreements;
 
     event ReleaseProduct(address indexed owner, string indexed productCode);
     event IssuePolicy(address indexed owner, address indexed issuer, string indexed policyNumber);
@@ -80,21 +116,12 @@ contract InsuranceSales is Ownable {
     event WithdrawPendingEndorsement(address indexed owner, string indexed endorsementNumber);
     event ApproveSalesAgreement(address indexed owner, address indexed approver, string indexed productCode);
 
-    event RegisterOrg(address indexed owner, address indexed orgAddress);
-
-    modifier onlyRegistration() {
-        require(_organization[msg.sender], "Caller is not registered!");
-        _;
+    function findOrgAddress(string memory orgCode) public view returns (address orgAddress) {
+        orgAddress = _orgAddress[orgCode];
     }
 
-    function registerOrg(address org) public onlyOwner {
-        _organization[org] = true;
-
-        emit RegisterOrg(_owner, org);
-    }
-
-    function findOrg(address org) public view returns (bool) {
-        return _organization[org];
+    function findOrgPubKey(string memory orgCode) public view onlyRegistration returns (string memory pubKey) {
+        pubKey = _orgPubKey[orgCode];
     }
 
     function releaseProduct(string memory productCode, string memory productSpec) public onlyRegistration {
@@ -112,23 +139,24 @@ contract InsuranceSales is Ownable {
 
     function findProductFromChannel(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
-        require(salesAuth,"Caller don't have the sales agreement for this product!");
+        if (!salesAuth)
+            revert("Caller don't have the sales agreement for this product!");
 
         productSpec = _products[productCode];
     }
 
-    function approveAgreement(address channel, string memory productCode) public onlyRegistration {
+    function approveAgreement(string memory orgCode, string memory productCode) public onlyRegistration {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
-        _salesAgreements[channel].push(productCode);
+        _salesAgreements[_orgAddress[orgCode]].push(productCode);
 
-        emit ApproveSalesAgreement(channel,_owner,productCode);
+        emit ApproveSalesAgreement(_orgAddress[orgCode],msg.sender,productCode);
     }
 
-    function withdrawAgreement(address channel, string memory productCode) public onlyRegistration {
+    function withdrawAgreement(string memory orgCode, string memory productCode) public onlyRegistration {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
-        string[] storage products = _salesAgreements[channel];
+        string[] storage products = _salesAgreements[_orgAddress[orgCode]];
         for (uint i = 0; i < products.length; i++) {
             if (keccak256(bytes(products[i])) == keccak256(bytes(productCode))) {
                 for (uint j = i; j < products.length-1; j++){
@@ -146,14 +174,22 @@ contract InsuranceSales is Ownable {
 
         address owner = _productToOwner[productCode];
         _policies[policyNumber] = policy;
-        _policyToOwner[policyNumber] = owner;
+        _policyToOwner[policyNumber].push(owner);
+        _policyToOwner[policyNumber].push(msg.sender);
         _pendingPolicies[owner].push(policyNumber);
 
         emit IssuePolicy(owner,msg.sender,policyNumber);
     }
 
     function findPolicy(string memory policyNumber) public view onlyRegistration returns (string memory policy)  {
-        require(msg.sender == _policyToOwner[policyNumber],"Caller are not the policy owner!");
+        address[] memory owners = _policyToOwner[policyNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller are not the policy owner!");
 
         policy = _policies[policyNumber];
     }
@@ -174,8 +210,6 @@ contract InsuranceSales is Ownable {
     }
 
     function withdrawPendingPolicy(string memory policyNumber) public onlyRegistration {
-        require(msg.sender == _policyToOwner[policyNumber],"Caller is not the policy owner!");
-
         string[] storage policies = _pendingPolicies[msg.sender];
         for (uint i = 0; i < policies.length; i++) {
             if (keccak256(bytes(policies[i])) == keccak256(bytes(policyNumber))) {
@@ -194,23 +228,27 @@ contract InsuranceSales is Ownable {
 
     function issueEndorsement(string memory endorsementNumber, string memory productCode, string memory endorsement) public onlyRegistration {
         bool salesAuth = checkSalesAuth(msg.sender,productCode);
-        require(salesAuth,"Caller don't have the sales agreement for this product!");
+        if (!salesAuth)
+            revert("Caller don't have the sales agreement for this product!");
 
         address owner = _productToOwner[productCode];
         _endorsements[endorsementNumber] = endorsement;
-        _endorsementToOwner[endorsementNumber] = owner;
+        _endorsementToOwner[endorsementNumber].push(owner);
+        _endorsementToOwner[endorsementNumber].push(msg.sender);
         _pendingEndorsements[owner].push(endorsementNumber);
 
         emit IssueEndorsement(owner,msg.sender,endorsementNumber);
     }
 
     function findEndorsement(string memory endorsementNumber) public view onlyRegistration returns (string memory endosement) {
+        address[] memory owners = _endorsementToOwner[endorsementNumber];
         bool isOwner = false;
-        address endosementOwner = _endorsementToOwner[endorsementNumber];
-        if (msg.sender == endosementOwner) {
-            isOwner = true;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
         }
-        require(isOwner,"Caller are not the endorsement owner!");
+        if (!isOwner)
+            revert("Caller are not the endorsement owner!");
 
         endosement = _endorsements[endorsementNumber];
     }
@@ -231,8 +269,6 @@ contract InsuranceSales is Ownable {
     }
 
     function withdrawPendingEndorsement(string memory endorsementNumber) public onlyRegistration {
-        require(msg.sender == _endorsementToOwner[endorsementNumber],"Caller is not the endorsement owner!");
-
         string[] storage endorsments = _pendingEndorsements[msg.sender];
         for (uint i = 0; i < endorsments.length; i++) {
             if (keccak256(bytes(endorsments[i])) == keccak256(bytes(endorsementNumber))) {
@@ -262,6 +298,25 @@ contract InsuranceSales is Ownable {
     }
 }
 
+contract InsuranceSalesProxy is UpgradeabilityProxy,InsuranceSalesBase {
+
+  /**
+   * @return The address of the implementation.
+   */
+  function implementation() external view onlyOwner returns (address) {
+    return _implementation();
+  }
+
+  /**
+   * @dev Upgrade the backing implementation of the proxy.
+   * Only the Owner can call this function.
+   * @param newImplementation Address of the new implementation.
+   */
+  function upgradeTo(address newImplementation) external onlyOwner {
+    _upgradeTo(newImplementation);
+  }
+
+}
 
 library String {
 

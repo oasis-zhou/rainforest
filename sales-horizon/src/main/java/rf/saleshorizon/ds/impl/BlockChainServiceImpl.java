@@ -34,7 +34,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         //从区块链获取产品信息，缓存产品和费率表数据
         if(productSpec == null) {
             try {
-                InsuranceSales insuranceSales = contractFactory.loadContract();
+                InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
                 RemoteCall<String> remoteCall = insuranceSales.findProduct(productCode);
 
                 byte[] response = remoteCall.send().getBytes();
@@ -60,7 +60,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public String issuePolicy(Policy policy) {
         String tx = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<TransactionReceipt> remoteCall = insuranceSales.issuePolicy(policy.getPolicyNumber(), policy.getProductCode(), jsonHelper.toJSON(policy));
 
             tx = remoteCall.send().getTransactionHash();
@@ -75,7 +75,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public String issueEndorsement(Endorsement endorsement) {
         String tx = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<TransactionReceipt> remoteCall = insuranceSales.issueEndorsement(endorsement.getEndorsementNumber(), endorsement.getProductCode(), jsonHelper.toJSON(endorsement));
 
             tx = remoteCall.send().getTransactionHash();
@@ -90,7 +90,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public Policy findPolicy(String policyNumber) {
         Policy policy = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findPolicy(policyNumber);
             byte[] response = remoteCall.send().getBytes();
             String policyStr = new String(response);
@@ -107,7 +107,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public Endorsement findEndorsement(String endorsementNumber) {
         Endorsement endorsement = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findEndorsement(endorsementNumber);
             byte[] response = remoteCall.send().getBytes();
             String endorsementStr = new String(response);
@@ -120,18 +120,4 @@ public class BlockChainServiceImpl implements BlockChainService {
         return endorsement;
     }
 
-    @Override
-    public String register(String accountAddress) {
-        String tx = null;
-        try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
-            RemoteCall<TransactionReceipt> remoteCall = insuranceSales.registerOrg(accountAddress);
-
-            tx = remoteCall.send().getTransactionHash();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new GenericException(e);
-        }
-        return tx;
-    }
 }

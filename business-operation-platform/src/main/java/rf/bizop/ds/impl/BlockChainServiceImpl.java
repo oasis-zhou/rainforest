@@ -8,6 +8,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import rf.bizop.contract.ContractFactory;
 import rf.bizop.contract.InsuranceSales;
 import rf.bizop.ds.BlockChainService;
+import rf.bizop.model.Registration;
 import rf.foundation.cache.GuavaCacheManager;
 import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;
@@ -32,7 +33,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public String releaseProduct(ProductSpec productSpec) {
         String tx = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<TransactionReceipt> remoteCall = insuranceSales.releaseProduct(productSpec.getCode(),jsonHelper.toJSON(productSpec));
 
             tx = remoteCall.send().getTransactionHash();
@@ -50,7 +51,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         //从区块链获取产品信息，缓存产品和费率表数据
         if(productSpec == null) {
             try {
-                InsuranceSales insuranceSales = contractFactory.loadContract();
+                InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
                 RemoteCall<String> remoteCall = insuranceSales.findProduct(productCode);
 
                 byte[] response = remoteCall.send().getBytes();
@@ -76,7 +77,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public Policy findPolicy(String policyNumber) {
         Policy policy = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findPolicy(policyNumber);
             byte[] response = remoteCall.send().getBytes();
             String policyStr = new String(response);
@@ -93,7 +94,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public Endorsement findEndorsement(String endorsementNumber) {
         Endorsement endorsement = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findEndorsement(endorsementNumber);
             byte[] response = remoteCall.send().getBytes();
             String endorsementStr = new String(response);
@@ -110,7 +111,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public List<Policy> findPendingPolicies() {
         List<Policy> policies = Lists.newArrayList();
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findPendingPolicies();
             byte[] response = remoteCall.send().getBytes();
             String policyNumberStr = new String(response);
@@ -132,7 +133,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public List<Endorsement> findPendingEndorsements() {
         List<Endorsement> endorsements = Lists.newArrayList();
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<String> remoteCall = insuranceSales.findPendingEndorsements();
             byte[] response = remoteCall.send().getBytes();
             String endorsementNumberStr = new String(response);
@@ -154,7 +155,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     public String withdrawPendingPolicy(String policyNumber) {
         String tx = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<TransactionReceipt> remoteCall = insuranceSales.withdrawPendingPolicy(policyNumber);
 
             tx = remoteCall.send().getTransactionHash();
@@ -169,8 +170,23 @@ public class BlockChainServiceImpl implements BlockChainService {
     public String withdrawPendingEndorsement(String endorsementNumber) {
         String tx = null;
         try {
-            InsuranceSales insuranceSales = contractFactory.loadContract();
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
             RemoteCall<TransactionReceipt> remoteCall = insuranceSales.withdrawPendingEndorsement(endorsementNumber);
+
+            tx = remoteCall.send().getTransactionHash();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e);
+        }
+        return tx;
+    }
+
+    @Override
+    public String register(Registration registration) {
+        String tx = null;
+        try {
+            InsuranceSales insuranceSales = contractFactory.loadContractWithProxy();
+            RemoteCall<TransactionReceipt> remoteCall = insuranceSales.register(registration.getOrgCode(),registration.getPubKey(),registration.getAccountAddress());
 
             tx = remoteCall.send().getTransactionHash();
         } catch (Exception e) {
