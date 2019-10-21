@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import './UpgradeabilityProxy.sol';
 
-contract InsuranceSalesBase {
+contract InsuranceBase {
 
     uint internal maxQueryNumber = 100;
     // Storage position of the owner of the contract
@@ -17,11 +17,20 @@ contract InsuranceSalesBase {
 
     mapping(string => string) internal _policies;
     mapping(string => address[]) internal _policyToOwner;
+    mapping(string => address) internal _policyToInsurer;
     mapping(address => string[]) internal _pendingPolicies;
 
     mapping(string => string) internal _endorsements;
     mapping(string => address[]) internal _endorsementToOwner;
     mapping(address => string[]) internal _pendingEndorsements;
+
+    mapping(string => string) internal _noticesOfLoss;
+    mapping(string => address[]) internal _noticeToOwner;
+    mapping(address => string[]) internal _pendingNotices;
+
+    mapping(string => string) internal _claims;
+    mapping(string => address[]) internal _claimToOwner;
+    mapping(address => string[]) internal _pendingClaims;
 
     mapping(address => string[]) internal _salesAgreements;
 
@@ -106,15 +115,35 @@ contract InsuranceSalesBase {
     }
 }
 
-contract InsuranceSales is InsuranceSalesBase {
+contract Insurance is InsuranceBase {
     using String for string;
 
     event ReleaseProduct(address indexed owner, string indexed productCode);
     event IssuePolicy(address indexed owner, address indexed issuer, string indexed policyNumber);
+    event UpdatePolicy(address indexed owner, address indexed operator, string indexed policyNumber);
     event WithdrawPendingPolicy(address indexed owner, string indexed policyNumber);
     event IssueEndorsement(address indexed owner, address indexed issuer, string indexed endorsementNumber);
     event WithdrawPendingEndorsement(address indexed owner, string indexed endorsementNumber);
+    event ApplyNoticeOfLoss(address indexed owner,address indexed applyer, string indexed noticeNumber);
+    event UpdateNoticeOfLoss(address indexed owner,address indexed operator, string indexed noticeNumber);
+    event WithdrawPendingNoticeOfLoss(address indexed owner, string indexed noticeNumber);
+    event CreateClaim(address indexed owner, address indexed creater, string indexed claimNumber);
+    event UpdateClaim(address indexed owner, address indexed operator, string indexed claimNumber);
+    event WithdrawPendingClaim(address indexed owner, string indexed claimNumber);
+    event CloseClaim(address indexed owner, address indexed operator, string indexed claimNumber);
     event ApproveSalesAgreement(address indexed owner, address indexed approver, string indexed productCode);
+
+    function _checkSalesAuth(address channel, string memory productCode) internal view returns (bool) {
+        bool salesAuth = false;
+        string[] storage agreements = _salesAgreements[channel];
+        for (uint i = 0; i < agreements.length; i++) {
+            if (keccak256(bytes(agreements[i])) == keccak256(bytes(productCode))) {
+               salesAuth = true;
+            }
+        }
+
+        return salesAuth;
+    }
 
     function findOrgAddress(string memory orgCode) public view returns (address orgAddress) {
         orgAddress = _orgAddress[orgCode];
@@ -131,14 +160,14 @@ contract InsuranceSales is InsuranceSalesBase {
         emit ReleaseProduct(msg.sender,productCode);
     }
 
-    function findProduct(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
+    function findProductByOwner(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
         require(msg.sender == _productToOwner[productCode],"Caller is not the product owner!");
 
         productSpec = _products[productCode];
     }
 
-    function findProductFromChannel(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
-        bool salesAuth = checkSalesAuth(msg.sender,productCode);
+    function findProductByChannel(string memory productCode) public view onlyRegistration returns (string memory productSpec) {
+        bool salesAuth = _checkSalesAuth(msg.sender,productCode);
         if (!salesAuth)
             revert("Caller don't have the sales agreement for this product!");
 
@@ -159,26 +188,39 @@ contract InsuranceSales is InsuranceSalesBase {
         string[] storage products = _salesAgreements[_orgAddress[orgCode]];
         for (uint i = 0; i < products.length; i++) {
             if (keccak256(bytes(products[i])) == keccak256(bytes(productCode))) {
-                for (uint j = i; j < products.length-1; j++){
-                    products[j] = products[j+1];
-                }
-                delete products[products.length - 1];
-                products.length--;
+                products[i] = products[products.length - 1];
+                products.pop();
             }
         }
     }
 
-    function issuePolicy(string memory policyNumber, string memory productCode, string memory policy) public onlyRegistration {
-        bool salesAuth = checkSalesAuth(msg.sender,productCode);
+    function issuePolicyByChannel(string memory policyNumber, string memory productCode, string memory policy) public onlyRegistration {
+        bool salesAuth = _checkSalesAuth(msg.sender,productCode);
         require(salesAuth,"Caller don't have the sales agreement for this product!");
 
-        address owner = _productToOwner[productCode];
+        address insurer = _productToOwner[productCode];
         _policies[policyNumber] = policy;
-        _policyToOwner[policyNumber].push(owner);
+        _policyToInsurer[policyNumber] = insurer;
+        _policyToOwner[policyNumber].push(insurer);
         _policyToOwner[policyNumber].push(msg.sender);
-        _pendingPolicies[owner].push(policyNumber);
+        _pendingPolicies[insurer].push(policyNumber);
 
-        emit IssuePolicy(owner,msg.sender,policyNumber);
+        emit IssuePolicy(insurer,msg.sender,policyNumber);
+    }
+
+    function updatePolicy(string memory policyNumber, string memory policy) public onlyRegistration {
+        address[] memory owners = _policyToOwner[policyNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the policy owner!");
+
+        _policies[policyNumber] = policy;
+
+        emit UpdatePolicy(_policyToInsurer[policyNumber], msg.sender, policyNumber);
     }
 
     function findPolicy(string memory policyNumber) public view onlyRegistration returns (string memory policy)  {
@@ -189,7 +231,7 @@ contract InsuranceSales is InsuranceSalesBase {
                 isOwner = true;
         }
         if (!isOwner)
-            revert("Caller are not the policy owner!");
+            revert("Caller is not the policy owner!");
 
         policy = _policies[policyNumber];
     }
@@ -197,7 +239,11 @@ contract InsuranceSales is InsuranceSalesBase {
     function findPendingPolicies() public view onlyRegistration returns (string memory policies) {
         string[] memory policyNumbers = _pendingPolicies[msg.sender];
         policies = "";
-        for (uint i = 0; i < policyNumbers.length; i++) {
+        uint length = policyNumbers.length;
+        if (length > maxQueryNumber) {
+            length = maxQueryNumber;
+        }
+        for (uint i = 0; i < length; i++) {
             if(bytes(policyNumbers[i]).length > 0) {
                 if( i == 0) {
                     policies = policyNumbers[i];
@@ -217,27 +263,32 @@ contract InsuranceSales is InsuranceSalesBase {
                 for (uint j = i; j < policies.length-1; j++){
                     policies[j] = policies[j+1];
                 }
-                delete policies[policies.length - 1];
-                policies.length--;
-                // delete policies[i];
+                policies.pop();
+                // delete policies[policies.length - 1];
+                // policies.length--;
             }
         }
 
         emit WithdrawPendingPolicy(msg.sender,policyNumber);
     }
 
-    function issueEndorsement(string memory endorsementNumber, string memory productCode, string memory endorsement) public onlyRegistration {
-        bool salesAuth = checkSalesAuth(msg.sender,productCode);
-        if (!salesAuth)
-            revert("Caller don't have the sales agreement for this product!");
+    function issueEndorsement(string memory endorsementNumber, string memory policyNumber, string memory endorsement) public onlyRegistration {
+        address[] memory owners = _policyToOwner[policyNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the policy owner!");
 
-        address owner = _productToOwner[productCode];
+        address insurer = _policyToInsurer[policyNumber];
         _endorsements[endorsementNumber] = endorsement;
-        _endorsementToOwner[endorsementNumber].push(owner);
+        _endorsementToOwner[endorsementNumber].push(insurer);
         _endorsementToOwner[endorsementNumber].push(msg.sender);
-        _pendingEndorsements[owner].push(endorsementNumber);
+        _pendingEndorsements[insurer].push(endorsementNumber);
 
-        emit IssueEndorsement(owner,msg.sender,endorsementNumber);
+        emit IssueEndorsement(insurer,msg.sender,endorsementNumber);
     }
 
     function findEndorsement(string memory endorsementNumber) public view onlyRegistration returns (string memory endosement) {
@@ -248,7 +299,7 @@ contract InsuranceSales is InsuranceSalesBase {
                 isOwner = true;
         }
         if (!isOwner)
-            revert("Caller are not the endorsement owner!");
+            revert("Caller is not the endorsement owner!");
 
         endosement = _endorsements[endorsementNumber];
     }
@@ -256,7 +307,11 @@ contract InsuranceSales is InsuranceSalesBase {
     function findPendingEndorsements() public view onlyRegistration returns (string memory endorsments) {
         string[] memory endoNumbers = _pendingEndorsements[msg.sender];
         endorsments = "";
-        for (uint i = 0; i < endoNumbers.length; i++) {
+        uint length = endoNumbers.length;
+        if (length > maxQueryNumber) {
+            length = maxQueryNumber;
+        }
+        for (uint i = 0; i < length; i++) {
             if(bytes(endoNumbers[i]).length > 0) {
                 if( i == 0) {
                     endorsments = endoNumbers[i];
@@ -269,36 +324,199 @@ contract InsuranceSales is InsuranceSalesBase {
     }
 
     function withdrawPendingEndorsement(string memory endorsementNumber) public onlyRegistration {
-        string[] storage endorsments = _pendingEndorsements[msg.sender];
-        for (uint i = 0; i < endorsments.length; i++) {
-            if (keccak256(bytes(endorsments[i])) == keccak256(bytes(endorsementNumber))) {
+        string[] storage endorsements = _pendingEndorsements[msg.sender];
+        for (uint i = 0; i < endorsements.length; i++) {
+            if (keccak256(bytes(endorsements[i])) == keccak256(bytes(endorsementNumber))) {
                 // 删除待处理批改，同时释放空间，可能存在和并发写入的冲突问题
-                for (uint j = i; j < endorsments.length-1; j++){
-                    endorsments[j] = endorsments[j+1];
+                for (uint j = i; j < endorsements.length-1; j++){
+                    endorsements[j] = endorsements[j+1];
                 }
-                delete endorsments[endorsments.length - 1];
-                endorsments.length--;
-                // delete endorsments[i];
+                endorsements.pop();
+                // delete endorsments[endorsments.length - 1];
+                // endorsments.length--;
             }
         }
 
         emit WithdrawPendingEndorsement(msg.sender,endorsementNumber);
     }
 
-    function checkSalesAuth(address channel, string memory productCode) internal view returns (bool) {
-        bool salesAuth = false;
-        string[] storage agreements = _salesAgreements[channel];
-        for (uint i = 0; i < agreements.length; i++) {
-            if (keccak256(bytes(agreements[i])) == keccak256(bytes(productCode))) {
-               salesAuth = true;
+    function applyNoticeOfLoss(string memory noticeNumber, string memory policyNumber, string memory noticeOfLoss) public onlyRegistration {
+        address[] memory owners = _policyToOwner[policyNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the policy owner!");
+
+        address insurer = _policyToInsurer[policyNumber];
+        _noticesOfLoss[noticeNumber] = noticeOfLoss;
+        _noticeToOwner[noticeNumber].push(insurer);
+        _noticeToOwner[noticeNumber].push(msg.sender);
+        _pendingNotices[insurer].push(noticeNumber);
+
+        emit ApplyNoticeOfLoss(insurer, msg.sender, noticeNumber);
+    }
+
+    function updateNoticeOfLoss(string memory noticeNumber, string memory policyNumber, string memory noticeOfLoss) public onlyRegistration {
+        address[] memory owners = _noticeToOwner[noticeNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the notice of loss owner!");
+
+        _noticesOfLoss[noticeNumber] = noticeOfLoss;
+
+        emit UpdateNoticeOfLoss(_policyToInsurer[policyNumber], msg.sender, noticeNumber);
+    }
+
+    function findNoticeOfLoss(string memory noticeNumber) public view onlyRegistration returns (string memory noticeOfLoss) {
+        address[] memory owners = _noticeToOwner[noticeNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the notice of loss owner!");
+
+        noticeOfLoss = _noticesOfLoss[noticeNumber];
+    }
+
+    function findPendingNoticeOfLoss() public view onlyRegistration returns (string memory notices) {
+        string[] memory noticeNumbers = _pendingNotices[msg.sender];
+        notices = "";
+        uint length = noticeNumbers.length;
+        if (length > maxQueryNumber) {
+            length = maxQueryNumber;
+        }
+        for (uint i = 0; i < length; i++) {
+            if(bytes(noticeNumbers[i]).length > 0) {
+                if( i == 0) {
+                    notices = noticeNumbers[i];
+                } else {
+                    notices = notices.append(",");
+                    notices = notices.append(noticeNumbers[i]);
+                }
+            }
+        }
+    }
+
+    function withdrawPendingNoticeOfLoss(string memory noticeNumber) public onlyRegistration {
+        string[] storage notices = _pendingNotices[msg.sender];
+        for (uint i = 0; i < notices.length; i++) {
+            if (keccak256(bytes(notices[i])) == keccak256(bytes(noticeNumber))) {
+                for (uint j = i; j < notices.length-1; j++){
+                    notices[j] = notices[j+1];
+                }
+                notices.pop();
             }
         }
 
-        return salesAuth;
+        emit WithdrawPendingNoticeOfLoss(msg.sender, noticeNumber);
+    }
+
+    function createClaim(string memory claimNumber, string memory policyNumber, string memory claim) public onlyRegistration {
+        address[] memory owners = _policyToOwner[policyNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller are not the policy owner!");
+
+        address insurer = _policyToInsurer[policyNumber];
+        _claims[claimNumber] = claim;
+        _claimToOwner[claimNumber].push(insurer);
+        _claimToOwner[claimNumber].push(msg.sender);
+        _pendingClaims[insurer].push(claimNumber);
+
+        emit ApplyNoticeOfLoss(insurer, msg.sender, claimNumber);
+    }
+
+    function updateClaim(string memory claimNumber, string memory policyNumber, string memory claim) public onlyRegistration {
+        address[] memory owners = _claimToOwner[claimNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the claim owner!");
+
+        _claims[claimNumber] = claim;
+
+        emit UpdateClaim(_policyToInsurer[policyNumber], msg.sender, claimNumber);
+    }
+
+    function closeClaim(string memory claimNumber, string memory policyNumber, string memory claim) public onlyRegistration {
+        address[] memory owners = _claimToOwner[claimNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the claim owner!");
+
+        _claims[claimNumber] = claim;
+
+        emit CloseClaim(_policyToInsurer[policyNumber], msg.sender, claimNumber);
+    }
+
+    function findClaim(string memory claimNumber) public view onlyRegistration returns (string memory claim) {
+        address[] memory owners = _claimToOwner[claimNumber];
+        bool isOwner = false;
+        for (uint i = 0; i < owners.length; i++) {
+            if (msg.sender == owners[i])
+                isOwner = true;
+        }
+        if (!isOwner)
+            revert("Caller is not the claim owner!");
+
+        claim = _claims[claimNumber];
+    }
+
+    function findPendingClaim() public view onlyRegistration returns (string memory claims) {
+        string[] memory claimNumbers = _pendingClaims[msg.sender];
+        claims = "";
+        uint length = claimNumbers.length;
+        if (length > maxQueryNumber) {
+            length = maxQueryNumber;
+        }
+        for (uint i = 0; i < length; i++) {
+            if(bytes(claimNumbers[i]).length > 0) {
+                if( i == 0) {
+                    claims = claimNumbers[i];
+                } else {
+                    claims = claims.append(",");
+                    claims = claims.append(claimNumbers[i]);
+                }
+            }
+        }
+    }
+
+    function withdrawPendingClaim(string memory claimNumber) public onlyRegistration {
+        string[] storage claims = _pendingClaims[msg.sender];
+        for (uint i = 0; i < claims.length; i++) {
+            if (keccak256(bytes(claims[i])) == keccak256(bytes(claimNumber))) {
+                for (uint j = i; j < claims.length-1; j++){
+                    claims[j] = claims[j+1];
+                }
+                claims.pop();
+            }
+        }
+
+        emit WithdrawPendingClaim(msg.sender, claimNumber);
     }
 }
 
-contract InsuranceSalesProxy is UpgradeabilityProxy,InsuranceSalesBase {
+contract InsuranceProxy is UpgradeabilityProxy,InsuranceBase {
 
   /**
    * @return The address of the implementation.

@@ -136,7 +136,7 @@ contract Collaboration is CollaborationBase{
                 }
             }
             if(!isParticipant)
-                revert("The transaction is existed, Caller are not the participant!");
+                revert("The transaction is existed, Caller is not the participant!");
         }
 
         _transactions[transactionNumber] = transaction;
@@ -176,7 +176,7 @@ contract Collaboration is CollaborationBase{
     }
 
     function findMessage(string memory msgID) public view onlyRegistration returns (string memory message) {
-        require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
+        require (msg.sender == _messageToOwner[msgID], "Caller is not the message owner!");
         message = _messages[msgID];
     }
 
@@ -200,7 +200,7 @@ contract Collaboration is CollaborationBase{
     }
 
     function withdrawPendingMessage(string memory msgID) public onlyRegistration {
-        require (msg.sender == _messageToOwner[msgID], "Caller are not the message owner!");
+        require (msg.sender == _messageToOwner[msgID], "Caller is not the message owner!");
 
         string[] storage msgs = _pendingMessages[msg.sender];
         for (uint i = 0; i < msgs.length; i++) {
