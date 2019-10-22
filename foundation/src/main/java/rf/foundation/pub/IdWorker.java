@@ -22,7 +22,7 @@ public class IdWorker {
     private static IdWorker flowIdWorker = new IdWorker();
 
     private final long workerId;
-    private final long epoch = 1403854494756L;   // 时间起始标记点，作为基准，一般取系统的最近时间
+    private final long epoch = 1571732023059L;   // 时间起始标记点，作为基准，一般取系统的最近时间
     private final long workerIdBits = 10L;      // 机器标识位数
     private final long maxWorkerId = -1L ^ -1L << this.workerIdBits;// 机器ID最大值: 1023
     private long sequence = 0L;                   // 0，并发控制
