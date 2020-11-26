@@ -23,8 +23,7 @@
         <module>collaboration-horizon</module>
         <module>sales-horizon</module>
         <module>rating</module>
-        <module>deposit-certificate-horizon</module>
-        <module>data-exchange-horizon</module>
+
     </modules>
 
     <name>rf</name>
@@ -183,11 +182,7 @@
             <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
