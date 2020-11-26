@@ -1,6 +1,7 @@
 package rf.cohorizon.contract;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import rf.foundation.exception.GenericException;
 import rf.foundation.utils.JsonHelper;
 
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -113,7 +115,12 @@ public class ContractFactory {
         if (web3j == null) {
             synchronized (this) {
                 if (web3j == null) {
-                    web3j = Web3j.build(new HttpService(nodeUrl));
+                    OkHttpClient httpClient = new OkHttpClient.Builder()
+                            .connectTimeout(60, TimeUnit.SECONDS)//设置连接时间
+                            .readTimeout(60, TimeUnit.SECONDS)//设置读取时间
+                            .writeTimeout(60, TimeUnit.SECONDS)//设置写入时间
+                            .build();
+                    web3j = Web3j.build(new HttpService(nodeUrl,httpClient));
                     return web3j;
                 }
             }
