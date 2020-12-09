@@ -44,7 +44,7 @@
         <io.swagger.version>1.5.21</io.swagger.version>
         <fastjson.version>1.2.54</fastjson.version>
         <commons-pool2.version>2.5.0</commons-pool2.version>
-        <groovy.version>2.4.7</groovy.version>
+        <groovy.version>3.0.7</groovy.version>
         <jjwt.version>0.9.1</jjwt.version>
         <poi.version>3.8</poi.version>
         <lombok.version>1.18.8</lombok.version>
