@@ -48,7 +48,7 @@
         <jjwt.version>0.9.1</jjwt.version>
         <poi.version>3.8</poi.version>
         <lombok.version>1.18.8</lombok.version>
-        <guava.vsersion>28.0-jre</guava.vsersion>
+        <guava.vsersion>29.0-jre</guava.vsersion>
         <jodatime.version>2.9.4</jodatime.version>
         <mysql.connector.version>8.0.16</mysql.connector.version>
         <ipfs.version>v1.2.3</ipfs.version>
